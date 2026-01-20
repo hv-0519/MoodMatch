@@ -12,6 +12,7 @@ from flask_login import (
     logout_user,
     login_required,
 )
+from routes import user
 from utils.helper import generate_username, send_email
 
 auth_bp = Blueprint("auth", __name__)
@@ -30,9 +31,10 @@ def block_auth_pages_for_logged_in_users():
 # USER MODEL FOR FLASK-LOGIN
 # ---------------------------
 class User(UserMixin):
-    def __init__(self, id, username):
+    def __init__(self, id, username, profile_picture=None):
         self.id = id
         self.username = username
+        self.profile_picture = profile_picture
 
 
 # ---------------------------
@@ -128,14 +130,26 @@ def login():
         conn = sqlite3.connect("models/mood.db")
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT id, password_hash FROM users WHERE username = ?",
-            (username,),
-        )
+    """
+    SELECT id, username, profile_picture, password_hash
+    FROM users
+    WHERE username = ?
+    """,
+    (username,),
+)
         row = cursor.fetchone()
+
         conn.close()
 
-        if row and check_password_hash(row[1], password):
-            login_user(User(id=row[0], username=username))
+        if row and check_password_hash(row[3], password):
+            login_user(
+                User(
+                    id=row[0],
+                    username=username[1],
+                    profile_picture=row[2],
+                )
+            )
+            #login_user(user)
             return redirect(url_for("main.index"))
 
         return render_template("auth/login.html", error="Invalid credentials")
@@ -177,9 +191,7 @@ def forget_password():
                 error="Invalid username or email",
             )
 
-        reset_code = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=6)
-        )
+        reset_code = "".join(random.choices(string.digits, k=6))
 
         cursor.execute(
             "UPDATE users SET reset_code = ? WHERE username = ?",

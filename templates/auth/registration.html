@@ -1,1526 +1,459 @@
-{% extends "base.html" %} {% block title %}Create Account{% endblock %} {% block
-head %}
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='css/auth.css') }}"
-/>
-{% endblock %} {% block content %}
-<section class="auth-section registration-section">
-  <div class="registration-wrapper">
-    <!-- Header -->
-    <div class="reg-header">
-      <h2>Create Your Account</h2>
-      <p>Join MoodMatch and start discovering activities tailored to you</p>
+{% extends "base.html" %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/premium-auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container registration-container">
+  <!-- Left Side - Branding -->
+  <div class="auth-branding">
+    <div class="branding-content">
+      <div class="brand-logo">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+          <defs>
+            <linearGradient id="gradient1" x1="2" y1="2" x2="22" y2="12">
+              <stop offset="0%" stop-color="#667eea" />
+              <stop offset="100%" stop-color="#764ba2" />
+            </linearGradient>
+            <linearGradient id="gradient2" x1="2" y1="7" x2="22" y2="22">
+              <stop offset="0%" stop-color="#f093fb" />
+              <stop offset="100%" stop-color="#f5576c" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h1 class="brand-title">Join Our<br><span class="highlight">Community</span></h1>
+      <p class="brand-description">Start your journey to better mood management and personalized activity
+        recommendations.</p>
+
+      <div class="stats-grid">
+        <div class="stat-item">
+          <h3>10K+</h3>
+          <p class="brand-description">Active Users</p>
+        </div>
+        <div class="stat-item">
+          <h3>50K+</h3>
+          <p class="brand-description">Activities</p>
+        </div>
+        <div class="stat-item">
+          <h3>98%</h3>
+          <p class="brand-description">Satisfaction</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Progress Indicator -->
-    <div class="reg-progress">
-      <div class="progress-step active" data-step="1">
-        <div class="progress-circle">1</div>
-        <span class="progress-label">Personal Info</span>
-      </div>
-      <div class="progress-step" data-step="2">
-        <div class="progress-circle">2</div>
-        <span class="progress-label">Contact Details</span>
-      </div>
-      <div class="progress-step" data-step="3">
-        <div class="progress-circle">3</div>
-        <span class="progress-label">Profile & Interests</span>
-      </div>
-      <div class="progress-step" data-step="4">
-        <div class="progress-circle">4</div>
-        <span class="progress-label">Security</span>
-      </div>
-      <div class="progress-step" data-step="5">
-        <div class="progress-circle">5</div>
-        <span class="progress-label">Review</span>
-      </div>
+    <div class="decorative-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
     </div>
+  </div>
 
-    <!-- Error Alert -->
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %} {% for category, message in messages %}
-    <div class="auth-error-alert">{{ message }}</div>
-    {% endfor %} {% endif %} {% endwith %}
+  <!-- Right Side - Registration Form -->
+  <div class="auth-form-section">
+    <div class="form-container wide-form">
+      <div class="form-header">
+        <h2>Create Account</h2>
+        <p>Join MoodMatch in just a few steps</p>
+      </div>
 
-    <!-- Registration Form Card -->
-    <div class="modern-form-card">
-      <form
-        action="{{ url_for('auth.register') }}"
-        method="POST"
-        enctype="multipart/form-data"
-        id="registrationForm"
-      >
-        <!-- STEP 1: Personal Information -->
+      <!-- Progress Steps -->
+      <div class="progress-steps">
+        <div class="step active" data-step="1">
+          <div class="step-number">1</div>
+          <span style="font-size: medium;">Personal</span>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-number">2</div>
+          <span style="font-size: medium;">Contact</span>
+        </div>
+        <div class="step" data-step="3">
+          <div class="step-number">3</div>
+          <span style="font-size: medium;">Profile</span>
+        </div>
+        <div class="step" data-step="4">
+          <div class="step-number">4</div>
+          <span style="font-size: medium;">Security</span>
+        </div>
+        <div class="step" data-step="5">
+          <div class="step-number">5</div>
+          <span style="font-size: medium;">Review</span>
+        </div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        {{ message }}
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      <form action="{{ url_for('auth.register') }}" method="POST" enctype="multipart/form-data"
+        class="auth-form multi-step-form" id="registrationForm">
+
+        <!-- Step 1: Personal Information -->
         <div class="form-step active" data-step="1">
-
-          <div class="reg-form-grid">
-            <!-- First Name -->
-            <div class="reg-form-group">
-              <label for="first_name"
-                >First Name <span class="required-mark">*</span></label
-              >
-              <input
-                type="text"
-                id="first_name"
-                name="first_name"
-                placeholder="Enter your first name"
-                required
-                autocomplete="given-name"
-              />
-              <span class="input-icon"></span>
-              <span class="error-message">Please enter your first name</span>
+          <div class="step-content">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="first_name">First Name <span class="required">*</span></label>
+                <div class="input-container">
+                  <input type="text" id="first_name" name="first_name" placeholder="John" required
+                    autocomplete="given-name">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="last_name">Last Name <span class="required">*</span></label>
+                <div class="input-container">
+                  <input type="text" id="last_name" name="last_name" placeholder="Doe" required
+                    autocomplete="family-name">
+                </div>
+              </div>
             </div>
 
-            <!-- Last Name -->
-            <div class="reg-form-group">
-              <label for="last_name"
-                >Last Name <span class="required-mark">*</span></label
-              >
-              <input
-                type="text"
-                id="last_name"
-                name="last_name"
-                placeholder="Enter your last name"
-                required
-                autocomplete="family-name"
-              />
-              <span class="input-icon"></span>
-              <span class="error-message">Please enter your last name</span>
-            </div>
-
-            <!-- Gender -->
-            <div class="reg-form-group full-width">
-              <label>Gender <span class="required-mark">*</span></label>
-              <div class="reg-radio-group">
-                <label>
-                  <input type="radio" name="gender" value="male" required />
+            <div class="form-group">
+              <label>Gender <span class="required">*</span></label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="gender" value="male" required>
+                  <!-- <span class="radio-custom"></span> -->
                   <span>👨 Male</span>
                 </label>
-                <label>
-                  <input type="radio" name="gender" value="female" />
+                <label class="radio-label">
+                  <input type="radio" name="gender" value="female">
+                  <!-- <span class="radio-custom"></span> -->
                   <span>👩 Female</span>
                 </label>
-                <label>
-                  <input type="radio" name="gender" value="other" />
+                <label class="radio-label">
+                  <input type="radio" name="gender" value="other">
+                  <!-- <span class="radio-custom"></span> -->
                   <span>⚧️ Other</span>
                 </label>
-
               </div>
             </div>
 
-            <!-- Date of Birth -->
-            <div class="reg-form-group full-width">
-              <label for="date_of_birth"
-                >Date of Birth <span class="required-mark">*</span></label
-              >
-              <input
-                type="date"
-                id="date_of_birth"
-                name="date_of_birth"
-                required
-                autocomplete="bday"
-              />
-              <span class="help-text"
-                >You must be at least 13 years old to create an account</span
-              >
+            <div class="form-group">
+              <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
+              <div class="input-container">
+                <input type="date" id="date_of_birth" name="date_of_birth" required autocomplete="bday">
+              </div>
+              <small class="help-text">You must be at least 13 years old</small>
             </div>
-          </div>
-
-          <div class="form-navigation">
-            <div></div>
-            <button
-              type="button"
-              class="btn-nav btn-next"
-              onclick="nextStep(1)"
-            >
-              Continue
-              <span>&rarr;</span>
-            </button>
           </div>
         </div>
 
-        <!-- STEP 2: Contact Details -->
+        <!-- Step 2: Contact Details -->
         <div class="form-step" data-step="2">
-          
-
-          <div class="reg-form-grid">
-            <!-- Email -->
-            <div class="reg-form-group full-width">
-              <label for="email"
-                >Email Address <span class="required-mark">*</span></label
-              >
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="your.email@example.com"
-                required
-                autocomplete="email"
-              />
-              <span class="input-icon"></span>
-              <span class="error-message"
-                >Please enter a valid email address</span
-              >
+          <div class="step-content">
+            <div class="form-group">
+              <label for="email">Email Address <span class="required">*</span></label>
+              <div class="input-container">
+                <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
+                <input type="email" id="email" name="email" placeholder="john.doe@example.com" required
+                  autocomplete="email">
+              </div>
             </div>
 
-            <!-- Phone Number -->
-            <div class="reg-form-group full-width">
-              <label for="phone"
-                >Phone Number <span class="required-mark">*</span></label
-              >
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                placeholder="+1 (555) 123-4567"
-                required
-                autocomplete="tel"
-              />
-              <span class="input-icon"></span>
-              <span class="error-message"
-                >Please enter a valid phone number</span
-              >
+            <div class="form-group">
+              <label for="phone">Phone Number <span class="required">*</span></label>
+              <div class="input-container">
+                <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <path
+                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+                <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567" required autocomplete="tel">
+              </div>
             </div>
 
-            <!-- Address - Street -->
-            <div class="reg-form-group full-width">
-              <label for="street"
-                >Street Address <span class="required-mark">*</span></label
-              >
-              <input
-                type="text"
-                id="street"
-                name="street"
-                placeholder="123 Main Street, Apt 4B"
-                required
-                autocomplete="street-address"
-              />
+            <div class="form-group">
+              <label for="street">Street Address <span class="required">*</span></label>
+              <div class="input-container">
+                <input type="text" id="street" name="street" placeholder="123 Main St, Apt 4B" required
+                  autocomplete="street-address">
+              </div>
             </div>
 
-            <!-- City -->
-            <div class="reg-form-group">
-              <label for="city"
-                >City <span class="required-mark">*</span></label
-              >
-              <input
-                type="text"
-                id="city"
-                name="city"
-                placeholder="New York"
-                required
-                autocomplete="address-level2"
-              />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="city">City <span class="required">*</span></label>
+                <input type="text" id="city" name="city" placeholder="New York" required autocomplete="address-level2">
+              </div>
+              <div class="form-group">
+                <label for="state">State/Province <span class="required">*</span></label>
+                <input type="text" id="state" name="state" placeholder="NY" required autocomplete="address-level1">
+              </div>
             </div>
 
-            <!-- State/Province -->
-            <div class="reg-form-group">
-              <label for="state"
-                >State / Province <span class="required-mark">*</span></label
-              >
-              <input
-                type="text"
-                id="state"
-                name="state"
-                placeholder="NY"
-                required
-                autocomplete="address-level1"
-              />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="postal_code">Postal Code <span class="required">*</span></label>
+                <input type="text" id="postal_code" name="postal_code" placeholder="10001" required
+                  autocomplete="postal-code">
+              </div>
+              <div class="form-group">
+                <label for="country">Country <span class="required">*</span></label>
+                <select id="country" name="country" required autocomplete="country">
+                  <option value="">Select Country</option>
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="UK">United Kingdom</option>
+                  <option value="AU">Australia</option>
+                  <option value="IN">India</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
             </div>
-
-            <!-- Postal Code -->
-            <div class="reg-form-group">
-              <label for="postal_code"
-                >Postal Code <span class="required-mark">*</span></label
-              >
-              <input
-                type="text"
-                id="postal_code"
-                name="postal_code"
-                placeholder="10001"
-                required
-                autocomplete="postal-code"
-              />
-            </div>
-
-            <!-- Country -->
-            <div class="reg-form-group">
-              <label for="country"
-                >Country <span class="required-mark">*</span></label
-              >
-              <select
-                id="country"
-                name="country"
-                required
-                autocomplete="country"
-              >
-                <option value="">Select Country</option>
-                <option value="US">United States</option>
-                <option value="CA">Canada</option>
-                <option value="UK">United Kingdom</option>
-                <option value="AU">Australia</option>
-                <option value="DE">Germany</option>
-                <option value="FR">France</option>
-                <option value="IN">India</option>
-                <option value="JP">Japan</option>
-                <option value="BR">Brazil</option>
-                <option value="MX">Mexico</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-navigation">
-            <button
-              type="button"
-              class="btn-nav btn-prev"
-              onclick="prevStep(2)"
-            >
-              <span>&larr;</span>
-              Back
-            </button>
-            <button
-              type="button"
-              class="btn-nav btn-next"
-              onclick="nextStep(2)"
-            >
-              Continue
-              <span>&rarr;</span>
-            </button>
           </div>
         </div>
 
-        <!-- STEP 3: Profile & Interests -->
+        <!-- Step 3: Profile & Interests -->
         <div class="form-step" data-step="3">
-          
-
-          <div class="reg-form-grid">
-            <!-- Profile Picture -->
-            <div class="reg-form-group full-width">
+          <div class="step-content">
+            <div class="form-group">
               <label>Profile Picture</label>
-              <div class="file-upload-wrapper">
-                <div class="file-upload-area" id="fileUploadArea">
-                  <input
-                    type="file"
-                    id="profile_picture"
-                    name="profile_picture"
-                    accept="image/*"
-                  />
-                  <span class="upload-icon">
-                    <svg
-                      width="48"
-                      height="48"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="var(--auth-primary-light)"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="17,8 12,3 7,8" />
-                      <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                  </span>
+              <div class="file-upload-area" id="fileUploadArea">
+                <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+                <div class="upload-content">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
                   <p><strong>Click to upload</strong> or drag and drop</p>
-                  <p class="help-text">PNG, JPG, GIF up to 5MB</p>
+                  <small>PNG, JPG up to 5MB</small>
                 </div>
-                <div class="file-preview" id="filePreview">
-                  <img id="previewImage" src="" alt="Preview" />
+                <div class="file-preview hidden" id="filePreview">
+                  <img id="previewImage" src="" alt="Preview">
                   <div class="file-info">
-                    <div class="file-name" id="fileName"></div>
-                    <div class="file-size" id="fileSize"></div>
+                    <span id="fileName"></span>
+                    <button type="button" class="btn-text" onclick="removeFile()">Remove</button>
                   </div>
-                  <button
-                    type="button"
-                    class="remove-file"
-                    onclick="removeFile()"
-                  >
-                    Remove
-                  </button>
                 </div>
               </div>
             </div>
 
-            <!-- Interests Selection -->
-            <div class="reg-form-group full-width">
-              <label
-                >Choose Your Interests
-                <span class="required-mark">*</span></label
-              >
-              <p class="help-text" style="margin-bottom: 16px">
-                Select at least 3 interests to personalize your recommendations
-              </p>
-
+            <div class="form-group">
+              <label>Choose Your Interests <span class="required">*</span></label>
+              <small class="help-text">Select at least 3 interests</small>
               <div class="interests-grid">
-                <!-- Creative -->
-                <div class="interest-category">
-                  <h4 class="interest-category-title">
-                    <span class="category-icon creative-icon">
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path
-                          d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"
-                        />
-                      </svg>
-                    </span>
-                    Creative
-                  </h4>
-                  <div class="interest-options">
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="writing" />
-                      <span>Writing</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="drawing" />
-                      <span>Drawing / Art</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="music" />
-                      <span>Music Creation</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="photography"
-                      />
-                      <span>Photography</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="video_editing"
-                      />
-                      <span>Video Editing</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="designing"
-                      />
-                      <span>Designing</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="journaling"
-                      />
-                      <span>Journaling</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="diy_crafts"
-                      />
-                      <span>DIY Crafts</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Intellectual -->
-                <div class="interest-category">
-                  <h4 class="interest-category-title">
-                    <span class="category-icon intellectual-icon">
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path
-                          d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
-                        />
-                      </svg>
-                    </span>
-                    Intellectual
-                  </h4>
-                  <div class="interest-options">
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="reading" />
-                      <span>Reading</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="research"
-                      />
-                      <span>Research</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="learning_skills"
-                      />
-                      <span>Learning Skills</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="tutorials"
-                      />
-                      <span>Tutorials / Courses</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="documentaries"
-                      />
-                      <span>Documentaries</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Gaming -->
-                <div class="interest-category">
-                  <h4 class="interest-category-title">
-                    <span class="category-icon gaming-icon">
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <rect width="20" height="12" x="2" y="6" rx="2" />
-                        <path d="M6 12h4" />
-                        <path d="M8 10v4" />
-                        <circle cx="17" cy="10" r="1" />
-                        <circle cx="15" cy="14" r="1" />
-                      </svg>
-                    </span>
-                    Gaming & Digital
-                  </h4>
-                  <div class="interest-options">
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="mobile_games"
-                      />
-                      <span>Mobile Games</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="pc_games"
-                      />
-                      <span>PC Games</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="brain_games"
-                      />
-                      <span>Brain Games</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="puzzles" />
-                      <span>Puzzles</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="board_games"
-                      />
-                      <span>Board Games</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Physical & Adventure -->
-                <div class="interest-category">
-                  <h4 class="interest-category-title">
-                    <span class="category-icon physical-icon">
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="m3 11 18-5v12L3 14v-3z" />
-                        <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
-                      </svg>
-                    </span>
-                    Physical & Adventure
-                  </h4>
-                  <div class="interest-options">
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="hiking" />
-                      <span>Hiking</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="cycling" />
-                      <span>Cycling</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="gym" />
-                      <span>Gym</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="dance" />
-                      <span>Dance</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="sports" />
-                      <span>Sports</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="adventure_sports"
-                      />
-                      <span>Adventure Sports</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Travel -->
-                <div class="interest-category">
-                  <h4 class="interest-category-title">
-                    <span class="category-icon travel-icon">
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path
-                          d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"
-                        />
-                        <circle cx="12" cy="10" r="3" />
-                      </svg>
-                    </span>
-                    Travel & Exploration
-                  </h4>
-                  <div class="interest-options">
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="local_exploration"
-                      />
-                      <span>Local Exploration</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="cafes_restaurants"
-                      />
-                      <span>Cafes & Restaurants</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="road_trips"
-                      />
-                      <span>Road Trips</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="treks" />
-                      <span>Treks</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="historical_places"
-                      />
-                      <span>Historical Places</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="parks_nature"
-                      />
-                      <span>Parks & Nature</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Lifestyle -->
-                <div class="interest-category">
-                  <h4 class="interest-category-title">
-                    <span class="category-icon lifestyle-icon">
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
-                        <path d="M7 2v20" />
-                        <path
-                          d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"
-                        />
-                      </svg>
-                    </span>
-                    Lifestyle & Productivity
-                  </h4>
-                  <div class="interest-options">
-                    <label class="interest-chip">
-                      <input type="checkbox" name="interests" value="cooking" />
-                      <span>Cooking</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="gardening"
-                      />
-                      <span>Gardening</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="self_care"
-                      />
-                      <span>Self-Care</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="organizing"
-                      />
-                      <span>Organizing</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="financial_planning"
-                      />
-                      <span>Financial Planning</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="meal_prep"
-                      />
-                      <span>Meal Prep</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Social -->
-                <div class="interest-category">
-                  <h4 class="interest-category-title">
-                    <span class="category-icon social-icon">
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
-                    </span>
-                    Social Interaction
-                  </h4>
-                  <div class="interest-options">
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="meeting_friends"
-                      />
-                      <span>Meeting Friends</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="local_events"
-                      />
-                      <span>Local Events</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="volunteering"
-                      />
-                      <span>Volunteering</span>
-                    </label>
-                    <label class="interest-chip">
-                      <input
-                        type="checkbox"
-                        name="interests"
-                        value="online_communities"
-                      />
-                      <span>Online Communities</span>
-                    </label>
-                  </div>
-                </div>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="writing">
+                  <span>✍️ Writing</span>
+                </label>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="drawing">
+                  <span>🎨 Drawing</span>
+                </label>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="music">
+                  <span>🎵 Music</span>
+                </label>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="photography">
+                  <span>📷 Photography</span>
+                </label>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="reading">
+                  <span>📚 Reading</span>
+                </label>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="gaming">
+                  <span>🎮 Gaming</span>
+                </label>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="sports">
+                  <span>⚽ Sports</span>
+                </label>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="travel">
+                  <span>✈️ Travel</span>
+                </label>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="cooking">
+                  <span>🍳 Cooking</span>
+                </label>
+                <label class="interest-tag">
+                  <input type="checkbox" name="interests" value="fitness">
+                  <span>💪 Fitness</span>
+                </label>
               </div>
-              <span class="error-message" id="interestsError"
-                >Please select at least 3 interests</span
-              >
             </div>
-          </div>
-
-          <div class="form-navigation">
-            <button
-              type="button"
-              class="btn-nav btn-prev"
-              onclick="prevStep(3)"
-            >
-              <span>&larr;</span>
-              Back
-            </button>
-            <button
-              type="button"
-              class="btn-nav btn-next"
-              onclick="nextStep(3)"
-            >
-              Continue
-              <span>&rarr;</span>
-            </button>
           </div>
         </div>
 
-        <!-- STEP 4: Security -->
+        <!-- Step 4: Security -->
         <div class="form-step" data-step="4">
-          
-
-          <div class="reg-form-grid">
-            <!-- Password -->
-            <div class="reg-form-group full-width">
-              <label for="password"
-                >Create Password <span class="required-mark">*</span></label
-              >
-              <div class="password-input-wrapper">
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Create a strong password"
-                  required
-                  autocomplete="new-password"
-                  minlength="8"
-                />
-                <button
-                  type="button"
-                  class="password-toggle"
-                  onclick="togglePassword('password')"
-                >
-                  <svg
-                    class="eye-icon"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+          <div class="step-content">
+            <div class="form-group">
+              <label for="password">Create Password <span class="required">*</span></label>
+              <div class="input-container">
+                <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input type="password" id="password" name="password" placeholder="Create a strong password" required
+                  autocomplete="new-password" minlength="8">
+                <button type="button" class="password-toggle" onclick="togglePasswordField('password')">
+                  <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
-                  <svg
-                    class="eye-off-icon hidden"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                  <svg class="eye-closed hidden" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
                     <path
-                      d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
-                    />
-                    <path
-                      d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
-                    />
-                    <line x1="2" x2="22" y1="2" y2="22" />
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
                 </button>
               </div>
 
-              <!-- Password Strength Meter -->
               <div class="password-strength">
                 <div class="strength-bar">
                   <div class="strength-fill" id="strengthFill"></div>
                 </div>
-                <span class="strength-text" id="strengthText"
-                  >Password strength</span
-                >
+                <small id="strengthText">Password strength</small>
               </div>
 
-              <!-- Password Requirements -->
               <div class="password-requirements">
                 <div class="requirement" id="req-length">
-                  <span class="req-icon">&#10003;</span>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                   <span>At least 8 characters</span>
                 </div>
                 <div class="requirement" id="req-uppercase">
-                  <span class="req-icon">&#10003;</span>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                   <span>One uppercase letter</span>
                 </div>
-                <div class="requirement" id="req-lowercase">
-                  <span class="req-icon">&#10003;</span>
-                  <span>One lowercase letter</span>
-                </div>
                 <div class="requirement" id="req-number">
-                  <span class="req-icon">&#10003;</span>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                   <span>One number</span>
                 </div>
-                <div class="requirement" id="req-special">
-                  <span class="req-icon">&#10003;</span>
-                  <span>One special character (!@#$%^&*)</span>
-                </div>
               </div>
             </div>
 
-            <!-- Confirm Password -->
-            <div class="reg-form-group full-width">
-              <label for="confirm_password"
-                >Confirm Password <span class="required-mark">*</span></label
-              >
-              <div class="password-input-wrapper">
-                <input
-                  type="password"
-                  id="confirm_password"
-                  name="confirm_password"
-                  placeholder="Re-enter your password"
-                  required
-                  autocomplete="new-password"
-                />
-                <button
-                  type="button"
-                  class="password-toggle"
-                  onclick="togglePassword('confirm_password')"
-                >
-                  <svg
-                    class="eye-icon"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                  <svg
-                    class="eye-off-icon hidden"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                    <path
-                      d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
-                    />
-                    <path
-                      d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
-                    />
-                    <line x1="2" x2="22" y1="2" y2="22" />
-                  </svg>
-                </button>
+            <div class="form-group">
+              <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+              <div class="input-container">
+                <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input type="password" id="confirm_password" name="confirm_password"
+                  placeholder="Re-enter your password" required autocomplete="new-password">
               </div>
-              <span class="input-icon"></span>
-              <span class="error-message" id="passwordMatchError"
-                >Passwords do not match</span
-              >
             </div>
-          </div>
-
-          <div class="form-navigation">
-            <button
-              type="button"
-              class="btn-nav btn-prev"
-              onclick="prevStep(4)"
-            >
-              <span>&larr;</span>
-              Back
-            </button>
-            <button
-              type="button"
-              class="btn-nav btn-next"
-              onclick="nextStep(4)"
-            >
-              Continue
-              <span>&rarr;</span>
-            </button>
           </div>
         </div>
 
-        <!-- STEP 5: Review -->
+        <!-- Step 5: Review -->
         <div class="form-step" data-step="5">
-          
-
-          <div id="reviewContent">
-            <!-- Personal Info Review -->
+          <div class="step-content">
             <div class="review-section">
-              <h3>Personal Information</h3>
-              <div class="review-grid">
-                <div class="review-item">
-                  <span class="review-label">Full Name</span>
-                  <span class="review-value" id="review_name">-</span>
-                </div>
-                <div class="review-item">
-                  <span class="review-label">Gender</span>
-                  <span class="review-value" id="review_gender">-</span>
-                </div>
-                <div class="review-item">
-                  <span class="review-label">Date of Birth</span>
-                  <span class="review-value" id="review_dob">-</span>
-                </div>
+              <h3>Review Your Information</h3>
+              <div class="review-grid" id="reviewContent">
+                <!-- Will be populated by JavaScript -->
               </div>
             </div>
 
-            <!-- Contact Info Review -->
-            <div class="review-section">
-              <h3>Contact Details</h3>
-              <div class="review-grid">
-                <div class="review-item">
-                  <span class="review-label">Email</span>
-                  <span class="review-value" id="review_email">-</span>
-                </div>
-                <div class="review-item">
-                  <span class="review-label">Phone</span>
-                  <span class="review-value" id="review_phone">-</span>
-                </div>
-                <div class="review-item full-width">
-                  <span class="review-label">Address</span>
-                  <span class="review-value" id="review_address">-</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Profile Review -->
-            <div class="review-section">
-              <h3>Profile & Interests</h3>
-              <div class="review-profile">
-                <div class="review-avatar" id="review_avatar">
-                  <svg
-                    width="40"
-                    height="40"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                  >
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </div>
-                <div class="review-interests" id="review_interests">
-                  <span class="review-label">Selected Interests</span>
-                  <div class="interests-preview"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Terms & Conditions -->
-          <div class="terms-group">
-            <label>
-              <input type="checkbox" name="terms" id="terms" required />
-              <span class="terms-text">
-                I agree to the <a href="#">Terms of Service</a> and
-                <a href="#">Privacy Policy</a>. I understand that MoodMatch will
-                use my preferences to personalize my experience.
-              </span>
+            <label class="checkbox-label">
+              <input type="checkbox" name="terms" id="terms" required>
+              <!-- <span class="checkbox-custom"></span> -->
+              <span class="checkbox-text">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy
+                  Policy</a></span>
             </label>
-            <span class="error-message" id="termsError"
-              >You must accept the terms to continue</span
-            >
           </div>
+        </div>
 
-          <div class="form-navigation">
-            <button
-              type="button"
-              class="btn-nav btn-prev"
-              onclick="prevStep(5)"
-            >
-              <span>&larr;</span>
-              Back
-            </button>
-            <button type="submit" class="btn-nav btn-submit">
-              Create Account
-              <span>&#10003;</span>
-            </button>
-          </div>
+        <!-- Navigation Buttons -->
+        <div class="form-navigation">
+          <button type="button" class="btn-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            <span>Back</span>
+          </button>
+          <button type="button" class="btn btn-primary btn-sm navbar-cta" id="nextBtn" onclick="changeStep(1)">
+            <span>Continue</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </button>
         </div>
       </form>
-    </div>
 
-    <!-- Login Link -->
-    <div class="auth-footer-link">
-      <span>Already have an account?</span>
-      <a href="{{ url_for('auth.login') }}">Sign in here</a>
+      <div class="signup-link">
+        <span>Already have an account?</span>
+        <a href="{{ url_for('auth.login') }}">Sign in</a>
+      </div>
     </div>
   </div>
-</section>
-{% endblock %} {% block scripts %}
-<script>
-  // Current step tracker
-  let currentStep = 1;
-  const totalSteps = 5;
+</div>
 
-  // Step Navigation
-  function nextStep(step) {
-    if (validateStep(step)) {
-      currentStep = step + 1;
-      updateFormSteps();
-      updateProgressIndicator();
-      if (currentStep === 5) {
-        populateReviewSection();
-      }
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }
+<!-- Confirmation Modal -->
+<div class="modal" id="confirmModal">
+  <div class="modal-content">
+    <div class="modal-icon">
+      <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="#667eea" stroke-width="2" />
+        <line x1="12" y1="8" x2="12" y2="12" stroke="#667eea" stroke-width="2" />
+        <line x1="12" y1="16" x2="12.01" y2="16" stroke="#667eea" stroke-width="2" />
+      </svg>
+    </div>
+    <h3>Confirm Registration</h3>
+    <p>Are you sure all the information is correct?</p>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" onclick="closeModal('confirmModal')">Review Again</button>
+      <button type="button" class="btn-primary" onclick="submitForm()">Confirm & Create Account</button>
+    </div>
+  </div>
+</div>
 
-  function prevStep(step) {
-    currentStep = step - 1;
-    updateFormSteps();
-    updateProgressIndicator();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+<!-- Success Modal -->
+<div class="modal" id="successModal">
+  <div class="modal-content success-modal">
+    <div class="modal-icon">
+      <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2" />
+        <path d="M8 12l2 2 4-4" stroke="#10b981" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </div>
+    <h3>Account Created Successfully!</h3>
+    <p>Welcome to MoodMatch! Redirecting to login page...</p>
+  </div>
+</div>
 
-  function updateFormSteps() {
-    document.querySelectorAll(".form-step").forEach((step) => {
-      step.classList.remove("active");
-      if (parseInt(step.dataset.step) === currentStep) {
-        step.classList.add("active");
-      }
-    });
-  }
+{% endblock %}
 
-  function updateProgressIndicator() {
-    document.querySelectorAll(".progress-step").forEach((step) => {
-      const stepNum = parseInt(step.dataset.step);
-      step.classList.remove("active", "completed");
-
-      if (stepNum === currentStep) {
-        step.classList.add("active");
-      } else if (stepNum < currentStep) {
-        step.classList.add("completed");
-      }
-    });
-  }
-
-  // Step Validation
-  function validateStep(step) {
-    let isValid = true;
-
-    if (step === 1) {
-      const firstName = document.getElementById("first_name");
-      const lastName = document.getElementById("last_name");
-      const gender = document.querySelector('input[name="gender"]:checked');
-      const dob = document.getElementById("date_of_birth");
-
-      if (!firstName.value.trim()) {
-        showError(firstName);
-        isValid = false;
-      } else {
-        hideError(firstName);
-      }
-
-      if (!lastName.value.trim()) {
-        showError(lastName);
-        isValid = false;
-      } else {
-        hideError(lastName);
-      }
-
-      if (!gender) {
-        isValid = false;
-        alert("Please select your gender");
-      }
-
-      if (!dob.value) {
-        isValid = false;
-        alert("Please enter your date of birth");
-      } else {
-        // Age validation (13+)
-        const birthDate = new Date(dob.value);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-          age--;
-        }
-        if (age < 13) {
-          isValid = false;
-          alert("You must be at least 13 years old");
-        }
-      }
-    }
-
-    if (step === 2) {
-      const email = document.getElementById("email");
-      const phone = document.getElementById("phone");
-      const street = document.getElementById("street");
-      const city = document.getElementById("city");
-      const state = document.getElementById("state");
-      const postalCode = document.getElementById("postal_code");
-      const country = document.getElementById("country");
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email.value)) {
-        showError(email);
-        isValid = false;
-      } else {
-        hideError(email);
-      }
-
-      if (!phone.value.trim() || phone.value.length < 10) {
-        showError(phone);
-        isValid = false;
-      } else {
-        hideError(phone);
-      }
-
-      const requiredFields = [street, city, state, postalCode];
-      requiredFields.forEach((field) => {
-        if (!field.value.trim()) {
-          field.classList.add("invalid");
-          isValid = false;
-        } else {
-          field.classList.remove("invalid");
-        }
-      });
-
-      if (!country.value) {
-        country.classList.add("invalid");
-        isValid = false;
-      } else {
-        country.classList.remove("invalid");
-      }
-    }
-
-    if (step === 3) {
-      const interests = document.querySelectorAll(
-        'input[name="interests"]:checked',
-      );
-      const errorMsg = document.getElementById("interestsError");
-
-      if (interests.length < 3) {
-        errorMsg.classList.add("show");
-        isValid = false;
-      } else {
-        errorMsg.classList.remove("show");
-      }
-    }
-
-    if (step === 4) {
-      const password = document.getElementById("password");
-      const confirmPassword = document.getElementById("confirm_password");
-      const matchError = document.getElementById("passwordMatchError");
-
-      // Password strength check
-      const passwordValue = password.value;
-      const hasLength = passwordValue.length >= 8;
-      const hasUpper = /[A-Z]/.test(passwordValue);
-      const hasLower = /[a-z]/.test(passwordValue);
-      const hasNumber = /[0-9]/.test(passwordValue);
-      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(passwordValue);
-
-      if (!hasLength || !hasUpper || !hasLower || !hasNumber || !hasSpecial) {
-        isValid = false;
-        alert("Please create a stronger password that meets all requirements");
-      }
-
-      if (password.value !== confirmPassword.value) {
-        matchError.classList.add("show");
-        isValid = false;
-      } else {
-        matchError.classList.remove("show");
-      }
-    }
-
-    return isValid;
-  }
-
-  function showError(input) {
-    input.classList.add("invalid");
-    const errorMsg = input.parentElement.querySelector(".error-message");
-    if (errorMsg) errorMsg.classList.add("show");
-  }
-
-  function hideError(input) {
-    input.classList.remove("invalid");
-    input.classList.add("valid");
-    const errorMsg = input.parentElement.querySelector(".error-message");
-    if (errorMsg) errorMsg.classList.remove("show");
-  }
-
-  // Toggle Password Visibility
-  function togglePassword(inputId) {
-    const input = document.getElementById(inputId);
-    const wrapper = input.closest(".password-input-wrapper");
-    const eyeIcon = wrapper.querySelector(".eye-icon");
-    const eyeOffIcon = wrapper.querySelector(".eye-off-icon");
-
-    if (input.type === "password") {
-      input.type = "text";
-      eyeIcon.classList.add("hidden");
-      eyeOffIcon.classList.remove("hidden");
-    } else {
-      input.type = "password";
-      eyeIcon.classList.remove("hidden");
-      eyeOffIcon.classList.add("hidden");
-    }
-  }
-
-  // Password Strength Meter
-  document.getElementById("password").addEventListener("input", function () {
-    const password = this.value;
-    const strengthFill = document.getElementById("strengthFill");
-    const strengthText = document.getElementById("strengthText");
-
-    // Check requirements
-    const hasLength = password.length >= 8;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    // Update requirement indicators
-    updateRequirement("req-length", hasLength);
-    updateRequirement("req-uppercase", hasUpper);
-    updateRequirement("req-lowercase", hasLower);
-    updateRequirement("req-number", hasNumber);
-    updateRequirement("req-special", hasSpecial);
-
-    // Calculate strength
-    let strength = 0;
-    if (hasLength) strength++;
-    if (hasUpper) strength++;
-    if (hasLower) strength++;
-    if (hasNumber) strength++;
-    if (hasSpecial) strength++;
-
-    // Update strength meter
-    const percentage = (strength / 5) * 100;
-    strengthFill.style.width = percentage + "%";
-
-    if (strength <= 2) {
-      strengthFill.className = "strength-fill weak";
-      strengthText.textContent = "Weak password";
-      strengthText.style.color = "#ef4444";
-    } else if (strength <= 3) {
-      strengthFill.className = "strength-fill medium";
-      strengthText.textContent = "Medium password";
-      strengthText.style.color = "#f59e0b";
-    } else if (strength <= 4) {
-      strengthFill.className = "strength-fill strong";
-      strengthText.textContent = "Strong password";
-      strengthText.style.color = "#10b981";
-    } else {
-      strengthFill.className = "strength-fill very-strong";
-      strengthText.textContent = "Very strong password";
-      strengthText.style.color = "#059669";
-    }
-  });
-
-  function updateRequirement(id, met) {
-    const req = document.getElementById(id);
-    if (met) {
-      req.classList.add("met");
-    } else {
-      req.classList.remove("met");
-    }
-  }
-
-  // File Upload Handling
-  const fileInput = document.getElementById("profile_picture");
-  const fileUploadArea = document.getElementById("fileUploadArea");
-  const filePreview = document.getElementById("filePreview");
-  const previewImage = document.getElementById("previewImage");
-  const fileName = document.getElementById("fileName");
-  const fileSize = document.getElementById("fileSize");
-
-  fileInput.addEventListener("change", handleFileSelect);
-
-  fileUploadArea.addEventListener("dragover", function (e) {
-    e.preventDefault();
-    this.classList.add("dragover");
-  });
-
-  fileUploadArea.addEventListener("dragleave", function (e) {
-    e.preventDefault();
-    this.classList.remove("dragover");
-  });
-
-  fileUploadArea.addEventListener("drop", function (e) {
-    e.preventDefault();
-    this.classList.remove("dragover");
-    const files = e.dataTransfer.files;
-    if (files.length) {
-      fileInput.files = files;
-      handleFileSelect({ target: fileInput });
-    }
-  });
-
-  function handleFileSelect(e) {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File size must be less than 5MB");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        previewImage.src = e.target.result;
-        fileName.textContent = file.name;
-        fileSize.textContent = formatFileSize(file.size);
-        fileUploadArea.style.display = "none";
-        filePreview.classList.add("show");
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  function removeFile() {
-    fileInput.value = "";
-    previewImage.src = "";
-    fileUploadArea.style.display = "block";
-    filePreview.classList.remove("show");
-  }
-
-  function formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-  }
-
-  // Populate Review Section
-  function populateReviewSection() {
-    const firstName = document.getElementById("first_name").value;
-    const lastName = document.getElementById("last_name").value;
-    const gender = document.querySelector('input[name="gender"]:checked');
-    const dob = document.getElementById("date_of_birth").value;
-    const email = document.getElementById("email").value;
-    const phone = document.getElementById("phone").value;
-    const street = document.getElementById("street").value;
-    const city = document.getElementById("city").value;
-    const state = document.getElementById("state").value;
-    const postalCode = document.getElementById("postal_code").value;
-    const country = document.getElementById("country");
-
-    document.getElementById("review_name").textContent =
-      firstName + " " + lastName;
-    document.getElementById("review_gender").textContent = gender
-      ? gender.value.charAt(0).toUpperCase() +
-        gender.value.slice(1).replace(/_/g, " ")
-      : "-";
-    document.getElementById("review_dob").textContent = dob
-      ? new Date(dob).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      : "-";
-    document.getElementById("review_email").textContent = email;
-    document.getElementById("review_phone").textContent = phone;
-
-    const fullAddress = [
-      street,
-      city,
-      state,
-      postalCode,
-      country.options[country.selectedIndex]?.text,
-    ]
-      .filter(Boolean)
-      .join(", ");
-    document.getElementById("review_address").textContent = fullAddress || "-";
-
-    // Profile picture
-    const avatarDiv = document.getElementById("review_avatar");
-    if (previewImage.src && previewImage.src !== window.location.href) {
-      avatarDiv.innerHTML = `<img src="${previewImage.src}" alt="Profile">`;
-    }
-
-    // Interests
-    const interests = document.querySelectorAll(
-      'input[name="interests"]:checked',
-    );
-    const interestsContainer = document.querySelector(".interests-preview");
-    interestsContainer.innerHTML = "";
-    interests.forEach((interest) => {
-      const chip = document.createElement("span");
-      chip.className = "review-chip";
-      chip.textContent = interest.value
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, (l) => l.toUpperCase());
-      interestsContainer.appendChild(chip);
-    });
-  }
-
-  // Form Submission
-  document
-    .getElementById("registrationForm")
-    .addEventListener("submit", function (e) {
-      const terms = document.getElementById("terms");
-      const termsError = document.getElementById("termsError");
-
-      if (!terms.checked) {
-        e.preventDefault();
-        termsError.classList.add("show");
-      } else {
-        termsError.classList.remove("show");
-      }
-    });
-</script>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/registration.js') }}"></script>
 {% endblock %}

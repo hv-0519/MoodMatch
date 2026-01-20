@@ -23,14 +23,18 @@ def load_user(user_id):
     conn = sqlite3.connect("models/mood.db")
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT id, username FROM users WHERE id = ?",
+        "SELECT id, username, profile_picture FROM users WHERE id = ?",
         (user_id,),
     )
     row = cursor.fetchone()
     conn.close()
 
     if row:
-        return User(id=row[0], username=row[1])
+        return User(
+            row[0],
+            row[1],
+            row[2],
+        )
     return None
 
 

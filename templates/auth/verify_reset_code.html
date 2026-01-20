@@ -1,17 +1,390 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}Verify Reset Code{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/premium-auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
 
 {% block content %}
+<div class="auth-container">
+    <!-- Left Side - Branding -->
+    <div class="auth-branding">
+        <div class="branding-content">
+            <div class="brand-logo">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                    <defs>
+                        <linearGradient id="gradient1" x1="2" y1="2" x2="22" y2="12">
+                            <stop offset="0%" stop-color="#667eea"/>
+                            <stop offset="100%" stop-color="#764ba2"/>
+                        </linearGradient>
+                        <linearGradient id="gradient2" x1="2" y1="7" x2="22" y2="22">
+                            <stop offset="0%" stop-color="#f093fb"/>
+                            <stop offset="100%" stop-color="#f5576c"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <h1 class="brand-title">Verify Your<br><span class="highlight">Identity</span></h1>
+            <p class="brand-description">We've sent a 6-digit verification code to your email. Enter it below to continue with password reset.</p>
+            
+            <div class="features-list">
+                <div class="feature-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <span>Code expires in 15 minutes</span>
+                </div>
+                <div class="feature-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <span>Check your spam folder</span>
+                </div>
+                <div class="feature-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <span>Request a new code if needed</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="decorative-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </div>
 
-<h2>Verify Reset Code</h2>
+    <!-- Right Side - Form -->
+    <div class="auth-form-section">
+        <div class="form-container">
+            <div class="form-header">
+                <div class="header-icon">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="url(#iconGradient)" stroke-width="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="url(#iconGradient)" stroke-width="2"/>
+                        <circle cx="12" cy="16" r="1" fill="url(#iconGradient)"/>
+                        <defs>
+                            <linearGradient id="iconGradient" x1="3" y1="7" x2="21" y2="22">
+                                <stop offset="0%" stop-color="#667eea"/>
+                                <stop offset="100%" stop-color="#764ba2"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h2>Enter Verification Code</h2>
+                <p>Enter the 6-digit code sent to your email</p>
+            </div>
 
-{% if error %}
-<p style="color:red;">{{ error }}</p>
-{% endif %}
+            {% if error %}
+                <div class="alert alert-error">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    {{ error }}
+                </div>
+            {% endif %}
 
-<form method="POST">
-    <input type="text" name="reset_code" maxlength="6" required>
-    <input type="hidden" name="username" value="{{ username }}">
-    <button type="submit">Verify Code</button>
-</form>
+            <form method="POST" class="auth-form" id="verifyCodeForm">
+                <div class="code-input-group">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required id="code1" autocomplete="off">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required id="code2" autocomplete="off">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required id="code3" autocomplete="off">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required id="code4" autocomplete="off">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required id="code5" autocomplete="off">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required id="code6" autocomplete="off">
+                </div>
+                
+                <input type="hidden" name="reset_code" id="reset_code">
+                <input type="hidden" name="username" value="{{ username }}">
 
+                <div class="timer-display">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <div class="timer-text">Code expires in</div>
+                    <div class="timer-countdown" id="countdown">15:00</div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="verifyBtn">
+                    <span>Verify Code</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div class="resend-section">
+                <p style="color: var(--text-secondary); margin-bottom: 8px;">Didn't receive the code?</p>
+                <button type="button" class="resend-btn" id="resendBtn" onclick="resendCode()">
+                    Resend Code
+                </button>
+                <span id="resendTimer" style="display: none; color: var(--text-light); font-size: 0.875rem;"></span>
+            </div>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <div class="action-links">
+                <a href="{{ url_for('auth.forget_password') }}" class="link-with-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"/>
+                        <polyline points="12 19 5 12 12 5"/>
+                    </svg>
+                    <span>Try Different Email</span>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="link-with-icon">
+                    <span>Back to Login</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal" id="successModal">
+    <div class="modal-content success-modal">
+        <div class="modal-icon">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/>
+                <path d="M8 12l2 2 4-4" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <h3>Code Verified!</h3>
+        <p>Redirecting to password reset page...</p>
+    </div>
+</div>
+
+<!-- Expired Modal -->
+<div class="modal" id="expiredModal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="#ef4444" stroke-width="2"/>
+                <line x1="15" y1="9" x2="9" y2="15" stroke="#ef4444" stroke-width="2"/>
+                <line x1="9" y1="9" x2="15" y2="15" stroke="#ef4444" stroke-width="2"/>
+            </svg>
+        </div>
+        <h3>Code Expired</h3>
+        <p>Your verification code has expired. Please request a new one.</p>
+        <div class="modal-actions">
+            <button type="button" class="btn-primary" onclick="resendCode()">Request New Code</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Code Input Management
+const codeInputs = document.querySelectorAll('.code-input');
+const resetCodeField = document.getElementById('reset_code');
+const verifyBtn = document.getElementById('verifyBtn');
+
+codeInputs.forEach((input, index) => {
+    input.addEventListener('input', function(e) {
+        // Only allow numbers
+        this.value = this.value.replace(/[^0-9]/g, '');
+        
+        // Move to next input
+        if (this.value.length === 1 && index < codeInputs.length - 1) {
+            codeInputs[index + 1].focus();
+        }
+        
+        // Update hidden field
+        updateResetCode();
+    });
+    
+    input.addEventListener('keydown', function(e) {
+        // Move to previous input on backspace
+        if (e.key === 'Backspace' && this.value === '' && index > 0) {
+            codeInputs[index - 1].focus();
+        }
+        
+        // Move to next input on arrow right
+        if (e.key === 'ArrowRight' && index < codeInputs.length - 1) {
+            codeInputs[index + 1].focus();
+        }
+        
+        // Move to previous input on arrow left
+        if (e.key === 'ArrowLeft' && index > 0) {
+            codeInputs[index - 1].focus();
+        }
+    });
+    
+    // Handle paste
+    input.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '');
+        
+        if (pastedData.length === 6) {
+            pastedData.split('').forEach((char, i) => {
+                if (codeInputs[i]) {
+                    codeInputs[i].value = char;
+                }
+            });
+            codeInputs[5].focus();
+            updateResetCode();
+        }
+    });
+});
+
+function updateResetCode() {
+    const code = Array.from(codeInputs).map(input => input.value).join('');
+    resetCodeField.value = code;
+    
+    // Enable/disable verify button
+    verifyBtn.disabled = code.length !== 6;
+}
+
+// Countdown Timer (15 minutes = 900 seconds)
+let timeLeft = 900;
+const countdownElement = document.getElementById('countdown');
+
+function updateCountdown() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    
+    countdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Warning state when less than 2 minutes
+    if (timeLeft < 120) {
+        countdownElement.classList.add('warning');
+    }
+    
+    if (timeLeft <= 0) {
+        clearInterval(countdownInterval);
+        showExpiredModal();
+        disableForm();
+    }
+    
+    timeLeft--;
+}
+
+const countdownInterval = setInterval(updateCountdown, 1000);
+updateCountdown();
+
+function disableForm() {
+    codeInputs.forEach(input => input.disabled = true);
+    verifyBtn.disabled = true;
+}
+
+function showExpiredModal() {
+    document.getElementById('expiredModal').classList.add('active');
+}
+
+// Resend Code Functionality
+let resendCooldown = 0;
+
+function resendCode() {
+    if (resendCooldown > 0) return;
+    
+    // Reset form
+    codeInputs.forEach(input => {
+        input.value = '';
+        input.disabled = false;
+    });
+    codeInputs[0].focus();
+    
+    // Reset timer
+    clearInterval(countdownInterval);
+    timeLeft = 900;
+    countdownElement.classList.remove('warning');
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+    
+    // Start resend cooldown (60 seconds)
+    resendCooldown = 60;
+    const resendBtn = document.getElementById('resendBtn');
+    const resendTimer = document.getElementById('resendTimer');
+    
+    resendBtn.style.display = 'none';
+    resendTimer.style.display = 'inline';
+    
+    const resendInterval = setInterval(() => {
+        resendTimer.textContent = `Resend available in ${resendCooldown}s`;
+        resendCooldown--;
+        
+        if (resendCooldown < 0) {
+            clearInterval(resendInterval);
+            resendBtn.style.display = 'inline';
+            resendTimer.style.display = 'none';
+            resendCooldown = 0;
+        }
+    }, 1000);
+    
+    // Close modal if open
+    document.getElementById('expiredModal').classList.remove('active');
+    
+    // Show success message
+    showAlert('New verification code sent to your email', 'success');
+    
+    // In real app, make API call to resend code
+    // fetch('/api/resend-code', { method: 'POST', ... })
+}
+
+// Form Submission
+document.getElementById('verifyCodeForm').addEventListener('submit', function(e) {
+    const code = resetCodeField.value;
+    
+    if (code.length !== 6) {
+        e.preventDefault();
+        showAlert('Please enter the complete 6-digit code', 'error');
+        return;
+    }
+    
+    // Show success modal (in real app, wait for server response)
+    // For demo purposes only
+    // Uncomment below to test modal
+    /*
+    e.preventDefault();
+    setTimeout(() => {
+        document.getElementById('successModal').classList.add('active');
+        setTimeout(() => {
+            window.location.href = '/reset-password';
+        }, 2000);
+    }, 500);
+    */
+});
+
+function showAlert(message, type) {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        ${message}
+    `;
+    
+    const formHeader = document.querySelector('.form-header');
+    const existingAlert = formHeader.nextElementSibling;
+    if (existingAlert && existingAlert.classList.contains('alert')) {
+        existingAlert.remove();
+    }
+    formHeader.after(alert);
+    
+    setTimeout(() => alert.remove(), 5000);
+}
+
+// Auto-focus first input
+codeInputs[0].focus();
+</script>
 {% endblock %}
