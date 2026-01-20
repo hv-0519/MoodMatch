@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}History{% endblock %}
+{% block nav_history %}active{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <span class="section-tag">Your Activity Log</span>
+            <h1 class="page-title">Recommendation History</h1>
+            <p class="page-description">Track your past activity recommendations and discoveries</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        {% if history %}
+        <div class="history-header">
+            <p class="history-count">{{ history|length }} recommendation{{ 's' if history|length != 1 else '' }} in your history</p>
+            <button class="btn btn-secondary btn-sm" id="clearHistory">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                Clear History
+            </button>
+        </div>
+        
+        <div class="history-list">
+            {% for item in history %}
+            <article class="history-item" data-history-id="{{ item.id }}">
+                <div class="history-date-group">
+                    <time class="history-timestamp">
+                        <span class="timestamp-date">{{ item.date }}</span>
+                        <span class="timestamp-time">{{ item.time }}</span>
+                    </time>
+                </div>
+                <div class="history-content">
+                    <div class="history-card">
+                        <div class="history-card-header">
+                            <div class="activity-icon {{ item.mood_class }}">
+                                {{ item.icon|safe }}
+                            </div>
+                            <div class="history-meta">
+                                <span class="history-category">{{ item.category }}</span>
+                                <h3 class="history-name">{{ item.activity_name }}</h3>
+                            </div>
+                            <button class="delete-history-btn" data-history-id="{{ item.id }}" aria-label="Delete from history">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="history-description">{{ item.description }}</p>
+                        <div class="history-filters">
+                            <span class="filter-used">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                                    <line x1="9" y1="9" x2="9.01" y2="9"/>
+                                    <line x1="15" y1="9" x2="15.01" y2="9"/>
+                                </svg>
+                                Mood: {{ item.mood }}
+                            </span>
+                            {% if item.filters %}
+                            <span class="filter-used">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                                </svg>
+                                {{ item.filters }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="history-actions">
+                            <a href="{{ url_for('main.history') }}?activity={{ item.activity_id }}" class="btn btn-text">
+                                <span>View Details</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                    <polyline points="12 5 19 12 12 19"/>
+                                </svg>
+                            </a>
+                            <button class="btn btn-text favorite-from-history" data-activity-id="{{ item.activity_id }}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                                <span>Save to Favorites</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </div>
+            <h3 class="empty-title">No History Yet</h3>
+            <p class="empty-description">
+                Your activity recommendations will appear here as you explore different moods and activities.
+            </p>
+            <a href="{{ url_for('auth.register') }}#mood-selector" class="btn btn-primary">
+                <span>Start Exploring</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

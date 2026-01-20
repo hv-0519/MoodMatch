@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="hero-gradient"></div>
+        <div class="hero-pattern"></div>
+    </div>
+    
+    <div class="container hero-container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                <span>Discover Your Perfect Activity</span>
+            </div>
+            <h1 class="hero-title">
+                Match Your <span class="text-gradient">Mood</span> to the Perfect Activity
+            </h1>
+            <p class="hero-description">
+                Whether you're feeling creative, adventurous, or want to learn something new, 
+                MoodMatch recommends personalized activities tailored to your current state of mind.
+            </p>
+            <div class="hero-actions">
+                <a href="#mood-selector" class="btn btn-primary btn-lg">
+                    <span>Find Activities</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+                <a href="{{ url_for('main.index') }}" class="btn btn-secondary btn-lg">
+                    Learn More
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-value">7</span>
+                    <span class="stat-label">Mood Categories</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-value">40+</span>
+                    <span class="stat-label">Activities</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-value">5</span>
+                    <span class="stat-label">Smart Filters</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating cards - placed here to appear on the right side -->
+        <div class="hero-visual">
+            <div class="floating-cards">
+                <div class="floating-card card-1">
+                    <div class="card-icon creative">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                            <path d="M2 2l7.586 7.586"/>
+                            <circle cx="11" cy="11" r="2"/>
+                        </svg>
+                    </div>
+                    <span>Creative</span>
+                </div>
+                <div class="floating-card card-2">
+                    <div class="card-icon adventure">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                        </svg>
+                    </div>
+                    <span>Adventure</span>
+                </div>
+                <div class="floating-card card-3">
+                    <div class="card-icon learning">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                        </svg>
+                    </div>
+                    <span>Learning</span>
+                </div>
+                <div class="floating-card card-4">
+                    <div class="card-icon social">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <span>Social</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mood Selector Section -->
+<section class="section mood-section" id="mood-selector">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Step 1</span>
+            <h2 class="section-title">What's Your Mood Today?</h2>
+            <p class="section-description">Select a mood category that resonates with how you're feeling right now</p>
+        </div>
+        
+        <div class="mood-grid">
+            {% for mood in mood_categories %}
+            <button class="mood-card" data-mood="{{ mood.id }}">
+                <div class="mood-card-bg mood-bg-{{ mood.id }}"></div>
+                <div class="mood-card-content">
+                    <div class="mood-icon">
+                        {{ mood.icon|safe }}
+                    </div>
+                    <h3 class="mood-name">{{ mood.name }}</h3>
+                    <p class="mood-description">{{ mood.description }}</p>
+                    <span class="mood-count">{{ mood.activity_count }} activities</span>
+                </div>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Filters Section -->
+<section class="section filters-section" id="filters">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Step 2</span>
+            <h2 class="section-title">Refine Your Preferences</h2>
+            <p class="section-description">Optional filters to get more personalized recommendations</p>
+        </div>
+        
+        <div class="filters-card">
+            <div class="filters-grid">
+                <!-- Time Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        Time Available
+                    </label>
+                    <div class="filter-chips" data-filter="time">
+                        <button class="chip" data-value="1h">1 Hour</button>
+                        <button class="chip" data-value="2h">2 Hours</button>
+                        <button class="chip" data-value="4h">4 Hours</button>
+                        <button class="chip" data-value="full_day">Full Day</button>
+                        <button class="chip" data-value="weekend">Weekend</button>
+                    </div>
+                </div>
+                
+                <!-- Budget Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                        Budget
+                    </label>
+                    <div class="filter-chips" data-filter="budget">
+                        <button class="chip" data-value="none">Free</button>
+                        <button class="chip" data-value="low">Low</button>
+                        <button class="chip" data-value="medium">Medium</button>
+                        <button class="chip" data-value="high">High</button>
+                    </div>
+                </div>
+                
+                <!-- Energy Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                        Energy Level
+                    </label>
+                    <div class="filter-chips" data-filter="energy">
+                        <button class="chip" data-value="low">Low Energy</button>
+                        <button class="chip" data-value="medium">Medium</button>
+                        <button class="chip" data-value="high">High Energy</button>
+                    </div>
+                </div>
+                
+                <!-- Environment Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        Environment
+                    </label>
+                    <div class="filter-chips" data-filter="environment">
+                        <button class="chip" data-value="indoor">Indoor</button>
+                        <button class="chip" data-value="outdoor">Outdoor</button>
+                        <button class="chip" data-value="both">Either</button>
+                    </div>
+                </div>
+                
+                <!-- Distance Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="10" r="3"/>
+                            <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/>
+                        </svg>
+                        Distance
+                    </label>
+                    <div class="filter-chips" data-filter="distance">
+                        <button class="chip" data-value="home">At Home</button>
+                        <button class="chip" data-value="short">Short Range</button>
+                        <button class="chip" data-value="long">Long Range</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filters-actions">
+                <button class="btn btn-secondary" id="clearFilters">
+                    Clear All
+                </button>
+                <button class="btn btn-primary" id="applyFilters">
+                    <span>Show Activities</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Activities Section -->
+<section class="section activities-section" id="activities">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Step 3</span>
+            <h2 class="section-title">Recommended Activities</h2>
+            <p class="section-description">Activities tailored to your mood and preferences</p>
+        </div>
+        
+        <div class="activities-grid" id="activitiesGrid">
+            {% if activities %}
+                {% for activity in activities %}
+                <article class="activity-card" data-activity-id="{{ activity.id }}">
+                    <div class="activity-header">
+                        <div class="activity-icon {{ activity.mood_class }}">
+                            {{ activity.icon|safe }}
+                        </div>
+                        <div class="activity-meta">
+                            <span class="activity-category">{{ activity.category }}</span>
+                            <h3 class="activity-name">{{ activity.name }}</h3>
+                        </div>
+                        <button class="favorite-btn" data-activity-id="{{ activity.id }}" aria-label="Add to favorites">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="activity-description">{{ activity.description }}</p>
+                    <div class="activity-tags">
+                        <span class="tag tag-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            {{ activity.time }}
+                        </span>
+                        <span class="tag tag-budget">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="1" x2="12" y2="23"/>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                            {{ activity.budget }}
+                        </span>
+                        <span class="tag tag-energy">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                            </svg>
+                            {{ activity.energy }}
+                        </span>
+                    </div>
+                    <div class="activity-footer">
+                        <button class="btn btn-text expand-btn">
+                            <span>View Tips</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="activity-tips">
+                        <div class="tips-content">
+                            <h4>Pro Tips</h4>
+                            <p>{{ activity.tips }}</p>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </div>
+                <h3>Select Your Mood</h3>
+                <p>Choose a mood category above to see personalized activity recommendations</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="section how-it-works-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">How It Works</span>
+            <h2 class="section-title">Simple Steps to Find Your Activity</h2>
+            <p class="section-description">Getting personalized recommendations takes just a few clicks</p>
+        </div>
+        
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9"/>
+                    </svg>
+                </div>
+                <h3 class="step-title">Choose Your Mood</h3>
+                <p class="step-description">Select the mood category that best describes what you're in the mood for</p>
+            </div>
+            
+            <div class="step-connector">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                    </svg>
+                </div>
+                <h3 class="step-title">Set Preferences</h3>
+                <p class="step-description">Optionally refine by time, budget, energy level, and location preferences</p>
+            </div>
+            
+            <div class="step-connector">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                </div>
+                <h3 class="step-title">Get Inspired</h3>
+                <p class="step-description">Discover activities perfect for your mood and save your favorites</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
