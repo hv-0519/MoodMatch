@@ -99,7 +99,12 @@
           >
             Get Started
           </a>
-          <a href="{{ url_for('auth.logout') }}">Logout</a>
+          {% if current_user.is_authenticated %}
+        <span>👋 {{ current_user.username }}</span>
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('auth.login') }}">Login</a>
+    {% endif %}
 
         </div>
       </div>
