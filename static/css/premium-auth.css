@@ -84,19 +84,19 @@ body {
 }
 
 .highlight {
-    background: linear-gradient(135deg, #fff 0%, #a8e6ff 100%);
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .brand-description {
-    font-size: 1.125rem;
+    font-size: 2rem;
     opacity: 0.95;
     margin-bottom: 48px;
     line-height: 1.7;
     animation: fadeInUp 0.6s ease 0.2s both;
-    color: white;
+    color: black;
 }
 
 .features-list {
@@ -104,6 +104,8 @@ body {
     flex-direction: column;
     gap: 16px;
     animation: fadeInUp 0.6s ease 0.3s both;
+    font-size: 2rem;
+    color: black;
 }
 
 .feature-item {
@@ -210,6 +212,7 @@ body {
 
 .form-container {
     width: 100%;
+    height: 100%;
     max-width: 480px;
     background: var(--bg-primary);
     padding: 48px;
@@ -289,7 +292,6 @@ body {
 }
 
 .step.active .step-number {
-    background: var(--custom-gradient);
     border-color: transparent;
     color: white;
     transform: scale(1.1);
@@ -368,10 +370,17 @@ body {
     gap: 20px;
 }
 
+.pqr{
+    color: black;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    font-weight: bolder;
+
+
 }
 
 .form-group label {
@@ -688,8 +697,8 @@ textarea:focus {
 
 .interest-tag input:checked+span {
     background: var(--primary-gradient);
-    border-color: transparent;
-    color: white;
+    border-color: black;
+    color: black;
 }
 
 /* Password Strength */
@@ -746,6 +755,7 @@ textarea:focus {
 .requirement .check-icon {
     opacity: 0.3;
     transition: var(--transition);
+    color: black;
 }
 
 .requirement.met {
