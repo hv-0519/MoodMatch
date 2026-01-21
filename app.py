@@ -4,6 +4,9 @@ import sqlite3
 
 from routes.main import main_bp
 from routes.auth import auth_bp, User  # 👈 import User class
+from routes.admin import admin_bp
+from routes.user import user_bp
+
 
 app = Flask(__name__)
 
@@ -20,6 +23,13 @@ login_manager.login_view = "auth.login"
 
 @login_manager.user_loader
 def load_user(user_id):
+    user_id = int(user_id)  # safety
+
+    # Special case for hardcoded super admin
+    if user_id == 0:
+        return User(id=0, username="admin")
+
+    # Normal users from 'users' table
     conn = sqlite3.connect("models/mood.db")
     cursor = conn.cursor()
     cursor.execute(
@@ -27,14 +37,20 @@ def load_user(user_id):
         (user_id,),
     )
     row = cursor.fetchone()
+
+    # Also check admins table (optional but recommended)
+    if not row:
+        cursor.execute(
+            "SELECT id, username, NULL as profile_picture FROM admins WHERE id = ?",
+            (user_id,),
+        )
+        row = cursor.fetchone()
+
     conn.close()
 
     if row:
-        return User(
-            row[0],
-            row[1],
-            row[2],
-        )
+        return User(row[0], row[1], row[2] if len(row) > 2 else None)
+
     return None
 
 
@@ -43,8 +59,8 @@ def load_user(user_id):
 # ===============================
 app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp)
-# app.register_blueprint(admin_bp)
-# app.register_blueprint(user_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(user_bp)
 
 
 # ===============================

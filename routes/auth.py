@@ -12,7 +12,6 @@ from flask_login import (
     logout_user,
     login_required,
 )
-from routes import user
 from utils.helper import generate_username, send_email
 
 auth_bp = Blueprint("auth", __name__)
@@ -28,12 +27,13 @@ def block_auth_pages_for_logged_in_users():
 
 
 # ---------------------------
-# USER MODEL FOR FLASK-LOGIN
+# USER MODEL
 # ---------------------------
 class User(UserMixin):
-    def __init__(self, id, username, profile_picture=None):
+    def __init__(self, id, username, first_name=None, profile_picture=None):
         self.id = id
         self.username = username
+        self.first_name = first_name
         self.profile_picture = profile_picture
 
 
@@ -55,7 +55,6 @@ def register():
         postal_code = request.form.get("postal_code")
         country = request.form.get("country")
 
-        # profile picture
         file = request.files.get("profile_picture")
         profile_picture = None
         if file and file.filename:
@@ -79,7 +78,7 @@ def register():
                 postal_code, country, profile_picture,
                 password_hash
             ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-            """,
+        """,
             (
                 first_name,
                 last_name,
@@ -103,14 +102,7 @@ def register():
         send_email(
             to_email=email,
             subject="Welcome to MoodMatch",
-            body=f"""Hello {first_name},
-
-Your account has been created successfully.
-
-Username: {username}
-
-Use this username to log in.
-""",
+            body=f"Hello {first_name},\n\nUsername: {username}",
         )
 
         return redirect(url_for("auth.login"))
@@ -129,28 +121,46 @@ def login():
 
         conn = sqlite3.connect("models/mood.db")
         cursor = conn.cursor()
+
+        # 1️⃣ ADMIN LOGIN
         cursor.execute(
-    """
-    SELECT id, username, profile_picture, password_hash
-    FROM users
-    WHERE username = ?
-    """,
-    (username,),
-)
-        row = cursor.fetchone()
+            """
+            SELECT id, username, password_hash
+            FROM admins
+            WHERE username = ?
+        """,
+            (username,),
+        )
+        admin = cursor.fetchone()
+
+        if admin and check_password_hash(admin[2], password):
+            login_user(User(id=admin[0], username=admin[1], first_name="Admin"))
+            conn.close()
+            return redirect(url_for("admin.admin_dashboard"))
+
+        # 2️⃣ USER LOGIN
+        cursor.execute(
+            """
+           SELECT id, username, first_name, profile_picture, password_hash
+FROM users
+WHERE username = ?
+        """,
+            (username,),
+        )
+        user = cursor.fetchone()
 
         conn.close()
 
-        if row and check_password_hash(row[3], password):
+        if user and check_password_hash(user[4], password):
             login_user(
                 User(
-                    id=row[0],
-                    username=username[1],
-                    profile_picture=row[2],
+                    id=user[0],
+                    username=user[1],
+                    first_name=user[2],  # TEXT
+                    # profile_picture=user[3],  # IMAGE
                 )
             )
-            #login_user(user)
-            return redirect(url_for("main.index"))
+            return redirect(url_for("user.user_dashboard"))
 
         return render_template("auth/login.html", error="Invalid credentials")
 
@@ -158,7 +168,7 @@ def login():
 
 
 # ---------------------------
-# LOGOUT (REAL LOGOUT)
+# LOGOUT
 # ---------------------------
 @auth_bp.route("/logout")
 @login_required

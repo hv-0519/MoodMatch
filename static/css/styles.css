@@ -270,7 +270,7 @@ p {
   align-items: center;
   gap: var(--space-3);
   font-weight: var(--font-weight-bold);
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: var(--text);
 }
 
@@ -1631,3 +1631,4 @@ p {
 .social-link.linkedin:hover { background: #0077b5; border-color:#0077b5; }
 .social-link.instagram:hover { background: #E1306C; border-color:#E1306C; }
 .social-link.facebook:hover { background: #1877F2; border-color:#1877F2; }
+

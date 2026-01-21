@@ -41,6 +41,12 @@ CREATE TABLE users (
 ALTER TABLE users ADD COLUMN username TEXT;
 ALTER TABLE users ADD COLUMN reset_code TEXT;
 
+CREATE TABLE admins(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    password_hash TEXT NOT NULL
+);
+
 CREATE TABLE interest_categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE
