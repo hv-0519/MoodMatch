@@ -12,40 +12,43 @@
   --surface-elevated: #ffffff;
   --primary: #e63946;
   --primary-light: #111111;
-  --primary-dark: #4338CA;
-  --accent: #0EA5E9;
-  --accent-light: #38BDF8;
+  --primary-dark: #4338ca;
+  --accent: #0ea5e9;
+  --accent-light: #38bdf8;
   --text: #111111;
   --text-secondary: #555555;
   --text-tertiary: #201e1e;
   --border: #e5e7eb;
   --border-light: #f3f4f6;
   --custome: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 50%, #e0f2f1 100%);
-  
+
   /* Mood Colors */
-  --mood-creative: #EC4899;
-  --mood-creative-light: #FDF2F8;
-  --mood-intellectual: #8B5CF6;
-  --mood-intellectual-light: #F5F3FF;
-  --mood-gaming: #F59E0B;
-  --mood-gaming-light: #FFFBEB;
-  --mood-adventure: #10B981;
-  --mood-adventure-light: #ECFDF5;
-  --mood-travel: #0EA5E9;
-  --mood-travel-light: #F0F9FF;
-  --mood-lifestyle: #F97316;
-  --mood-lifestyle-light: #FFF7ED;
-  --mood-social: #EF4444;
-  --mood-social-light: #FEF2F2;
-  
+  --mood-creative: #ec4899;
+  --mood-creative-light: #fdf2f8;
+  --mood-intellectual: #8b5cf6;
+  --mood-intellectual-light: #f5f3ff;
+  --mood-gaming: #f59e0b;
+  --mood-gaming-light: #fffbeb;
+  --mood-adventure: #10b981;
+  --mood-adventure-light: #ecfdf5;
+  --mood-travel: #0ea5e9;
+  --mood-travel-light: #f0f9ff;
+  --mood-lifestyle: #f97316;
+  --mood-lifestyle-light: #fff7ed;
+  --mood-social: #ef4444;
+  --mood-social-light: #fef2f2;
+
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  
+
   /* Spacing Scale */
   --space-1: 4px;
   --space-2: 8px;
@@ -59,14 +62,14 @@
   --space-16: 64px;
   --space-20: 80px;
   --space-24: 96px;
-  
+
   /* Typography */
   --font-sans: cursive;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  
+
   /* Border Radius */
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -74,7 +77,7 @@
   --radius-xl: 16px;
   --radius-2xl: 24px;
   --radius-full: 9999px;
-  
+
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 200ms ease;
@@ -84,7 +87,9 @@
 /* =====================================================
    Reset & Base Styles
    ===================================================== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -119,7 +124,8 @@ button {
   background: none;
 }
 
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
@@ -166,16 +172,29 @@ img {
 /* =====================================================
    Typography
    ===================================================== */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: var(--font-weight-bold);
   line-height: 1.2;
   color: var(--text);
 }
 
-h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
-h2 { font-size: clamp(1.5rem, 4vw, 2.5rem); }
-h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); }
-h4 { font-size: 1.125rem; }
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+}
+h3 {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+}
+h4 {
+  font-size: 1.125rem;
+}
 
 p {
   color: var(--text-secondary);
@@ -200,14 +219,18 @@ p {
 .btn-primary {
   background: var(--primary);
   color: white;
-  box-shadow: var(--shadow-sm), 0 0 0 0 rgba(79, 70, 229, 0.4);
+  box-shadow:
+    var(--shadow-sm),
+    0 0 0 0 rgba(79, 70, 229, 0.4);
   font-size: 25px;
 }
 
 .btn-primary:hover {
   background: var(--primary-light);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md), 0 0 0 4px rgba(79, 70, 229, 0.15);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 4px rgba(79, 70, 229, 0.15);
 }
 
 .btn-primary:active {
@@ -223,7 +246,7 @@ p {
 
 .btn-secondary:hover {
   background: var(--background);
-  border-color: var(--text-tertiary);
+  /* border-color: var(--text-tertiary); */
 }
 
 .btn-text {
@@ -362,7 +385,7 @@ p {
   .navbar-toggle {
     display: none;
   }
-  
+
   .navbar-menu {
     position: static;
     width: auto;
@@ -374,16 +397,16 @@ p {
     align-items: center;
     gap: var(--space-2);
   }
-  
+
   .navbar-nav {
     flex-direction: row;
     gap: var(--space-1);
   }
-  
+
   .nav-link {
     padding: var(--space-2) var(--space-3);
   }
-  
+
   .navbar-cta {
     margin-top: 0;
     margin-left: var(--space-4);
@@ -412,13 +435,20 @@ p {
   right: -20%;
   width: 80%;
   height: 150%;
-  background: radial-gradient(ellipse, rgba(79, 70, 229, 0.08) 0%, transparent 70%);
+  background: radial-gradient(
+    ellipse,
+    rgba(79, 70, 229, 0.08) 0%,
+    transparent 70%
+  );
 }
 
 .hero-pattern {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(rgba(79, 70, 229, 0.08) 1px, transparent 1px);
+  background-image: radial-gradient(
+    rgba(79, 70, 229, 0.08) 1px,
+    transparent 1px
+  );
   background-size: 24px 24px;
   opacity: 0.5;
 }
@@ -438,7 +468,11 @@ p {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(14, 165, 233, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(79, 70, 229, 0.1),
+    rgba(14, 165, 233, 0.1)
+  );
   border: 1px solid rgba(79, 70, 229, 0.2);
   border-radius: var(--radius-full);
   font-size: 0.875rem;
@@ -456,8 +490,15 @@ p {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.2); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
 }
 
 .hero-title {
@@ -565,26 +606,47 @@ p {
   color: var(--mood-social);
 }
 
-.card-1 { top: 10%; left: 5%; animation-delay: 0s; }
-.card-2 { top: 50%; right: 5%; animation-delay: 1.5s; }
-.card-3 { bottom: 20%; left: 15%; animation-delay: 3s; }
-.card-4 { top: 25%; right: 20%; animation-delay: 4.5s; }
+.card-1 {
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+}
+.card-2 {
+  top: 50%;
+  right: 5%;
+  animation-delay: 1.5s;
+}
+.card-3 {
+  bottom: 20%;
+  left: 15%;
+  animation-delay: 3s;
+}
+.card-4 {
+  top: 25%;
+  right: 20%;
+  animation-delay: 4.5s;
+}
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @media (min-width: 768px) {
   .hero {
     padding: var(--space-20) 0 var(--space-24);
   }
-  
+
   .hero-container {
     grid-template-columns: 1fr 1fr;
     gap: var(--space-16);
   }
-  
+
   .hero-visual {
     display: block;
   }
@@ -657,7 +719,9 @@ p {
 
 .mood-card.selected {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15), var(--shadow-lg);
+  box-shadow:
+    0 0 0 3px rgba(79, 70, 229, 0.15),
+    var(--shadow-lg);
 }
 
 .mood-card-bg {
@@ -676,13 +740,27 @@ p {
   opacity: 0.6;
 }
 
-.mood-bg-creative { background: var(--mood-creative); }
-.mood-bg-intellectual { background: var(--mood-intellectual); }
-.mood-bg-gaming { background: var(--mood-gaming); }
-.mood-bg-adventure { background: var(--mood-adventure); }
-.mood-bg-travel { background: var(--mood-travel); }
-.mood-bg-lifestyle { background: var(--mood-lifestyle); }
-.mood-bg-social { background: var(--mood-social); }
+.mood-bg-creative {
+  background: var(--mood-creative);
+}
+.mood-bg-intellectual {
+  background: var(--mood-intellectual);
+}
+.mood-bg-gaming {
+  background: var(--mood-gaming);
+}
+.mood-bg-adventure {
+  background: var(--mood-adventure);
+}
+.mood-bg-travel {
+  background: var(--mood-travel);
+}
+.mood-bg-lifestyle {
+  background: var(--mood-lifestyle);
+}
+.mood-bg-social {
+  background: var(--mood-social);
+}
 
 .mood-card-content {
   position: relative;
@@ -702,13 +780,34 @@ p {
   transition: all var(--transition-base);
 }
 
-.mood-card[data-mood="creative"] .mood-icon { color: var(--mood-creative); background: var(--mood-creative-light); }
-.mood-card[data-mood="intellectual"] .mood-icon { color: var(--mood-intellectual); background: var(--mood-intellectual-light); }
-.mood-card[data-mood="gaming"] .mood-icon { color: var(--mood-gaming); background: var(--mood-gaming-light); }
-.mood-card[data-mood="adventure"] .mood-icon { color: var(--mood-adventure); background: var(--mood-adventure-light); }
-.mood-card[data-mood="travel"] .mood-icon { color: var(--mood-travel); background: var(--mood-travel-light); }
-.mood-card[data-mood="lifestyle"] .mood-icon { color: var(--mood-lifestyle); background: var(--mood-lifestyle-light); }
-.mood-card[data-mood="social"] .mood-icon { color: var(--mood-social); background: var(--mood-social-light); }
+.mood-card[data-mood="creative"] .mood-icon {
+  color: var(--mood-creative);
+  background: var(--mood-creative-light);
+}
+.mood-card[data-mood="intellectual"] .mood-icon {
+  color: var(--mood-intellectual);
+  background: var(--mood-intellectual-light);
+}
+.mood-card[data-mood="gaming"] .mood-icon {
+  color: var(--mood-gaming);
+  background: var(--mood-gaming-light);
+}
+.mood-card[data-mood="adventure"] .mood-icon {
+  color: var(--mood-adventure);
+  background: var(--mood-adventure-light);
+}
+.mood-card[data-mood="travel"] .mood-icon {
+  color: var(--mood-travel);
+  background: var(--mood-travel-light);
+}
+.mood-card[data-mood="lifestyle"] .mood-icon {
+  color: var(--mood-lifestyle);
+  background: var(--mood-lifestyle-light);
+}
+.mood-card[data-mood="social"] .mood-icon {
+  color: var(--mood-social);
+  background: var(--mood-social-light);
+}
 
 .mood-name {
   font-size: 1.25rem;
@@ -850,13 +949,34 @@ p {
   flex-shrink: 0;
 }
 
-.activity-icon.creative { background: var(--mood-creative-light); color: var(--mood-creative); }
-.activity-icon.intellectual { background: var(--mood-intellectual-light); color: var(--mood-intellectual); }
-.activity-icon.gaming { background: var(--mood-gaming-light); color: var(--mood-gaming); }
-.activity-icon.adventure { background: var(--mood-adventure-light); color: var(--mood-adventure); }
-.activity-icon.travel { background: var(--mood-travel-light); color: var(--mood-travel); }
-.activity-icon.lifestyle { background: var(--mood-lifestyle-light); color: var(--mood-lifestyle); }
-.activity-icon.social { background: var(--mood-social-light); color: var(--mood-social); }
+.activity-icon.creative {
+  background: var(--mood-creative-light);
+  color: var(--mood-creative);
+}
+.activity-icon.intellectual {
+  background: var(--mood-intellectual-light);
+  color: var(--mood-intellectual);
+}
+.activity-icon.gaming {
+  background: var(--mood-gaming-light);
+  color: var(--mood-gaming);
+}
+.activity-icon.adventure {
+  background: var(--mood-adventure-light);
+  color: var(--mood-adventure);
+}
+.activity-icon.travel {
+  background: var(--mood-travel-light);
+  color: var(--mood-travel);
+}
+.activity-icon.lifestyle {
+  background: var(--mood-lifestyle-light);
+  color: var(--mood-lifestyle);
+}
+.activity-icon.social {
+  background: var(--mood-social-light);
+  color: var(--mood-social);
+}
 
 .activity-meta {
   flex: 1;
@@ -961,8 +1081,14 @@ p {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =====================================================
@@ -1061,7 +1187,7 @@ p {
     justify-content: center;
     gap: var(--space-4);
   }
-  
+
   .step-connector {
     display: flex;
     transform: rotate(0);
@@ -1073,7 +1199,11 @@ p {
    ===================================================== */
 .about-hero {
   padding: var(--space-16) 0;
-  background: linear-gradient(180deg, rgba(79, 70, 229, 0.05) 0%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(79, 70, 229, 0.05) 0%,
+    transparent 100%
+  );
 }
 
 .about-hero-content {
@@ -1121,7 +1251,11 @@ p {
   width: 80px;
   height: 80px;
   margin: 0 auto var(--space-4);
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(14, 165, 233, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(79, 70, 229, 0.1),
+    rgba(14, 165, 233, 0.1)
+  );
   border-radius: var(--radius-lg);
   color: var(--primary);
 }
@@ -1277,7 +1411,11 @@ p {
 .cta-card {
   text-align: center;
   padding: var(--space-12) var(--space-6);
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-dark) 100%
+  );
   border-radius: var(--radius-2xl);
   color: white;
 }
@@ -1306,7 +1444,11 @@ p {
    ===================================================== */
 .page-header {
   padding: var(--space-12) 0;
-  background: linear-gradient(180deg, rgba(79, 70, 229, 0.05) 0%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(79, 70, 229, 0.05) 0%,
+    transparent 100%
+  );
 }
 
 .page-header-content {
@@ -1348,7 +1490,7 @@ p {
 }
 
 .remove-favorite-btn:hover {
-  color: var(--destructive, #EF4444);
+  color: var(--destructive, #ef4444);
   background: rgba(239, 68, 68, 0.1);
 }
 
@@ -1436,7 +1578,7 @@ p {
 }
 
 .delete-history-btn:hover {
-  color: var(--destructive, #EF4444);
+  color: var(--destructive, #ef4444);
   background: rgba(239, 68, 68, 0.1);
 }
 
@@ -1470,7 +1612,7 @@ p {
     grid-template-columns: 140px 1fr;
     gap: var(--space-6);
   }
-  
+
   .history-timestamp {
     text-align: right;
     padding-top: var(--space-5);
@@ -1572,7 +1714,7 @@ p {
   .footer-grid {
     grid-template-columns: 1.5fr 1fr 1fr 1fr;
   }
-  
+
   .footer-bottom {
     flex-direction: row;
     justify-content: space-between;
@@ -1604,15 +1746,15 @@ p {
 
 /* Brand hover */
 .social-link.instagram:hover {
-  background: #E1306C;
+  background: #e1306c;
   color: white;
-  border-color: #E1306C;
+  border-color: #e1306c;
 }
 
 .social-link.facebook:hover {
-  background: #1877F2;
+  background: #1877f2;
   color: white;
-  border-color: #1877F2;
+  border-color: #1877f2;
 }
 
 .social-link.twitter:hover {
@@ -1626,9 +1768,562 @@ p {
   stroke: white;
 }
 
-.social-link.twitter:hover { background: #1DA1F2; border-color:#1DA1F2; }
-.social-link.github:hover { background: #24292e; border-color:#24292e; }
-.social-link.linkedin:hover { background: #0077b5; border-color:#0077b5; }
-.social-link.instagram:hover { background: #E1306C; border-color:#E1306C; }
-.social-link.facebook:hover { background: #1877F2; border-color:#1877F2; }
+.social-link.twitter:hover {
+  background: #1da1f2;
+  border-color: #1da1f2;
+}
+.social-link.github:hover {
+  background: #24292e;
+  border-color: #24292e;
+}
+.social-link.linkedin:hover {
+  background: #0077b5;
+  border-color: #0077b5;
+}
+.social-link.instagram:hover {
+  background: #e1306c;
+  border-color: #e1306c;
+}
+.social-link.facebook:hover {
+  background: #1877f2;
+  border-color: #1877f2;
+}
+
+/* =====================================================
+   CRITICAL BUTTON FIXES - Add this to the END of styles.css
+   Removes blue border and unwanted focus states
+   ===================================================== */
+
+/* Remove ALL default browser outlines and borders from buttons */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-text,
+.btn-sm,
+.btn-lg,
+button,
+a.btn,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  outline: none !important;
+  border: none !important;
+}
+
+/* Remove focus states that create blue borders */
+.btn:focus,
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-text:focus,
+button:focus,
+a.btn:focus,
+.btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+button:active,
+a.btn:active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Override Bootstrap's button focus styles */
+.btn-primary:focus,
+.btn-primary.focus,
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active {
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+}
+
+/* Update primary button to ensure no blue shadow */
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+  font-size: 25px;
+  border: none !important;
+  outline: none !important;
+  transition: all var(--transition-base);
+}
+
+.btn-primary:hover {
+  background: var(--primary-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md); /* No blue color here */
+  border: none !important;
+  outline: none !important;
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm) !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Fix secondary button */
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-xs);
+  outline: none !important;
+}
+
+.btn-secondary:hover {
+  background: var(--background);
+  border: 1px solid var(--border) !important;
+  outline: none !important;
+}
+
+.btn-secondary:focus,
+.btn-secondary:active {
+  border: 1px solid var(--border) !important;
+  outline: none !important;
+  box-shadow: var(--shadow-xs) !important;
+}
+
+/* Remove default browser focus outline from everything */
+*:focus,
+*:active {
+  outline: none !important;
+}
+
+/* Add custom focus-visible for accessibility (keyboard navigation) */
+.btn:focus-visible,
+.btn-primary:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px;
+  box-shadow: var(--shadow-sm) !important;
+  border: none !important;
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--text-tertiary) !important;
+  outline-offset: 2px;
+  border: 1px solid var(--border) !important;
+}
+
+/* Override any Bootstrap or browser defaults */
+button::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner {
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure navbar buttons don't have blue borders */
+.navbar .btn,
+.navbar .btn-primary,
+.navbar .btn-secondary,
+.navbar-cta {
+  border: none !important;
+  outline: none !important;
+}
+
+.navbar .btn:focus,
+.navbar .btn-primary:focus,
+.navbar .btn:active,
+.navbar .btn-primary:active {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Small button sizes */
+.btn-sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.875rem;
+  border: none !important;
+  outline: none !important;
+}
+
+.btn-sm:focus,
+.btn-sm:active {
+  border: none !important;
+  outline: none !important;
+}
+
+/* =====================================================
+   NAVBAR ALIGNMENT & CONSISTENCY FIXES
+   Add this to styles.css to ensure all nav items are uniform
+   ===================================================== */
+
+/* Ensure navbar nav items are displayed inline */
+.navbar-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-1, 4px);
+}
+
+.navbar-nav .nav-item {
+  list-style: none;
+}
+
+/* Make all nav links uniform - same font size and padding */
+.navbar-nav .nav-link {
+  display: block;
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-secondary, #555555);
+  border-radius: var(--radius-md, 8px);
+  transition: all var(--transition-fast, 0.15s ease);
+  font-size: 25px;
+  white-space: nowrap;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  color: var(--primary, #e63946);
+  background: rgba(230, 57, 70, 0.08);
+}
+
+/* Ensure navbar menu aligns items properly */
+.navbar-menu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+
+/* Profile picture in navbar should align with nav items */
+.navbar-profile-pic,
+.navbar-profile-default {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Desktop navbar layout */
+@media (min-width: 768px) {
+  .navbar-menu {
+    position: static;
+    width: auto;
+    height: auto;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2, 8px);
+  }
+
+  .navbar-nav {
+    flex-direction: row;
+    gap: var(--space-1, 4px);
+  }
+
+  .nav-link {
+    padding: var(--space-2, 8px) var(--space-3, 12px);
+  }
+}
+
+/* Mobile navbar adjustments */
+@media (max-width: 767px) {
+  .navbar-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: var(--surface, #ffffff);
+    padding: var(--space-20, 80px) var(--space-6, 24px) var(--space-6, 24px);
+    box-shadow: var(--shadow-2xl);
+    transition: right var(--transition-slow, 0.3s ease);
+    flex-direction: column;
+    gap: var(--space-6, 24px);
+    align-items: flex-start;
+  }
+
+  .navbar-menu.active {
+    right: 0;
+  }
+
+  .navbar-nav {
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+    width: 100%;
+  }
+
+  .navbar-nav .nav-item {
+    width: 100%;
+  }
+
+  .navbar-nav .nav-link {
+    width: 100%;
+  }
+
+  /* Profile section in mobile */
+  .nav-item .navbar-profile-pic,
+  .nav-item .navbar-profile-default {
+    margin: 0 auto;
+    display: block;
+  }
+}
+
+/* =====================================================
+   CRITICAL FIXES - Add to END of styles.css
+   ===================================================== */
+
+/* ========================================
+   NAVBAR CONSISTENCY - ALL PAGES
+   ======================================== */
+
+/* Force navbar to stay consistent across all pages */
+.navbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+}
+
+.navbar-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 72px !important;
+}
+
+/* Navbar Menu - Desktop */
+.navbar-menu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+
+/* Navbar Navigation List */
+.navbar-nav {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: var(--space-1, 4px) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.navbar-nav .nav-item {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ALL NAV LINKS - UNIFORM STYLING */
+.navbar-nav .nav-link,
+.navbar-username-link,
+.navbar-logout-link {
+  display: block !important;
+  padding: var(--space-2, 8px) var(--space-3, 12px) !important;
+  font-weight: var(--font-weight-medium, 500) !important;
+  color: var(--text-secondary, #555555) !important;
+  border-radius: var(--radius-md, 8px) !important;
+  transition: all var(--transition-fast, 0.15s ease) !important;
+  font-size: 25px !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active,
+.navbar-username-link:hover,
+.navbar-logout-link:hover {
+  color: var(--primary, #e63946) !important;
+  background: rgba(230, 57, 70, 0.08) !important;
+}
+
+/* Profile Picture */
+.navbar-profile-pic,
+.navbar-profile-default {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid var(--border, #e5e7eb) !important;
+  transition: all var(--transition-fast, 0.15s ease) !important;
+  flex-shrink: 0 !important;
+  margin: 0 8px !important;
+}
+
+.navbar-profile-pic:hover,
+.navbar-profile-default:hover {
+  border-color: var(--primary, #e63946) !important;
+  transform: scale(1.05) !important;
+}
+
+.navbar-profile-default {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.navbar-profile-default svg {
+  width: 20px !important;
+  height: 20px !important;
+  color: var(--text-secondary, #555) !important;
+}
+
+/* ========================================
+   BUTTON FIXES - REMOVE BLUE BORDERS
+   ======================================== */
+
+/* Remove ALL borders and outlines */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-text,
+.btn-sm,
+.btn-lg,
+button,
+a.btn,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  outline: none !important;
+  border: none !important;
+}
+
+.btn:focus,
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-text:focus,
+button:focus,
+a.btn:focus,
+.btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+button:active,
+a.btn:active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Primary Button */
+.btn-primary {
+  background: var(--primary) !important;
+  color: white !important;
+  box-shadow: var(--shadow-sm) !important;
+  font-size: 25px !important;
+  border: none !important;
+  outline: none !important;
+  transition: all var(--transition-base) !important;
+  padding: var(--space-2, 8px) var(--space-4, 16px) !important;
+  border-radius: var(--radius-md, 8px) !important;
+  font-weight: var(--font-weight-semibold, 600) !important;
+}
+
+.btn-primary:hover {
+  background: var(--primary-light) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-md) !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.btn-primary:active,
+.btn-primary:focus {
+  transform: translateY(0) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Small Button */
+.btn-sm {
+  padding: var(--space-2, 8px) var(--space-4, 16px) !important;
+  font-size: 25px !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Remove focus outline globally */
+*:focus,
+*:active {
+  outline: none !important;
+}
+
+/* Override Bootstrap */
+.btn-primary:focus,
+.btn-primary.focus,
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active {
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+}
+
+button::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner {
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+/* ========================================
+   MOBILE RESPONSIVE
+   ======================================== */
+
+@media (min-width: 768px) {
+  .navbar-menu {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+
+  .navbar-nav {
+    flex-direction: row !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .navbar-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: var(--surface, #ffffff);
+    padding: var(--space-20, 80px) var(--space-6, 24px) var(--space-6, 24px);
+    box-shadow: var(--shadow-2xl);
+    transition: right var(--transition-slow, 0.3s ease);
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar-menu.active {
+    right: 0;
+  }
+
+  .navbar-nav {
+    flex-direction: column !important;
+    width: 100%;
+    gap: var(--space-2, 8px) !important;
+  }
+
+  .navbar-nav .nav-item {
+    width: 100%;
+  }
+
+  .navbar-nav .nav-link,
+  .navbar-username-link,
+  .navbar-logout-link {
+    width: 100%;
+  }
+}
 

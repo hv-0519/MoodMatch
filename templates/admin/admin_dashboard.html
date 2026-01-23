@@ -1,5 +1,578 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block head %}
+<!-- Admin Dashboard Specific CSS -->
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/admin.css') }}"
+/>
+<style>
+  Hide
+    profile
+    picture
+    and
+    logout
+    from
+    main
+    navbar
+    for
+    admin
+    .navbar
+    img[alt="Profile"],
+  .navbar a[href="{{ url_for('auth.logout') }}"] {
+    display: none !important;
+  }
 
-{% block content %}
-admin Dashboard!!!
+  /* Admin Sidebar Profile - Enhanced version */
+.admin-sidebar-profile {
+  padding: 28px 20px;
+  margin: 24px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  text-align: center;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.admin-sidebar-profile:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.11);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Avatar */
+.admin-profile-avatar {
+  margin: 0 auto 16px;
+}
+
+.avatar-circle {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  color: #334155;                   /* slate-700 - nice contrast */
+  font-size: 2.1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.18),
+    inset 0 2px 6px rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.admin-sidebar-profile:hover .avatar-circle {
+  transform: scale(1.08);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 
+    0 10px 24px rgba(0, 0, 0, 0.22),
+    inset 0 3px 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Role badge */
+.admin-profile-role {
+  display: inline-block;
+  padding: 8px 20px;
+  background: white;
+  color: #0f172a;                    /* very dark slate */
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-radius: 999px;               /* pill shape */
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.25s ease;
+  align-items: center;
+}
+
+.admin-sidebar-profile:hover .admin-profile-role {
+  transform: scale(1.04);
+  box-shadow: 
+    0 4px 14px rgba(0, 0, 0, 0.16),
+    inset 0 1px 3px rgba(255, 255, 255, 1);
+}
+
+  .avatar-circle {
+  background: linear-gradient(135deg, #fefcbf 0%, #fbbf24 100%);
+  color: #7c2d12;
+  border-color: #fcd34d;
+}
+
+.admin-profile-role {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #7c2d12;
+  border: none;
+}
+
+  /* Hide footer for admin pages */
+  .footer {
+    display: none important;
+  }
+</style>
+{% endblock %} {% block content %}
+
+<!-- Sidebar - Below Navbar, Always Visible -->
+<aside class="admin-sidebar">
+  <!-- Sidebar Profile -->
+  <div class="admin-sidebar-profile">
+    <div class="admin-sidebar-profile">
+  <!-- Avatar -->
+  <div class="admin-profile-avatar">
+    <div class="avatar-circle">👤</div>
+  </div>
+
+  <!-- Role badge -->
+  <div class="admin-profile-role">Administrator</div>
+</div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="admin-sidebar-nav">
+    <!-- Main Menu -->
+    <div class="admin-nav-section">
+      <div class="admin-nav-label">Main Menu</div>
+      <ul class="admin-nav-list">
+        <li class="admin-nav-item">
+          <a
+            href="{{ url_for('admin.admin_dashboard') }}"
+            class="admin-nav-link active"
+          >
+            <span class="admin-nav-icon">📊</span>
+            <span class="admin-nav-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">👥</span>
+            <span class="admin-nav-text">Manage Users</span>
+            <span class="admin-nav-badge">12</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">🎯</span>
+            <span class="admin-nav-text">Manage Activities</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">📈</span>
+            <span class="admin-nav-text">View Analytics</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">🏷️</span>
+            <span class="admin-nav-text">Manage Categories</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Account Menu -->
+    <div class="admin-nav-section">
+      <div class="admin-nav-label">Account</div>
+      <ul class="admin-nav-list">
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">👤</span>
+            <span class="admin-nav-text">View Profile</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">⚙️</span>
+            <span class="admin-nav-text">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="admin-sidebar-footer">
+    <a href="{{ url_for('auth.logout') }}" class="admin-logout-btn">
+      <span>🚪</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Main Content Area -->
+<div class="admin-dashboard-wrapper">
+  <!-- Admin Header -->
+  <div class="admin-header">
+    <div class="admin-header-content">
+      <div class="admin-title-section">
+        <h1>Admin Dashboard</h1>
+        <p class="admin-subtitle">
+          Welcome back! Here's what's happening with MoodMatch today.
+        </p>
+      </div>
+      <div class="admin-header-actions">
+        <button class="admin-btn admin-btn-white">
+          <span>📊</span>
+          <span>Generate Report</span>
+        </button>
+        <button class="admin-btn admin-btn-outline">
+          <span>⚙️</span>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="admin-content">
+    <!-- Stats Cards -->
+    <div class="admin-stats-grid">
+      <div class="admin-stat-card blue">
+        <div class="admin-stat-header">
+          <div class="admin-stat-info">
+            <div class="admin-stat-label">Total Users</div>
+            <div class="admin-stat-value">2,547</div>
+          </div>
+          <div class="admin-stat-icon">👥</div>
+        </div>
+        <div class="admin-stat-footer">
+          <span class="admin-stat-trend up">↑ 12%</span>
+          <span>vs last month</span>
+        </div>
+      </div>
+
+      <div class="admin-stat-card cyan">
+        <div class="admin-stat-header">
+          <div class="admin-stat-info">
+            <div class="admin-stat-label">Total Activities</div>
+            <div class="admin-stat-value">1,284</div>
+          </div>
+          <div class="admin-stat-icon">🎯</div>
+        </div>
+        <div class="admin-stat-footer">
+          <span class="admin-stat-trend up">↑ 8%</span>
+          <span>vs last month</span>
+        </div>
+      </div>
+
+      <div class="admin-stat-card purple">
+        <div class="admin-stat-header">
+          <div class="admin-stat-info">
+            <div class="admin-stat-label">Engagement Rate</div>
+            <div class="admin-stat-value">87.5%</div>
+          </div>
+          <div class="admin-stat-icon">📈</div>
+        </div>
+        <div class="admin-stat-footer">
+          <span class="admin-stat-trend up">↑ 3.2%</span>
+          <span>vs last month</span>
+        </div>
+      </div>
+
+      <div class="admin-stat-card green">
+        <div class="admin-stat-header">
+          <div class="admin-stat-info">
+            <div class="admin-stat-label">Active Today</div>
+            <div class="admin-stat-value">428</div>
+          </div>
+          <div class="admin-stat-icon">✨</div>
+        </div>
+        <div class="admin-stat-footer">
+          <span class="admin-stat-trend down">↓ 2%</span>
+          <span>vs yesterday</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="admin-content-grid">
+      <!-- Chart Card -->
+      <div class="admin-chart-card">
+        <div class="admin-card-header">
+          <h2 class="admin-card-title">User Growth</h2>
+          <div class="admin-card-actions">
+            <button class="admin-filter-btn active">7 Days</button>
+            <button class="admin-filter-btn">30 Days</button>
+            <button class="admin-filter-btn">90 Days</button>
+          </div>
+        </div>
+        <div class="admin-chart-placeholder">
+          <div class="admin-chart-placeholder-content">
+            <div class="admin-chart-placeholder-icon">📊</div>
+            <p>Chart visualization area</p>
+            <small style="color: var(--admin-text-muted)"
+              >Integrate Chart.js or Recharts here</small
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="admin-activity-card">
+        <div class="admin-card-header">
+          <h2 class="admin-card-title">Recent Activity</h2>
+        </div>
+        <div class="admin-activity-list">
+          <div class="admin-activity-item">
+            <div class="admin-activity-avatar">JD</div>
+            <div class="admin-activity-content">
+              <div class="admin-activity-text">
+                <strong>John Doe</strong> registered a new account
+              </div>
+              <div class="admin-activity-time">2 minutes ago</div>
+            </div>
+          </div>
+
+          <div class="admin-activity-item">
+            <div class="admin-activity-avatar">SM</div>
+            <div class="admin-activity-content">
+              <div class="admin-activity-text">
+                <strong>Sarah Miller</strong> added a new activity
+              </div>
+              <div class="admin-activity-time">15 minutes ago</div>
+            </div>
+          </div>
+
+          <div class="admin-activity-item">
+            <div class="admin-activity-avatar">RJ</div>
+            <div class="admin-activity-content">
+              <div class="admin-activity-text">
+                <strong>Robert Johnson</strong> updated profile
+              </div>
+              <div class="admin-activity-time">1 hour ago</div>
+            </div>
+          </div>
+
+          <div class="admin-activity-item">
+            <div class="admin-activity-avatar">EW</div>
+            <div class="admin-activity-content">
+              <div class="admin-activity-text">
+                <strong>Emma Wilson</strong> favorited 3 activities
+              </div>
+              <div class="admin-activity-time">2 hours ago</div>
+            </div>
+          </div>
+
+          <div class="admin-activity-item">
+            <div class="admin-activity-avatar">MB</div>
+            <div class="admin-activity-content">
+              <div class="admin-activity-text">
+                <strong>Michael Brown</strong> completed a survey
+              </div>
+              <div class="admin-activity-time">3 hours ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Users Table -->
+    <div class="admin-table-card">
+      <div class="admin-table-header">
+        <h2 class="admin-card-title">Recent Users</h2>
+        <div class="admin-search-box">
+          <input
+            type="text"
+            class="admin-search-input"
+            placeholder="Search users..."
+          />
+          <span class="admin-search-icon">🔍</span>
+        </div>
+      </div>
+
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Activities</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    class="admin-activity-avatar"
+                    style="width: 32px; height: 32px; font-size: 0.75rem"
+                  >
+                    JD
+                  </div>
+                  <strong>John Doe</strong>
+                </div>
+              </td>
+              <td>john.doe@example.com</td>
+              <td><span class="admin-badge success">Active</span></td>
+              <td>47</td>
+              <td>Jan 15, 2026</td>
+              <td>
+                <div class="admin-table-actions">
+                  <button class="admin-icon-btn" title="View">👁️</button>
+                  <button class="admin-icon-btn" title="Edit">✏️</button>
+                  <button class="admin-icon-btn" title="Delete">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    class="admin-activity-avatar"
+                    style="width: 32px; height: 32px; font-size: 0.75rem"
+                  >
+                    SM
+                  </div>
+                  <strong>Sarah Miller</strong>
+                </div>
+              </td>
+              <td>sarah.m@example.com</td>
+              <td><span class="admin-badge success">Active</span></td>
+              <td>32</td>
+              <td>Jan 14, 2026</td>
+              <td>
+                <div class="admin-table-actions">
+                  <button class="admin-icon-btn" title="View">👁️</button>
+                  <button class="admin-icon-btn" title="Edit">✏️</button>
+                  <button class="admin-icon-btn" title="Delete">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    class="admin-activity-avatar"
+                    style="width: 32px; height: 32px; font-size: 0.75rem"
+                  >
+                    RJ
+                  </div>
+                  <strong>Robert Johnson</strong>
+                </div>
+              </td>
+              <td>r.johnson@example.com</td>
+              <td><span class="admin-badge warning">Pending</span></td>
+              <td>15</td>
+              <td>Jan 13, 2026</td>
+              <td>
+                <div class="admin-table-actions">
+                  <button class="admin-icon-btn" title="View">👁️</button>
+                  <button class="admin-icon-btn" title="Edit">✏️</button>
+                  <button class="admin-icon-btn" title="Delete">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    class="admin-activity-avatar"
+                    style="width: 32px; height: 32px; font-size: 0.75rem"
+                  >
+                    EW
+                  </div>
+                  <strong>Emma Wilson</strong>
+                </div>
+              </td>
+              <td>emma.w@example.com</td>
+              <td><span class="admin-badge success">Active</span></td>
+              <td>68</td>
+              <td>Jan 12, 2026</td>
+              <td>
+                <div class="admin-table-actions">
+                  <button class="admin-icon-btn" title="View">👁️</button>
+                  <button class="admin-icon-btn" title="Edit">✏️</button>
+                  <button class="admin-icon-btn" title="Delete">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    class="admin-activity-avatar"
+                    style="width: 32px; height: 32px; font-size: 0.75rem"
+                  >
+                    MB
+                  </div>
+                  <strong>Michael Brown</strong>
+                </div>
+              </td>
+              <td>m.brown@example.com</td>
+              <td><span class="admin-badge info">New</span></td>
+              <td>8</td>
+              <td>Jan 11, 2026</td>
+              <td>
+                <div class="admin-table-actions">
+                  <button class="admin-icon-btn" title="View">👁️</button>
+                  <button class="admin-icon-btn" title="Edit">✏️</button>
+                  <button class="admin-icon-btn" title="Delete">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block scripts %}
+<script>
+  // ==========================================
+  // ADMIN DASHBOARD JAVASCRIPT
+  // ==========================================
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // ==========================================
+    // FILTER BUTTONS
+    // ==========================================
+
+    const filterBtns = document.querySelectorAll(".admin-filter-btn");
+    filterBtns.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        filterBtns.forEach((b) => b.classList.remove("active"));
+        this.classList.add("active");
+        console.log("Filter changed to:", this.textContent);
+      });
+    });
+
+    // ==========================================
+    // SEARCH FUNCTIONALITY
+    // ==========================================
+
+    const searchInput = document.querySelector(".admin-search-input");
+    if (searchInput) {
+      searchInput.addEventListener("input", function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const tableRows = document.querySelectorAll(".admin-table tbody tr");
+
+        tableRows.forEach((row) => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(searchTerm) ? "" : "none";
+        });
+      });
+    }
+
+    // ==========================================
+    // ACTION BUTTONS
+    // ==========================================
+
+    const actionBtns = document.querySelectorAll(".admin-icon-btn");
+    actionBtns.forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        const action = this.getAttribute("title");
+        console.log("Action:", action);
+        // Add your action handlers here
+      });
+    });
+  });
+</script>
 {% endblock %}

@@ -2,7 +2,7 @@ import os
 import random
 import string
 import sqlite3
-from flask import request, redirect, url_for, render_template, Blueprint
+from flask import request, redirect, url_for, render_template, Blueprint, session
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import (
@@ -17,24 +17,36 @@ from utils.helper import generate_username, send_email
 auth_bp = Blueprint("auth", __name__)
 
 
+# ---------------------------
+# BLOCK LOGIN / REGISTER FOR LOGGED-IN USERS (FIXED)
+# ---------------------------
 @auth_bp.before_request
 def block_auth_pages_for_logged_in_users():
-    if current_user.is_authenticated and request.endpoint in (
-        "auth.login",
-        "auth.register",
-    ):
-        return redirect(url_for("main.index"))
+    if current_user.is_authenticated:
+        if request.endpoint == "auth.login":
+            # Logged-in users should NOT see login again
+            return redirect(url_for("main.index"))
+        if request.endpoint == "auth.register":
+            return redirect(url_for("main.index"))
 
 
 # ---------------------------
-# USER MODEL
+# USER MODEL (IMPROVED)
 # ---------------------------
 class User(UserMixin):
-    def __init__(self, id, username, first_name=None, profile_picture=None):
+    def __init__(
+        self,
+        id,
+        username,
+        first_name=None,
+        profile_picture=None,
+        is_admin=False,
+    ):
         self.id = id
         self.username = username
         self.first_name = first_name
         self.profile_picture = profile_picture
+        self.is_admin = is_admin
 
 
 # ---------------------------
@@ -78,7 +90,7 @@ def register():
                 postal_code, country, profile_picture,
                 password_hash
             ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """,
+            """,
             (
                 first_name,
                 last_name,
@@ -111,7 +123,7 @@ def register():
 
 
 # ---------------------------
-# LOGIN
+# LOGIN (FIXED)
 # ---------------------------
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -119,36 +131,46 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
+        # ✅ FIX: checkbox handling
+        remember = True if request.form.get("remember") == "on" else False
+
         conn = sqlite3.connect("models/mood.db")
         cursor = conn.cursor()
 
-        # 1️⃣ ADMIN LOGIN
+        # ---------------------------
+        # ADMIN LOGIN
+        # ---------------------------
         cursor.execute(
-            """
-            SELECT id, username, password_hash
-            FROM admins
-            WHERE username = ?
-        """,
+            "SELECT id, username, password_hash FROM admins WHERE username = ?",
             (username,),
         )
         admin = cursor.fetchone()
 
         if admin and check_password_hash(admin[2], password):
-            login_user(User(id=admin[0], username=admin[1], first_name="Admin"))
+            login_user(
+                User(
+                    id=admin[0],
+                    username=admin[1],
+                    first_name="Admin",
+                    is_admin=True,
+                ),
+                remember=remember,
+            )
             conn.close()
             return redirect(url_for("admin.admin_dashboard"))
 
-        # 2️⃣ USER LOGIN
+        # ---------------------------
+        # USER LOGIN
+        # ---------------------------
         cursor.execute(
             """
-           SELECT id, username, first_name, profile_picture, password_hash
-FROM users
-WHERE username = ?
-        """,
+            SELECT id, username, first_name, profile_picture, password_hash
+            FROM users
+            WHERE username = ?
+            """,
             (username,),
         )
         user = cursor.fetchone()
-
         conn.close()
 
         if user and check_password_hash(user[4], password):
@@ -156,9 +178,11 @@ WHERE username = ?
                 User(
                     id=user[0],
                     username=user[1],
-                    first_name=user[2],  # TEXT
-                    # profile_picture=user[3],  # IMAGE
-                )
+                    first_name=user[2],
+                    profile_picture=user[3],
+                    is_admin=False,
+                ),
+                remember=remember,
             )
             return redirect(url_for("user.user_dashboard"))
 
@@ -168,17 +192,18 @@ WHERE username = ?
 
 
 # ---------------------------
-# LOGOUT
+# LOGOUT (CORRECT)
 # ---------------------------
 @auth_bp.route("/logout")
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for("main.index"))
 
 
 # ---------------------------
-# FORGET PASSWORD (username + email)
+# FORGET PASSWORD
 # ---------------------------
 @auth_bp.route("/forget_password", methods=["GET", "POST"])
 def forget_password():
@@ -277,7 +302,11 @@ def reset_password():
         conn = sqlite3.connect("models/mood.db")
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE users SET password_hash = ?, reset_code = NULL WHERE username = ?",
+            """
+            UPDATE users
+            SET password_hash = ?, reset_code = NULL
+            WHERE username = ?
+            """,
             (password_hash, username),
         )
         conn.commit()

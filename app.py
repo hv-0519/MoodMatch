@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_login import LoginManager
 import sqlite3
+from datetime import timedelta
 
 from routes.main import main_bp
 from routes.auth import auth_bp, User  # 👈 import User class
@@ -10,8 +11,17 @@ from routes.user import user_bp
 
 app = Flask(__name__)
 
-# 🔑 REQUIRED for Flask-Login
+# 🔒 REQUIRED for Flask-Login
 app.secret_key = "moodmatch-secret-key"
+
+# ✅ ADDED: Session configuration for proper logout behavior
+app.config["SESSION_COOKIE_NAME"] = "moodmatch_session"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
+    days=7
+)  # Session expires after 7 days
+app.config["SESSION_COOKIE_SECURE"] = False  # Set to True in production with HTTPS
 
 # ===============================
 # Flask-Login setup
@@ -19,6 +29,7 @@ app.secret_key = "moodmatch-secret-key"
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "auth.login"
+login_manager.session_protection = "strong"  # ✅ ADDED: Stronger session protection
 
 
 @login_manager.user_loader
@@ -27,13 +38,15 @@ def load_user(user_id):
 
     # Special case for hardcoded super admin
     if user_id == 0:
-        return User(id=0, username="admin")
+        return User(id=0, username="admin", first_name="Admin")
 
     # Normal users from 'users' table
     conn = sqlite3.connect("models/mood.db")
     cursor = conn.cursor()
+
+    # Query with correct column order
     cursor.execute(
-        "SELECT id, username, profile_picture FROM users WHERE id = ?",
+        "SELECT id, username, first_name, profile_picture FROM users WHERE id = ?",
         (user_id,),
     )
     row = cursor.fetchone()
@@ -41,7 +54,7 @@ def load_user(user_id):
     # Also check admins table (optional but recommended)
     if not row:
         cursor.execute(
-            "SELECT id, username, NULL as profile_picture FROM admins WHERE id = ?",
+            "SELECT id, username, NULL as first_name, NULL as profile_picture FROM admins WHERE id = ?",
             (user_id,),
         )
         row = cursor.fetchone()
@@ -49,7 +62,14 @@ def load_user(user_id):
     conn.close()
 
     if row:
-        return User(row[0], row[1], row[2] if len(row) > 2 else None)
+        # Create User with correct parameter order
+        # User(id, username, first_name, profile_picture)
+        return User(
+            id=row[0],  # id
+            username=row[1],  # username
+            first_name=row[2],  # first_name (can be None for admins)
+            profile_picture=row[3],  # profile_picture (can be None)
+        )
 
     return None
 
@@ -71,9 +91,11 @@ if __name__ == "__main__":
     print("🚀 MoodMatch Application Starting...")
     print("=" * 60)
     print("📊 Environment: development")
-    print("🔑 Debug Mode: True")
+    print("🔧 Debug Mode: True")
     print("=" * 60)
     print("🌐 Access the app at: http://127.0.0.1:6969")
+    print("=" * 60)
+    print("\n💡 TIP: To clear session, visit /logout or clear browser cookies")
     print("=" * 60)
 
     app.run(debug=True, port=6969)
