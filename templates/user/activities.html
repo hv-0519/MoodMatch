@@ -1,0 +1,436 @@
+{% extends "base.html" %} {% block title %}Find Activities{% endblock %} {%
+block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/user.css') }}"
+/>
+<style>
+  /* Activities Page Specific Styles */
+  .activities-main-wrapper {
+    margin-left: var(--user-sidebar-width);
+    min-height: calc(100vh - var(--navbar-height, 72px));
+    background: var(--user-bg);
+    padding: 60px 40px;
+  }
+
+  .activities-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .activities-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .activities-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    background: linear-gradient(
+      135deg,
+      var(--user-primary) 0%,
+      var(--user-secondary) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .activities-subtitle {
+    font-size: 1.125rem;
+    color: var(--user-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Mood Selection Card */
+  .mood-selection-card {
+    background: var(--user-surface);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--user-border);
+  }
+
+  .mood-input-group {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 24px;
+  }
+
+  .mood-textbox-wrapper {
+    flex: 2;
+    position: relative;
+  }
+
+  .mood-textbox {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 1rem;
+    border: 2px solid var(--user-border);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-family: "Inter", sans-serif;
+    background: var(--user-surface);
+  }
+
+  .mood-textbox:focus {
+    outline: none;
+    border-color: var(--user-primary);
+    box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
+  }
+
+  .mood-dropdown-wrapper {
+    flex: 1;
+    position: relative;
+  }
+
+  .mood-dropdown {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 1rem;
+    border: 2px solid var(--user-border);
+    border-radius: 12px;
+    background: var(--user-surface);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: "Inter", sans-serif;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23555555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 45px;
+  }
+
+  .mood-dropdown:focus {
+    outline: none;
+    border-color: var(--user-primary);
+    box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
+  }
+
+  .mood-dropdown:hover {
+    border-color: var(--user-primary-light);
+  }
+
+  /* Submit Button */
+  .find-activity-btn {
+    width: 100%;
+    padding: 18px 32px;
+    background: linear-gradient(
+      135deg,
+      var(--user-primary) 0%,
+      var(--user-secondary) 100%
+    );
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .find-activity-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(230, 57, 70, 0.3);
+  }
+
+  .find-activity-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Helper Text */
+  .helper-text {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--user-text-muted);
+    margin-top: 16px;
+  }
+
+  /* Popular Moods Section */
+  .popular-moods-section {
+    margin-top: 50px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--user-text);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .mood-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .mood-card {
+    background: var(--user-surface);
+    border: 2px solid var(--user-border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: block;
+  }
+
+  .mood-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--user-primary);
+    box-shadow: 0 10px 20px rgba(230, 57, 70, 0.15);
+  }
+
+  .mood-card-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+  }
+
+  .mood-card-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--user-text);
+    margin-bottom: 8px;
+  }
+
+  .mood-card-description {
+    font-size: 0.875rem;
+    color: var(--user-text-secondary);
+    line-height: 1.5;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .activities-main-wrapper {
+      margin-left: 200px;
+      padding: 40px 20px;
+    }
+
+    .mood-selection-card {
+      padding: 30px 20px;
+    }
+
+    .mood-input-group {
+      flex-direction: column;
+    }
+
+    .mood-cards-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .activities-main-wrapper {
+      margin-left: 180px;
+      padding: 30px 16px;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<!-- User Sidebar -->
+<aside class="user-sidebar">
+  <div class="user-sidebar-profile">
+    <div class="user-profile-badge-circle">
+      {% if current_user.profile_picture %}
+      <img
+        src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) }}"
+        alt="Profile"
+      />
+      {% else %} 👤 {% endif %}
+    </div>
+    <div class="user-profile-role-pill">User</div>
+    <div class="user-profile-email-small">{{ current_user.email }}</div>
+  </div>
+
+  <nav class="user-sidebar-nav">
+    <div class="user-nav-section">
+      <div class="user-nav-label">Main Menu</div>
+      <ul class="user-nav-list">
+        <li class="user-nav-item">
+          <a href="{{ url_for('user.user_dashboard') }}" class="user-nav-link">
+            <span class="user-nav-icon">🏠</span>
+            <span class="user-nav-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="{{ url_for('main.index') }}" class="user-nav-link active">
+            <span class="user-nav-icon">🎨</span>
+            <span class="user-nav-text">Find Activities</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="{{ url_for('main.favorites') }}" class="user-nav-link">
+            <span class="user-nav-icon">⭐</span>
+            <span class="user-nav-text">Favorites</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="{{ url_for('main.history') }}" class="user-nav-link">
+            <span class="user-nav-icon">📜</span>
+            <span class="user-nav-text">History</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="user-sidebar-footer">
+    <a href="{{ url_for('auth.logout') }}" class="user-logout-btn">
+      <span>🚪</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="activities-main-wrapper">
+  <div class="activities-container">
+    <!-- Header -->
+    <div class="activities-header">
+      <h1 class="activities-title">Find Your Perfect Activity</h1>
+      <p class="activities-subtitle">
+        Describe how you're feeling or select a mood category to discover
+        activities tailored just for you.
+      </p>
+    </div>
+
+    <!-- Mood Selection Form -->
+    <div class="mood-selection-card">
+      <form
+        action="{{ url_for('user.recommend_activity') }}"
+        method="POST"
+        id="moodForm"
+      >
+        <div class="mood-input-group">
+          <div class="mood-textbox-wrapper">
+            <input
+              type="text"
+              class="mood-textbox"
+              id="moodDescription"
+              name="mood_description"
+              placeholder="Describe your current mood or what you'd like to do..."
+            />
+          </div>
+
+          <div class="mood-dropdown-wrapper">
+            <select
+              class="mood-dropdown"
+              id="moodSelect"
+              name="mood_id"
+              required
+            >
+              <option value="">Select Mood</option>
+              <option value="1">Creative 🎨</option>
+              <option value="2">Intellectual 📚</option>
+              <option value="3">Adventure 🏔️</option>
+              <option value="4">Social 👥</option>
+              <option value="5">Relaxation 🧘</option>
+              <option value="6">Productive ⚡</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="find-activity-btn">
+          <span>Find My Activity</span>
+          <span>→</span>
+        </button>
+
+        <p class="helper-text">
+          💡 Choose a mood category to get personalized activity recommendations
+        </p>
+      </form>
+    </div>
+
+    <!-- Popular Moods Section -->
+    <div class="popular-moods-section">
+      <h2 class="section-title">Popular Mood Categories</h2>
+      <div class="mood-cards-grid">
+        <div class="mood-card" onclick="selectMood(1)">
+          <div class="mood-card-icon">🎨</div>
+          <div class="mood-card-name">Creative</div>
+          <div class="mood-card-description">
+            Express yourself through art, writing, and imagination
+          </div>
+        </div>
+
+        <div class="mood-card" onclick="selectMood(2)">
+          <div class="mood-card-icon">📚</div>
+          <div class="mood-card-name">Intellectual</div>
+          <div class="mood-card-description">
+            Learn, read, and expand your knowledge
+          </div>
+        </div>
+
+        <div class="mood-card" onclick="selectMood(3)">
+          <div class="mood-card-icon">🏔️</div>
+          <div class="mood-card-name">Adventure</div>
+          <div class="mood-card-description">
+            Explore new places and exciting experiences
+          </div>
+        </div>
+
+        <div class="mood-card" onclick="selectMood(4)">
+          <div class="mood-card-icon">👥</div>
+          <div class="mood-card-name">Social</div>
+          <div class="mood-card-description">
+            Connect with friends and meet new people
+          </div>
+        </div>
+
+        <div class="mood-card" onclick="selectMood(5)">
+          <div class="mood-card-icon">🧘</div>
+          <div class="mood-card-name">Relaxation</div>
+          <div class="mood-card-description">
+            Unwind and find your inner peace
+          </div>
+        </div>
+
+        <div class="mood-card" onclick="selectMood(6)">
+          <div class="mood-card-icon">⚡</div>
+          <div class="mood-card-name">Productive</div>
+          <div class="mood-card-description">
+            Get things done and achieve your goals
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  // Function to select mood from card click
+  function selectMood(moodId) {
+    const moodSelect = document.getElementById("moodSelect");
+    moodSelect.value = moodId;
+
+    // Scroll to form
+    document.querySelector(".mood-selection-card").scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    // Add visual feedback
+    moodSelect.style.borderColor = "var(--user-primary)";
+    setTimeout(() => {
+      moodSelect.style.borderColor = "";
+    }, 1000);
+  }
+
+  // Optional: Auto-submit when mood is selected from dropdown
+  document.getElementById("moodSelect").addEventListener("change", function () {
+    if (this.value) {
+      // Optional: uncomment to auto-submit
+      // document.getElementById('moodForm').submit();
+    }
+  });
+</script>
+{% endblock %}

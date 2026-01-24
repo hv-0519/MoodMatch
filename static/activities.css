@@ -1,0 +1,823 @@
+/* =====================================================
+   MoodMatch Activity Pages Styles
+   Writing, Reading, Cooking, Games, Travel
+   ===================================================== */
+
+/* Common Page Header */
+.activity-page-header {
+  background: linear-gradient(135deg, var(--user-primary) 0%, var(--user-secondary) 100%);
+  color: white;
+  padding: 40px;
+  margin-bottom: 40px;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px -5px rgba(230, 57, 70, 0.3);
+}
+
+.activity-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.activity-title-section h1 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.activity-subtitle {
+  font-size: 1.0625rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.activity-header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.activity-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.activity-btn-white {
+  background: white;
+  color: var(--user-primary);
+}
+
+.activity-btn-white:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+}
+
+.activity-btn-outline {
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.activity-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+.activity-btn-primary {
+  background: linear-gradient(135deg, var(--user-primary) 0%, var(--user-secondary) 100%);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(230, 57, 70, 0.3);
+}
+
+.activity-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(230, 57, 70, 0.4);
+}
+
+.activity-btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--user-danger);
+  border: 2px solid var(--user-danger);
+}
+
+.activity-btn-danger:hover {
+  background: var(--user-danger);
+  color: white;
+}
+
+/* =====================================================
+   WRITING EDITOR STYLES
+   ===================================================== */
+
+.editor-container {
+  background: var(--user-surface);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--user-border);
+  margin-bottom: 40px;
+}
+
+.editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.editor-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--user-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid var(--user-border);
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-family: inherit;
+  color: var(--user-text);
+  background: var(--user-surface);
+  transition: all 0.2s ease;
+}
+
+.editor-textarea {
+  width: 100%;
+  min-height: 400px;
+  padding: 20px;
+  border: 2px solid var(--user-border);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: 'Georgia', serif;
+  line-height: 1.8;
+  color: var(--user-text);
+  background: var(--user-surface);
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.editor-input:focus,
+.editor-textarea:focus {
+  outline: none;
+  border-color: var(--user-primary);
+  box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
+}
+
+.editor-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid var(--user-border);
+}
+
+.writings-list-section {
+  margin-top: 60px;
+}
+
+.writings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.writing-card {
+  background: var(--user-surface);
+  border: 2px solid var(--user-border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+}
+
+.writing-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--user-primary);
+  box-shadow: 0 10px 15px -3px rgba(230, 57, 70, 0.1);
+}
+
+.writing-card-header {
+  margin-bottom: 12px;
+}
+
+.writing-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--user-text);
+  margin-bottom: 8px;
+}
+
+.writing-preview {
+  font-size: 0.9375rem;
+  color: var(--user-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.writing-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--user-border);
+  font-size: 0.875rem;
+  color: var(--user-text-muted);
+}
+
+/* =====================================================
+   READING RESOURCES STYLES
+   ===================================================== */
+
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.resource-card {
+  background: var(--user-surface);
+  border: 2px solid var(--user-border);
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.resource-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--user-primary);
+  box-shadow: 0 10px 15px -3px rgba(230, 57, 70, 0.1);
+}
+
+.resource-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.resource-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(230, 57, 70, 0.1), rgba(236, 72, 153, 0.1));
+  border-radius: 12px;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.resource-title-section {
+  flex: 1;
+}
+
+.resource-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--user-text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.resource-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.resource-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.badge-book {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--user-accent);
+}
+
+.badge-article {
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--user-info);
+}
+
+.badge-beginner {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--user-success);
+}
+
+.badge-intermediate {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--user-warning);
+}
+
+.badge-advanced {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--user-danger);
+}
+
+.resource-description {
+  font-size: 0.9375rem;
+  color: var(--user-text-secondary);
+  line-height: 1.6;
+}
+
+.resource-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--user-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.resource-link:hover {
+  color: var(--user-secondary);
+  gap: 12px;
+}
+
+/* =====================================================
+   COOKING STEPS STYLES
+   ===================================================== */
+
+.recipe-header-card {
+  background: var(--user-surface);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--user-border);
+  margin-bottom: 40px;
+}
+
+.recipe-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--user-text);
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--user-primary) 0%, var(--user-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.recipe-meta-info {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.recipe-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: var(--user-text-secondary);
+}
+
+.recipe-meta-item i {
+  color: var(--user-primary);
+  font-size: 1.25rem;
+}
+
+.recipe-video-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--user-danger);
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.recipe-video-link:hover {
+  background: var(--user-danger);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.steps-container {
+  background: var(--user-surface);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--user-border);
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  counter-reset: step-counter;
+}
+
+.step-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 24px;
+  background: var(--user-bg);
+  border-radius: 16px;
+  border: 2px solid var(--user-border);
+  transition: all 0.3s ease;
+}
+
+.step-item:hover {
+  border-color: var(--user-primary);
+  transform: translateX(4px);
+}
+
+.step-number {
+  counter-increment: step-counter;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--user-primary) 0%, var(--user-secondary) 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-number::before {
+  content: counter(step-counter);
+}
+
+.step-content {
+  flex: 1;
+  padding-top: 8px;
+}
+
+.step-text {
+  font-size: 1.0625rem;
+  color: var(--user-text);
+  line-height: 1.7;
+}
+
+/* =====================================================
+   GAMES & SPORTS STYLES
+   ===================================================== */
+
+.game-details-card {
+  background: var(--user-surface);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--user-border);
+  margin-bottom: 40px;
+}
+
+.game-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--user-text);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.game-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.badge-indoor {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--user-accent);
+}
+
+.badge-outdoor {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--user-success);
+}
+
+.game-description {
+  font-size: 1.0625rem;
+  color: var(--user-text-secondary);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.rules-section {
+  margin-bottom: 32px;
+}
+
+.rules-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--user-text);
+  margin-bottom: 20px;
+}
+
+.rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rule-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--user-bg);
+  border-radius: 12px;
+  border-left: 4px solid var(--user-primary);
+}
+
+.rule-icon {
+  color: var(--user-primary);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rule-text {
+  font-size: 1rem;
+  color: var(--user-text);
+  line-height: 1.6;
+}
+
+.tutorial-section {
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(230, 57, 70, 0.05), rgba(236, 72, 153, 0.05));
+  border-radius: 16px;
+  border: 2px dashed var(--user-primary);
+}
+
+.tutorial-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--user-text);
+  margin-bottom: 12px;
+}
+
+.tutorial-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--user-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.0625rem;
+  transition: all 0.2s ease;
+}
+
+.tutorial-link:hover {
+  color: var(--user-secondary);
+  gap: 12px;
+}
+
+/* =====================================================
+   TRAVEL PLACES STYLES
+   ===================================================== */
+
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 28px;
+}
+
+.place-card {
+  background: var(--user-surface);
+  border: 2px solid var(--user-border);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.place-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--user-primary);
+  box-shadow: 0 15px 30px -5px rgba(230, 57, 70, 0.2);
+}
+
+.place-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  background: linear-gradient(135deg, rgba(230, 57, 70, 0.1), rgba(236, 72, 153, 0.1));
+}
+
+.place-content {
+  padding: 28px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.place-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--user-text);
+  margin-bottom: 16px;
+}
+
+.place-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.place-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--user-bg);
+  border-radius: 10px;
+}
+
+.place-info-icon {
+  color: var(--user-primary);
+  font-size: 1.125rem;
+}
+
+.place-info-text {
+  font-size: 0.9375rem;
+  color: var(--user-text-secondary);
+  font-weight: 500;
+}
+
+.place-description {
+  font-size: 1rem;
+  color: var(--user-text-secondary);
+  line-height: 1.7;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.place-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, var(--user-primary) 0%, var(--user-secondary) 100%);
+  color: white;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.place-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -3px rgba(230, 57, 70, 0.4);
+}
+
+/* Budget Badges */
+.budget-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.budget-low {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--user-success);
+}
+
+.budget-medium {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--user-warning);
+}
+
+.budget-high {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--user-danger);
+}
+
+/* =====================================================
+   RESPONSIVE DESIGN
+   ===================================================== */
+
+@media (max-width: 992px) {
+  .activity-page-header {
+    padding: 30px;
+  }
+
+  .editor-container,
+  .recipe-header-card,
+  .steps-container,
+  .game-details-card {
+    padding: 30px;
+  }
+
+  .writings-grid,
+  .resources-grid,
+  .places-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .activity-page-header {
+    padding: 24px;
+  }
+
+  .activity-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .activity-header-actions {
+    width: 100%;
+  }
+
+  .activity-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .editor-container,
+  .recipe-header-card,
+  .steps-container,
+  .game-details-card,
+  .place-content {
+    padding: 24px;
+  }
+
+  .editor-textarea {
+    min-height: 300px;
+  }
+
+  .writings-grid,
+  .resources-grid,
+  .places-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-meta-info {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .place-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .game-name {
+    font-size: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .activity-page-header {
+    padding: 20px;
+  }
+
+  .editor-actions {
+    flex-direction: column;
+  }
+
+  .activity-btn {
+    width: 100%;
+  }
+
+  .step-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .step-number {
+    margin: 0 auto;
+  }
+}

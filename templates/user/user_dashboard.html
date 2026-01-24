@@ -163,7 +163,7 @@
           </a>
         </li>
         <li class="admin-nav-item">
-          <a href="#" class="admin-nav-link">
+          <a href="{{ url_for('user.activities_page') }}" class="admin-nav-link">
             <span class="admin-nav-icon">🎨</span>
             <span class="admin-nav-text">Find Activities</span>
             <span class="admin-nav-badge">12</span>
@@ -245,15 +245,6 @@
           >
             <span class="user-nav-icon">📊</span>
             <span class="user-nav-text">Dashboard</span>
-          </a>
-        </li>
-        <li class="user-nav-item">
-          <a
-            href="{{ url_for('main.index') }}#mood-selector"
-            class="user-nav-link"
-          >
-            <span class="user-nav-icon">🎨</span>
-            <span class="user-nav-text">Find Activities</span>
           </a>
         </li>
         <li class="user-nav-item">
@@ -352,8 +343,8 @@
           </div>
           <div class="admin-stat-icon">❤️</div>
         </div>
-        <div class="user-stat-footer">
-          <span class="user-stat-trend up">↑ 8%</span>
+        <div class="admin-stat-footer">
+          <span class="admin-stat-trend up">↑ 8%</span>
           <span>vs last month</span>
         </div>
       </div>
@@ -367,8 +358,8 @@
           </div>
           <div class="admin-stat-icon">🏆</div>
         </div>
-        <div class="user-stat-footer">
-          <span class="user-stat-trend up">↑ 3.2%</span>
+        <div class="admin-stat-footer">
+          <span class="admin-stat-trend up">↑ 3.2%</span>
           <span>vs last month</span>
         </div>
       </div>
@@ -381,249 +372,14 @@
           </div>
           <div class="admin-stat-icon">⭐</div>
         </div>
-        <div class="user-stat-footer">
-          <span class="user-stat-trend down">↓ 2%</span>
+        <div class="admin-stat-footer">
+          <span class="admin-stat-trend down">↓ 2%</span>
           <span>vs yesterday</span>
         </div>
       </div>
     </div>
-
-    <!-- Main Content Grid -->
-    <div class="admin-content-grid">
-      <!-- Chart Card -->
-
-        <!-- <div class="user-chart-card">
-        <div class="user-card-header">
-          <h2 class="user-card-title">Activity Growth</h2>
-          <div class="user-card-actions">
-            <button class="user-filter-btn active">7 Days</button>
-            <button class="user-filter-btn">30 Days</button>
-            <button class="user-filter-btn">90 Days</button>
-          </div>
-        </div>
-        <div class="admin-chart-placeholder">
-          <div class="admin-chart-placeholder-content">
-            <div class="admin-chart-placeholder-icon">📊</div>
-            <p>Chart visualization area</p>
-            <small style="color: var(--admin-text-muted)"
-              >Integrate Chart.js or Recharts here</small
-            >
-          </div>
-        </div>
-      </div> -->
-
-      <!-- Recent Activity -->
-      <!-- <div class="admin-activity-card">
-        <div class="admin-card-header">
-          <h2 class="admin-card-title">Recent Activity</h2>
-        </div>
-        <div class="admin-activity-list">
-          <div class="admin-activity-item">
-            <div class="admin-activity-avatar">JD</div>
-            <div class="admin-activity-content">
-              <div class="admin-activity-text">
-                <strong>John Doe</strong> registered a new account
-              </div>
-              <div class="admin-activity-time">2 minutes ago</div>
-            </div>
-          </div>
-
-          <div class="admin-activity-item">
-            <div class="admin-activity-avatar">SM</div>
-            <div class="admin-activity-content">
-              <div class="admin-activity-text">
-                <strong>Sarah Miller</strong> added a new activity
-              </div>
-              <div class="admin-activity-time">15 minutes ago</div>
-            </div>
-          </div>
-
-          <div class="admin-activity-item">
-            <div class="admin-activity-avatar">RJ</div>
-            <div class="admin-activity-content">
-              <div class="admin-activity-text">
-                <strong>Robert Johnson</strong> updated profile
-              </div>
-              <div class="admin-activity-time">1 hour ago</div>
-            </div>
-          </div>
-
-          <div class="admin-activity-item">
-            <div class="admin-activity-avatar">EW</div>
-            <div class="admin-activity-content">
-              <div class="admin-activity-text">
-                <strong>Emma Wilson</strong> favorited 3 activities
-              </div>
-              <div class="admin-activity-time">2 hours ago</div>
-            </div>
-          </div>
-
-          <div class="admin-activity-item">
-            <div class="admin-activity-avatar">MB</div>
-            <div class="admin-activity-content">
-              <div class="admin-activity-text">
-                <strong>Michael Brown</strong> completed a survey
-              </div>
-              <div class="admin-activity-time">3 hours ago</div>
-            </div>
-          </div>
-        </div>
-      </div> -->
-    </div>
-
-    <!-- Recent Users Table -->
-    <!-- <div class="admin-table-card">
-      <div class="admin-table-header">
-        <h2 class="admin-card-title">Recent Users</h2>
-        <div class="admin-search-box">
-          <input
-            type="text"
-            class="admin-search-input"
-            placeholder="Search users..."
-          />
-          <span class="admin-search-icon">🔍</span>
-        </div>
-      </div>
-
-      <div class="admin-table-wrapper">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Status</th>
-              <th>Activities</th>
-              <th>Joined</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <div style="display: flex; align-items: center; gap: 10px">
-                  <div
-                    class="admin-activity-avatar"
-                    style="width: 32px; height: 32px; font-size: 0.75rem"
-                  >
-                    JD
-                  </div>
-                  <strong>John Doe</strong>
-                </div>
-              </td>
-              <td>john.doe@example.com</td>
-              <td><span class="admin-badge success">Active</span></td>
-              <td>47</td>
-              <td>Jan 15, 2026</td>
-              <td>
-                <div class="admin-table-actions">
-                  <button class="admin-icon-btn" title="View">👁️</button>
-                  <button class="admin-icon-btn" title="Edit">✏️</button>
-                  <button class="admin-icon-btn" title="Delete">🗑️</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div style="display: flex; align-items: center; gap: 10px">
-                  <div
-                    class="admin-activity-avatar"
-                    style="width: 32px; height: 32px; font-size: 0.75rem"
-                  >
-                    SM
-                  </div>
-                  <strong>Sarah Miller</strong>
-                </div>
-              </td>
-              <td>sarah.m@example.com</td>
-              <td><span class="admin-badge success">Active</span></td>
-              <td>32</td>
-              <td>Jan 14, 2026</td>
-              <td>
-                <div class="admin-table-actions">
-                  <button class="admin-icon-btn" title="View">👁️</button>
-                  <button class="admin-icon-btn" title="Edit">✏️</button>
-                  <button class="admin-icon-btn" title="Delete">🗑️</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div style="display: flex; align-items: center; gap: 10px">
-                  <div
-                    class="admin-activity-avatar"
-                    style="width: 32px; height: 32px; font-size: 0.75rem"
-                  >
-                    RJ
-                  </div>
-                  <strong>Robert Johnson</strong>
-                </div>
-              </td>
-              <td>r.johnson@example.com</td>
-              <td><span class="admin-badge warning">Pending</span></td>
-              <td>15</td>
-              <td>Jan 13, 2026</td>
-              <td>
-                <div class="admin-table-actions">
-                  <button class="admin-icon-btn" title="View">👁️</button>
-                  <button class="admin-icon-btn" title="Edit">✏️</button>
-                  <button class="admin-icon-btn" title="Delete">🗑️</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div style="display: flex; align-items: center; gap: 10px">
-                  <div
-                    class="admin-activity-avatar"
-                    style="width: 32px; height: 32px; font-size: 0.75rem"
-                  >
-                    EW
-                  </div>
-                  <strong>Emma Wilson</strong>
-                </div>
-              </td>
-              <td>emma.w@example.com</td>
-              <td><span class="admin-badge success">Active</span></td>
-              <td>68</td>
-              <td>Jan 12, 2026</td>
-              <td>
-                <div class="admin-table-actions">
-                  <button class="admin-icon-btn" title="View">👁️</button>
-                  <button class="admin-icon-btn" title="Edit">✏️</button>
-                  <button class="admin-icon-btn" title="Delete">🗑️</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div style="display: flex; align-items: center; gap: 10px">
-                  <div
-                    class="admin-activity-avatar"
-                    style="width: 32px; height: 32px; font-size: 0.75rem"
-                  >
-                    MB
-                  </div>
-                  <strong>Michael Brown</strong>
-                </div>
-              </td>
-              <td>m.brown@example.com</td>
-              <td><span class="admin-badge info">New</span></td>
-              <td>8</td>
-              <td>Jan 11, 2026</td>
-              <td>
-                <div class="admin-table-actions">
-                  <button class="admin-icon-btn" title="View">👁️</button>
-                  <button class="admin-icon-btn" title="Edit">✏️</button>
-                  <button class="admin-icon-btn" title="Delete">🗑️</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div> -->
   </div>
-</div>
+
 
 {% endblock %} {% block scripts %}
 <script>

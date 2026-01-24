@@ -154,10 +154,11 @@
           </a>
         </li>
         <li class="admin-nav-item">
-          <a href="#" class="admin-nav-link">
-            <span class="admin-nav-icon">🎯</span>
-            <span class="admin-nav-text">Manage Activities</span>
-          </a>
+          <a href="{{ url_for('admin.manage_activity') }}" class="admin-nav-link">
+  <span class="admin-nav-icon">🎯</span>
+  <span class="admin-nav-text">Manage Activities</span>
+</a>
+
         </li>
         <li class="admin-nav-item">
           <a href="#" class="admin-nav-link">
@@ -190,6 +191,12 @@
             <span class="admin-nav-text">Settings</span>
           </a>
         </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">📊</span>
+            <span class="admin-nav-text">Genarate Reports</span>
+          </a>
+        </li>
       </ul>
     </div>
   </nav>
@@ -213,16 +220,6 @@
         <p class="admin-subtitle">
           Welcome back! Here's what's happening with MoodMatch today.
         </p>
-      </div>
-      <div class="admin-header-actions">
-        <button class="admin-btn admin-btn-white">
-          <span>📊</span>
-          <span>Generate Report</span>
-        </button>
-        <button class="admin-btn admin-btn-outline">
-          <span>⚙️</span>
-          <span>Settings</span>
-        </button>
       </div>
     </div>
   </div>
@@ -248,7 +245,7 @@
       <div class="admin-stat-card cyan">
         <div class="admin-stat-header">
           <div class="admin-stat-info">
-            <div class="admin-stat-label">Total Activities</div>
+            <div class="admin-stat-label" style="font-size: small;">Total Activities</div>
             <div class="admin-stat-value">1,284</div>
           </div>
           <div class="admin-stat-icon">🎯</div>
@@ -262,7 +259,7 @@
       <div class="admin-stat-card purple">
         <div class="admin-stat-header">
           <div class="admin-stat-info">
-            <div class="admin-stat-label">Engagement Rate</div>
+            <div class="admin-stat-label" style="font-size: small;">Engagement Rate</div>
             <div class="admin-stat-value">87.5%</div>
           </div>
           <div class="admin-stat-icon">📈</div>

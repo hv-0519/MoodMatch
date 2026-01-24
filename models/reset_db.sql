@@ -70,135 +70,182 @@ CREATE TABLE user_interests (
 
 
 
--- -- CATEGORIES
--- CREATE TABLE categories (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     name TEXT NOT NULL,
---     domain TEXT NOT NULL
--- );
+-- 1. DOMAINS
+CREATE TABLE domains (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+);
 
--- -- ACTIVITIES
--- CREATE TABLE activities (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     name TEXT NOT NULL,
---     category_id INTEGER,
---     mood TEXT,
---     time_required TEXT,
---     budget TEXT,
---     energy_level TEXT,
---     location_type TEXT,
---     distance TEXT,
---     description TEXT,
---     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (category_id) REFERENCES categories(id)
--- );
+-- 2. MOODS
+CREATE TABLE moods (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+);
 
--- -- STEP BASED CONTENT (photography, video editing, cooking)
--- CREATE TABLE activity_steps (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     activity_id INTEGER,
---     step_number INTEGER,
---     step_text TEXT,
---     video_link TEXT,
---     FOREIGN KEY (activity_id) REFERENCES activities(id)
--- );
+-- 3. ACTIVITIES (MASTER TABLE)
+CREATE TABLE activities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    execution_type TEXT NOT NULL,
+    description TEXT,
+    is_active INTEGER DEFAULT 1,
+    priority INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
--- -- GAMES
--- CREATE TABLE games (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     name TEXT NOT NULL,
---     category_id INTEGER,
---     FOREIGN KEY (category_id) REFERENCES categories(id)
--- );
+-- 4. ACTIVITY ↔ DOMAIN (MANY TO MANY)
+CREATE TABLE activity_domains (
+    activity_id INTEGER,
+    domain_id INTEGER,
+    PRIMARY KEY (activity_id, domain_id),
+    FOREIGN KEY (activity_id) REFERENCES activities(id),
+    FOREIGN KEY (domain_id) REFERENCES domains(id)
+);
 
--- CREATE TABLE game_rules (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     game_id INTEGER,
---     rule_text TEXT,
---     FOREIGN KEY (game_id) REFERENCES games(id)
--- );
+-- 5. ACTIVITY ↔ MOOD (WEIGHTED)
+CREATE TABLE activity_moods (
+    activity_id INTEGER,
+    mood_id INTEGER,
+    weight INTEGER NOT NULL,
+    PRIMARY KEY (activity_id, mood_id),
+    FOREIGN KEY (activity_id) REFERENCES activities(id),
+    FOREIGN KEY (mood_id) REFERENCES moods(id)
+);
 
--- CREATE TABLE game_tutorials (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     game_id INTEGER,
---     tutorial_link TEXT,
---     FOREIGN KEY (game_id) REFERENCES games(id)
--- );
+-- 6. ACTIVITY FILTERS
+CREATE TABLE activity_filters (
+    activity_id INTEGER PRIMARY KEY,
+    min_time INTEGER,
+    max_time INTEGER,
+    min_budget INTEGER,
+    max_budget INTEGER,
+    energy_level TEXT,
+    location_type TEXT,
+    distance_type TEXT,
+    social_type TEXT,
+    FOREIGN KEY (activity_id) REFERENCES activities(id)
+);
 
--- -- TRAVEL
--- CREATE TABLE travel_places (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     name TEXT,
---     trip_type TEXT,
---     distance_km INTEGER,
---     days_required INTEGER,
---     description TEXT
--- );
+-- 7. ACTIVITY STEPS (COOKING / DIY / PHOTOGRAPHY)
+CREATE TABLE activity_steps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity_id INTEGER,
+    step_number INTEGER,
+    step_text TEXT,
+    video_link TEXT,
+    FOREIGN KEY (activity_id) REFERENCES activities(id)
+);
 
--- -- INTELLECTUAL RESOURCES
--- CREATE TABLE resources (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     category_id INTEGER,
---     title TEXT,
---     resource_type TEXT,
---     link TEXT,
---     difficulty TEXT,
---     FOREIGN KEY (category_id) REFERENCES categories(id)
--- );
+-- 8. ACTIVITY RESOURCES (READING / LEARNING)
+CREATE TABLE activity_resources (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity_id INTEGER,
+    title TEXT,
+    resource_type TEXT,
+    link TEXT,
+    difficulty TEXT,
+    FOREIGN KEY (activity_id) REFERENCES activities(id)
+);
 
--- -- USER GENERATED CONTENT
--- CREATE TABLE user_writings (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     user_id INTEGER,
---     title TEXT,
---     content TEXT,
---     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
+-- 9. ACTIVITY RULES (GAMES / SPORTS)
+CREATE TABLE activity_rules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity_id INTEGER,
+    rule_text TEXT,
+    FOREIGN KEY (activity_id) REFERENCES activities(id)
+);
 
--- CREATE TABLE user_drawings (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     user_id INTEGER,
---     file_path TEXT,
---     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
+-- 10. ACTIVITY PLACES (TRAVEL)
+CREATE TABLE activity_places (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity_id INTEGER,
+    name TEXT,
+    distance_km INTEGER,
+    days_required INTEGER,
+    budget_estimate INTEGER,
+    description TEXT,
+    FOREIGN KEY (activity_id) REFERENCES activities(id)
+);
 
--- -- USER PREFERENCES
--- CREATE TABLE user_preferences (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     user_id INTEGER,
---     preference_key TEXT,
---     preference_value TEXT,
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
+-- 11. user_writings
+CREATE TABLE user_writings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    activity_id INTEGER NOT NULL,
+    title TEXT,
+    content TEXT NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (activity_id) REFERENCES activities(id)
+);
 
--- -- USER HISTORY
--- CREATE TABLE user_history (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     user_id INTEGER,
---     activity_type TEXT,
---     reference_id INTEGER,
---     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
 
--- -- FAVORITES
--- CREATE TABLE favorites (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     user_id INTEGER,
---     item_type TEXT,
---     item_id INTEGER,
---     added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
+-- ========= CORE LOOKUPS =========
 
--- -- USER SAVED FILES
--- CREATE TABLE user_saved_files (
---     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     user_id INTEGER,
---     file_type TEXT,
---     file_path TEXT,
---     saved_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
+-- Activities (active + priority based fetch)
+CREATE INDEX idx_activities_active_priority
+ON activities (is_active, priority);
+
+-- Activities by execution type (writing, reading, travel, etc.)
+CREATE INDEX idx_activities_execution_type
+ON activities (execution_type);
+
+
+-- ========= DOMAIN & MOOD MAPPING =========
+
+-- Fast domain → activities lookup
+CREATE INDEX idx_activity_domains_domain
+ON activity_domains (domain_id);
+
+-- Fast activity → domains lookup
+CREATE INDEX idx_activity_domains_activity
+ON activity_domains (activity_id);
+
+-- Fast mood → activities lookup (MOST IMPORTANT for recommendations)
+CREATE INDEX idx_activity_moods_mood
+ON activity_moods (mood_id);
+
+-- Ranking activities by mood weight
+CREATE INDEX idx_activity_moods_weight
+ON activity_moods (mood_id, weight DESC);
+
+
+-- ========= FILTERING PERFORMANCE =========
+
+-- Energy / location / distance filtering
+CREATE INDEX idx_activity_filters_energy
+ON activity_filters (energy_level);
+
+CREATE INDEX idx_activity_filters_location
+ON activity_filters (location_type);
+
+CREATE INDEX idx_activity_filters_distance
+ON activity_filters (distance_type);
+
+CREATE INDEX idx_activity_filters_social
+ON activity_filters (social_type);
+
+-- Time & budget range filtering
+CREATE INDEX idx_activity_filters_time
+ON activity_filters (min_time, max_time);
+
+CREATE INDEX idx_activity_filters_budget
+ON activity_filters (min_budget, max_budget);
+
+
+-- ========= CONTENT TABLES =========
+
+-- Steps lookup
+CREATE INDEX idx_activity_steps_activity
+ON activity_steps (activity_id);
+
+-- Resources lookup
+CREATE INDEX idx_activity_resources_activity
+ON activity_resources (activity_id);
+
+-- Rules lookup
+CREATE INDEX idx_activity_rules_activity
+ON activity_rules (activity_id);
+
+-- Travel places lookup
+CREATE INDEX idx_activity_places_activity
+ON activity_places (activity_id);

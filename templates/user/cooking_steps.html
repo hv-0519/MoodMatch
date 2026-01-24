@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/activities.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<!-- User Sidebar -->
+<aside class="user-sidebar">
+  <div class="user-sidebar-profile">
+    <div class="user-profile-badge-circle">
+      <i class="fas fa-user"></i>
+    </div>
+    <div class="user-profile-role-pill">Premium Member</div>
+    <div class="user-profile-email-small">user@moodmatch.app</div>
+  </div>
+
+  <nav class="user-sidebar-nav">
+    <div class="user-nav-section">
+      <div class="user-nav-label">Main</div>
+      <ul class="user-nav-list">
+        <li class="user-nav-item">
+          <a href="{{ url_for('user.user_dashboard') }}" class="user-nav-link">
+            <i class="fas fa-home user-nav-icon"></i>
+            <span class="user-nav-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="{{ url_for('main.favorites') }}" class="user-nav-link">
+            <i class="fas fa-heart user-nav-icon"></i>
+            <span class="user-nav-text">My Favorites</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="{{ url_for('main.history') }}" class="user-nav-link">
+            <i class="fas fa-history user-nav-icon"></i>
+            <span class="user-nav-text">History</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="user-nav-section">
+      <div class="user-nav-label">Activities</div>
+      <ul class="user-nav-list">
+        <li class="user-nav-item">
+          <a href="{{ url_for('activities.writing_editor') }}" class="user-nav-link">
+            <i class="fas fa-pen user-nav-icon"></i>
+            <span class="user-nav-text">Writing</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="{{ url_for('activities.reading_resources') }}" class="user-nav-link">
+            <i class="fas fa-book user-nav-icon"></i>
+            <span class="user-nav-text">Reading</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="{{ url_for('activities.cooking_steps') }}" class="user-nav-link active">
+            <i class="fas fa-utensils user-nav-icon"></i>
+            <span class="user-nav-text">Cooking</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="{{ url_for('activities.games_details') }}" class="user-nav-link">
+            <i class="fas fa-gamepad user-nav-icon"></i>
+            <span class="user-nav-text">Games & Sports</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="{{ url_for('activities.travel_places') }}" class="user-nav-link">
+            <i class="fas fa-plane user-nav-icon"></i>
+            <span class="user-nav-text">Travel</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="user-sidebar-footer">
+    <a href="{{ url_for('auth.logout') }}" class="user-logout-btn">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="user-dashboard-wrapper">
+  <!-- Page Header -->
+  <div class="activity-page-header">
+    <div class="activity-header-content">
+      <div class="activity-title-section">
+        <h1>🍳 Cooking Journey</h1>
+        <p class="activity-subtitle">Master delicious recipes step by step and become a kitchen maestro</p>
+      </div>
+      <div class="activity-header-actions">
+        <a href="{{ url_for('user.user_dashboard') }}" class="activity-btn activity-btn-outline">
+          <i class="fas fa-arrow-left"></i>
+          <span>Back to Dashboard</span>
+        </a>
+        <a href="#" class="activity-btn activity-btn-white">
+          <i class="fas fa-heart"></i>
+          <span>Save Recipe</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recipe Header -->
+  <div class="recipe-header-card">
+    <h2 class="recipe-name">🍛 Chicken Tikka Masala</h2>
+    <div class="recipe-meta-info">
+      <div class="recipe-meta-item">
+        <i class="fas fa-clock"></i>
+        <span>45 minutes</span>
+      </div>
+      <div class="recipe-meta-item">
+        <i class="fas fa-users"></i>
+        <span>Serves 4</span>
+      </div>
+      <div class="recipe-meta-item">
+        <i class="fas fa-signal"></i>
+        <span>Intermediate</span>
+      </div>
+    </div>
+    <a href="https://www.youtube.com/watch?v=example" target="_blank" class="recipe-video-link">
+      <i class="fas fa-play-circle"></i>
+      <span>Watch Video Tutorial</span>
+    </a>
+  </div>
+
+  <!-- Steps Container -->
+  <div class="steps-container">
+    <h3 class="section-title">Step-by-Step Instructions</h3>
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <p class="step-text">
+            <strong>Marinate the chicken:</strong> In a large bowl, combine yogurt, lemon juice, ginger-garlic paste, garam masala, turmeric, and salt. Add chicken pieces and mix well. Cover and refrigerate for at least 2 hours (or overnight for best results).
+          </p>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <p class="step-text">
+            <strong>Prepare the sauce base:</strong> Heat oil in a large pan over medium heat. Add chopped onions and cook until golden brown, about 8-10 minutes. Add minced garlic and ginger, cook for another 2 minutes.
+          </p>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <p class="step-text">
+            <strong>Add tomatoes and spices:</strong> Stir in pureed tomatoes, paprika, cumin, coriander powder, and chili powder. Cook for 10 minutes, stirring occasionally, until the sauce thickens and oil starts to separate.
+          </p>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <p class="step-text">
+            <strong>Cook the chicken:</strong> Remove chicken from marinade and add to a hot grill or grill pan. Cook for 3-4 minutes per side until charred and nearly cooked through. Cut into bite-sized pieces.
+          </p>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <p class="step-text">
+            <strong>Combine and simmer:</strong> Add the grilled chicken pieces to the sauce. Pour in heavy cream and stir well. Simmer for 10-15 minutes, allowing the flavors to meld together.
+          </p>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <p class="step-text">
+            <strong>Final touches:</strong> Add butter and kasuri methi (dried fenugreek leaves). Stir gently and cook for another 2-3 minutes. Garnish with fresh cilantro and serve hot with naan bread or basmati rice.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const steps = document.querySelectorAll('.step-item');
+    steps.forEach((step, index) => {
+      step.addEventListener('click', function() {
+        this.style.borderColor = 'var(--user-success)';
+        this.style.background = 'rgba(16, 185, 129, 0.05)';
+      });
+    });
+  });
+</script>
+{% endblock %}
