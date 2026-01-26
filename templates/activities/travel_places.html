@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Travel Places{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+<style>
+    .travel-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .travel-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .travel-header h1 {
+        font-size: 2.2rem;
+        color: #1a202c;
+        margin-bottom: 10px;
+    }
+
+    .travel-header p {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+
+    .places-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .place-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .place-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .place-image {
+        height: 200px;
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+    }
+
+    .place-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .place-content {
+        padding: 25px;
+    }
+
+    .place-title {
+        font-size: 1.3rem;
+        color: #1a202c;
+        margin-bottom: 12px;
+    }
+
+    .place-description {
+        color: #718096;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .place-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .meta-tag {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .tag-distance {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .tag-budget {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .tag-location {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .explore-btn {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .explore-btn:hover {
+        opacity: 0.9;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #718096;
+    }
+
+    .empty-state h3 {
+        margin-bottom: 15px;
+        color: #4a5568;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="travel-container">
+    <div class="travel-header">
+        <h1>✈️ Travel Places</h1>
+        <p>Discover amazing destinations that match your mood and preferences.</p>
+        {% if recommended %}
+        <div style="background: #dbeafe; padding: 15px; border-radius: 10px; margin-top: 15px; display: inline-block;">
+            <strong>🌍 Recommended:</strong> {{ recommended.name }}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if places %}
+    <div class="places-grid">
+        {% for place in places %}
+        <div class="place-card">
+            <div class="place-image">
+                {% if place.image_url %}
+                <img src="{{ place.image_url }}" alt="{{ place.name }}">
+                {% else %}
+                🏝️
+                {% endif %}
+            </div>
+            <div class="place-content">
+                <h3 class="place-title">{{ place.name }}</h3>
+                <p class="place-description">
+                    {{ place.description or 'A beautiful destination waiting to be explored!' }}
+                </p>
+                <div class="place-meta">
+                    {% if place.distance %}
+                    <span class="meta-tag tag-distance">📍 {{ place.distance }}</span>
+                    {% endif %}
+                    {% if place.budget_level %}
+                    <span class="meta-tag tag-budget">💰 {{ place.budget_level }}</span>
+                    {% endif %}
+                    {% if place.location_type %}
+                    <span class="meta-tag tag-location">🗺️ {{ place.location_type }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <a href="#" class="explore-btn">Explore →</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>🗺️ No travel destinations available yet</h3>
+        <p>Check back soon for amazing travel recommendations!</p>
+        <a href="{{ url_for('user.activity_search') }}"
+            style="color: #0ea5e9; text-decoration: none; font-weight: 600;">
+            Find Activities →
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

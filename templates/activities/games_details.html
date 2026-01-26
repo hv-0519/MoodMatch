@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Games & Sports{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+<style>
+    .games-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .games-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .games-header h1 {
+        font-size: 2.2rem;
+        color: #1a202c;
+        margin-bottom: 10px;
+    }
+
+    .game-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .game-title {
+        font-size: 1.8rem;
+        color: #2d3748;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .game-badges {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .game-badge {
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .badge-indoor {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    .badge-outdoor {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .game-description {
+        text-align: center;
+        color: #4a5568;
+        font-size: 1.1rem;
+        line-height: 1.7;
+        margin-bottom: 40px;
+        padding: 0 20px;
+    }
+
+    .rules-section h3 {
+        font-size: 1.4rem;
+        color: #2d3748;
+        margin-bottom: 25px;
+        padding-left: 10px;
+        border-left: 4px solid #10b981;
+    }
+
+    .rule-item {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 18px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        border-radius: 12px;
+        border-left: 4px solid #10b981;
+    }
+
+    .rule-number {
+        width: 30px;
+        height: 30px;
+        background: #10b981;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .rule-text {
+        flex: 1;
+        color: #374151;
+        font-size: 1rem;
+        line-height: 1.6;
+        padding-top: 3px;
+    }
+
+    .tutorial-section {
+        margin-top: 40px;
+        text-align: center;
+    }
+
+    .tutorial-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 14px 30px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .tutorial-link:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #718096;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="games-container">
+    <div class="games-header">
+        <h1>🎮 Games & Sports</h1>
+        {% if recommended %}
+        <div style="background: #d1fae5; padding: 15px; border-radius: 10px; margin-top: 15px; display: inline-block;">
+            <strong>🏆 Let's Play:</strong> {{ recommended.name }}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if game %}
+    <div class="game-card">
+        <h2 class="game-title">{{ game.name }}</h2>
+
+        <div class="game-badges">
+            {% if game.indoor_outdoor %}
+            <span class="game-badge badge-{{ game.indoor_outdoor|lower }}">
+                {{ '🏠' if game.indoor_outdoor == 'Indoor' else '🌳' }} {{ game.indoor_outdoor }}
+            </span>
+            {% endif %}
+            {% if game.difficulty_level %}
+            <span class="game-badge" style="background: #fef3c7; color: #92400e;">
+                📊 {{ game.difficulty_level }}
+            </span>
+            {% endif %}
+        </div>
+
+        {% if game.description %}
+        <p class="game-description">{{ game.description }}</p>
+        {% endif %}
+
+        {% if game.rules %}
+        <div class="rules-section">
+            <h3>📋 Game Rules</h3>
+            {% for rule in game.rules %}
+            <div class="rule-item">
+                <div class="rule-number">{{ rule.rule_number }}</div>
+                <div class="rule-text">{{ rule.rule_text }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if game.tutorial_link %}
+        <div class="tutorial-section">
+            <a href="{{ game.tutorial_link }}" class="tutorial-link" target="_blank">
+                🎥 Watch Tutorial
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>🎯 No game selected</h3>
+        <p>Go to the activity search to get a game recommendation!</p>
+        <a href="{{ url_for('user.activity_search') }}"
+            style="color: #10b981; text-decoration: none; font-weight: 600;">
+            Find Activities →
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

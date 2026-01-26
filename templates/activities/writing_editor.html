@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Writing Editor{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+<style>
+    .writing-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .writing-header {
+        margin-bottom: 30px;
+    }
+
+    .writing-header h1 {
+        font-size: 2rem;
+        color: #1a202c;
+        margin-bottom: 10px;
+    }
+
+    .writing-header p {
+        color: #718096;
+        font-size: 1rem;
+    }
+
+    .editor-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+    }
+
+    .editor-textarea {
+        width: 100%;
+        min-height: 400px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        font-size: 1.1rem;
+        font-family: 'Georgia', serif;
+        line-height: 1.8;
+        resize: vertical;
+        transition: border-color 0.3s ease;
+    }
+
+    .editor-textarea:focus {
+        outline: none;
+        border-color: #e63946;
+    }
+
+    .editor-title {
+        width: 100%;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 15px 20px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: border-color 0.3s ease;
+    }
+
+    .editor-title:focus {
+        outline: none;
+        border-color: #e63946;
+    }
+
+    .editor-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #e63946 0%, #d62839 100%);
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3);
+    }
+
+    .btn-clear {
+        background: #f7fafc;
+        color: #4a5568;
+        padding: 12px 30px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-clear:hover {
+        background: #edf2f7;
+        border-color: #cbd5e0;
+    }
+
+    .previous-writings {
+        margin-top: 40px;
+    }
+
+    .previous-writings h3 {
+        font-size: 1.3rem;
+        color: #2d3748;
+        margin-bottom: 20px;
+    }
+
+    .writing-item {
+        background: #f7fafc;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .writing-item:hover {
+        background: #edf2f7;
+        transform: translateX(5px);
+    }
+
+    .writing-item h4 {
+        color: #2d3748;
+        margin-bottom: 8px;
+    }
+
+    .writing-item p {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="writing-container">
+    <div class="writing-header">
+        <h1>✍️ Writing Editor</h1>
+        <p>Express your thoughts, journal your feelings, or create something beautiful.</p>
+        {% if recommended %}
+        <div style="background: #fef3c7; padding: 15px; border-radius: 10px; margin-top: 15px;">
+            <strong>📝 Recommended:</strong> {{ recommended.name }} - {{ recommended.description }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="editor-card">
+        <input type="text" class="editor-title" placeholder="Give your writing a title..." id="writingTitle">
+        <textarea class="editor-textarea" placeholder="Start writing here..." id="writingContent"></textarea>
+        <div class="editor-actions">
+            <button class="btn-save" onclick="saveWriting()">💾 Save Writing</button>
+            <button class="btn-clear" onclick="clearEditor()">🗑️ Clear</button>
+        </div>
+    </div>
+
+    {% if writings %}
+    <div class="previous-writings">
+        <h3>📚 Your Previous Writings</h3>
+        {% for writing in writings %}
+        <div class="writing-item" onclick="loadWriting({{ writing.id }})">
+            <h4>{{ writing.title or 'Untitled' }}</h4>
+            <p>{{ writing.content[:100] }}{% if writing.content|length > 100 %}...{% endif %}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function saveWriting() {
+        const title = document.getElementById('writingTitle').value;
+        const content = document.getElementById('writingContent').value;
+
+        if (!content.trim()) {
+            alert('Please write something first!');
+            return;
+        }
+
+        fetch('/user/editor/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                activity_id: 1,
+                title: title,
+                content: content
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert('Writing saved successfully!');
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to save writing.');
+            });
+    }
+
+    function clearEditor() {
+        document.getElementById('writingTitle').value = '';
+        document.getElementById('writingContent').value = '';
+    }
+
+    function loadWriting(id) {
+        fetch(`/user/editor/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('writingTitle').value = data.title || '';
+                document.getElementById('writingContent').value = data.content || '';
+            });
+    }
+</script>
+{% endblock %}

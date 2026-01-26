@@ -1,0 +1,172 @@
+{% extends "base.html" %} {% block head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/user.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/activity-search.css') }}"
+/>
+{% endblock %} {% block content %}
+
+<!-- Hamburger Toggle Button -->
+<button
+  class="sidebar-toggle-btn"
+  id="sidebarToggle"
+  aria-label="Toggle sidebar"
+>
+  <span class="hamburger-line"></span>
+  <span class="hamburger-line"></span>
+  <span class="hamburger-line"></span>
+</button>
+
+<!-- Overlay for clicking outside to close sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar (hidden by default) -->
+<aside class="user-sidebar-collapsed" id="userSidebar">
+  <!-- Sidebar Profile -->
+  <div class="user-sidebar-profile">
+    <div class="user-profile-badge-circle">
+      {% if current_user.is_authenticated and current_user.profile_picture %}
+      <img
+        src="{{ url_for('static', filename='uploads/' ~ current_user.profile_picture) }}"
+        alt="Profile"
+      />
+      {% elif current_user.is_authenticated %} {{
+      current_user.username[0:2].upper() }} {% else %} U {% endif %}
+    </div>
+    <div class="user-profile-role-pill">
+      {% if current_user.is_authenticated %} {{ current_user.username }} {% else
+      %} Guest {% endif %}
+    </div>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="user-sidebar-nav">
+    <div class="user-nav-section">
+      <div class="user-nav-label">Main Menu</div>
+      <ul class="user-nav-list">
+        <li class="user-nav-item">
+          <a
+            href="{{ url_for('user.user_dashboard') }}"
+            class="user-nav-link"
+            data-tooltip="Dashboard"
+          >
+            <span class="user-nav-icon">📊</span>
+            <span class="user-nav-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a
+            href="{{ url_for('user.activity_search') }}"
+            class="user-nav-link active"
+            data-tooltip="Find Activities"
+          >
+            <span class="user-nav-icon">🎨</span>
+            <span class="user-nav-text">Find Activities</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a
+            href="{{ url_for('main.favorites') }}"
+            class="user-nav-link"
+            data-tooltip="My Favorites"
+          >
+            <span class="user-nav-icon">❤️</span>
+            <span class="user-nav-text">My Favorites</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a
+            href="{{ url_for('main.history') }}"
+            class="user-nav-link"
+            data-tooltip="Activity History"
+          >
+            <span class="user-nav-icon">📚</span>
+            <span class="user-nav-text">Activity History</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="user-nav-section">
+      <div class="user-nav-label">Account</div>
+      <ul class="user-nav-list">
+        <li class="user-nav-item">
+          <a href="#" class="user-nav-link" data-tooltip="My Profile">
+            <span class="user-nav-icon">👤</span>
+            <span class="user-nav-text">My Profile</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a
+            href="{{ url_for('main.about') }}"
+            class="user-nav-link"
+            data-tooltip="About"
+          >
+            <span class="user-nav-icon">ℹ️</span>
+            <span class="user-nav-text">About</span>
+          </a>
+        </li>
+        <li class="user-nav-item">
+          <a href="#" class="user-nav-link" data-tooltip="Settings">
+            <span class="user-nav-icon">⚙️</span>
+            <span class="user-nav-text">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="user-sidebar-footer">
+    <a href="{{ url_for('auth.logout') }}" class="user-logout-btn">
+      <span>🚪</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="content-with-collapsed-sidebar">
+  <div class="activity-search-container">
+    <h2>Find an Activity</h2>
+
+    <form id="activitySearchForm" method="post">
+      <!-- Free text input -->
+      <div>
+        <label for="user_text"
+          >How are you feeling or what do you want to do?</label
+        ><br />
+        <textarea
+          id="user_text"
+          name="user_text"
+          rows="4"
+          placeholder="Example: I feel low and want something calm"
+          required
+        ></textarea>
+      </div>
+
+      <br />
+
+      <!-- Activity dropdown -->
+      <div>
+        <label for="activity_type">Select Activity Type</label><br />
+        <select id="activity_type" name="activity_type" required>
+          <option value="">-- Select --</option>
+          <option value="editor">Writing / Journaling</option>
+          <option value="resource">Reading</option>
+          <option value="steps">Cooking</option>
+          <option value="game">Games / Sports</option>
+          <option value="travel">Travel</option>
+        </select>
+      </div>
+
+      <br />
+
+      <button type="submit">Recommend</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

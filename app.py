@@ -7,6 +7,7 @@ from routes.main import main_bp
 from routes.auth import auth_bp, User  # 👈 import User class
 from routes.admin import admin_bp
 from routes.user import user_bp
+from routes.activities import activities_bp  # 👈 import activities blueprint
 
 
 app = Flask(__name__)
@@ -81,6 +82,7 @@ app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp, url_prefix="/admin")
 app.register_blueprint(user_bp, url_prefix="/user")
+app.register_blueprint(activities_bp)  # 👈 activities blueprint (has url_prefix in blueprint)
 
 
 # ===============================

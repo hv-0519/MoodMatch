@@ -1,0 +1,459 @@
+/* =====================================================
+   Activity Search Page Styles
+   Premium Purple/Pink Theme - Matching user.css
+   ===================================================== */
+
+/* Activity Search Container */
+.activity-search-container {
+  max-width: 680px;
+  margin: 30px auto;
+  padding: 50px 40px;
+  background: var(--user-surface, #ffffff);
+  border-radius: 28px;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(230, 57, 70, 0.05);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Animated gradient border accent */
+.activity-search-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(
+    90deg,
+    #e63946 0%,
+    #ec4899 35%,
+    #8b5cf6 70%,
+    #e63946 100%
+  );
+  background-size: 300% 100%;
+  animation: gradientFlow 4s ease infinite;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Background decorative elements */
+.activity-search-container::after {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(
+    circle,
+    rgba(236, 72, 153, 0.06) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  top: -100px;
+  right: -80px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Form Title */
+.activity-search-container h2 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 800;
+  margin-bottom: 36px;
+  background: linear-gradient(
+    135deg,
+    #e63946 0%,
+    #ec4899 50%,
+    #8b5cf6 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Form base */
+#activitySearchForm {
+  position: relative;
+  z-index: 1;
+}
+
+/* Form groups */
+#activitySearchForm > div {
+  margin-bottom: 28px;
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+#activitySearchForm > div:nth-child(1) { animation-delay: 0.1s; }
+#activitySearchForm > div:nth-child(2) { animation-delay: 0.2s; }
+
+/* Labels */
+#activitySearchForm label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 12px;
+  letter-spacing: 0.01em;
+  position: relative;
+  padding-left: 20px;
+}
+
+#activitySearchForm label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, #e63946 0%, #ec4899 100%);
+  border-radius: 50%;
+  animation: labelPulse 2s ease infinite;
+}
+
+@keyframes labelPulse {
+  0%, 100% { 
+    opacity: 1; 
+    box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.4);
+  }
+  50% { 
+    opacity: 0.8; 
+    box-shadow: 0 0 0 6px rgba(230, 57, 70, 0);
+  }
+}
+
+/* Textarea styling */
+#user_text {
+  width: 100%;
+  padding: 18px 22px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #111111;
+  background: linear-gradient(145deg, #faf8f5 0%, #ffffff 100%);
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  resize: vertical;
+  min-height: 130px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+#user_text::placeholder {
+  color: #94a3b8;
+  font-style: italic;
+  font-weight: 400;
+}
+
+#user_text:hover {
+  border-color: #d1d5db;
+  background: #ffffff;
+}
+
+#user_text:focus {
+  outline: none;
+  border-color: #e63946;
+  background: #ffffff;
+  box-shadow: 
+    0 0 0 4px rgba(230, 57, 70, 0.12),
+    0 8px 24px -8px rgba(230, 57, 70, 0.15);
+}
+
+/* Select dropdown styling */
+#activity_type {
+  width: 100%;
+  padding: 18px 50px 18px 22px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #111111;
+  background: linear-gradient(145deg, #faf8f5 0%, #ffffff 100%);
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Custom dropdown arrow */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23e63946' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 20px;
+}
+
+#activity_type option {
+  padding: 14px;
+  background: #ffffff;
+  color: #111111;
+  font-weight: 500;
+}
+
+#activity_type option:first-child {
+  color: #94a3b8;
+}
+
+#activity_type:hover {
+  border-color: #d1d5db;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23e63946' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+#activity_type:focus {
+  outline: none;
+  border-color: #e63946;
+  background-color: #ffffff;
+  box-shadow: 
+    0 0 0 4px rgba(230, 57, 70, 0.12),
+    0 8px 24px -8px rgba(230, 57, 70, 0.15);
+}
+
+/* Submit Button */
+#activitySearchForm button[type="submit"] {
+  width: 100%;
+  padding: 18px 36px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: white;
+  background: linear-gradient(
+    135deg,
+    #e63946 0%,
+    #d62839 50%,
+    #ec4899 100%
+  );
+  background-size: 200% 100%;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  margin-top: 12px;
+  text-transform: uppercase;
+  box-shadow: 
+    0 8px 24px -6px rgba(230, 57, 70, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+#activitySearchForm button[type="submit"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+#activitySearchForm button[type="submit"]:hover {
+  background-position: 100% 0;
+  transform: translateY(-3px);
+  box-shadow: 
+    0 14px 32px -8px rgba(230, 57, 70, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+#activitySearchForm button[type="submit"]:hover::before {
+  left: 100%;
+}
+
+#activitySearchForm button[type="submit"]:active {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 16px -4px rgba(230, 57, 70, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+#activitySearchForm button[type="submit"]:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 4px rgba(230, 57, 70, 0.25),
+    0 14px 32px -8px rgba(230, 57, 70, 0.55);
+}
+
+/* Icon enhancement for button (optional - add emoji or icon) */
+#activitySearchForm button[type="submit"]::after {
+  content: " ✨";
+  font-size: 1.1rem;
+  margin-left: 8px;
+  display: inline-block;
+  animation: sparkle 1.5s ease infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-10deg) scale(1.1); }
+  75% { transform: rotate(10deg) scale(1.1); }
+}
+
+/* Remove default margins from br tags */
+#activitySearchForm br {
+  display: none;
+}
+
+/* =====================================================
+   RESPONSIVE DESIGN
+   ===================================================== */
+
+@media (max-width: 768px) {
+  .activity-search-container {
+    margin: 20px;
+    padding: 36px 28px;
+    border-radius: 24px;
+  }
+
+  .activity-search-container h2 {
+    font-size: 1.6rem;
+    margin-bottom: 28px;
+  }
+
+  #user_text,
+  #activity_type {
+    padding: 16px 18px;
+    font-size: 0.95rem;
+    border-radius: 14px;
+  }
+
+  #activity_type {
+    padding-right: 45px;
+    background-position: right 14px center;
+  }
+
+  #activitySearchForm button[type="submit"] {
+    padding: 16px 28px;
+    font-size: 1rem;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .activity-search-container {
+    margin: 16px;
+    padding: 28px 20px;
+    border-radius: 20px;
+  }
+
+  .activity-search-container::after {
+    width: 180px;
+    height: 180px;
+    top: -60px;
+    right: -50px;
+  }
+
+  .activity-search-container h2 {
+    font-size: 1.4rem;
+    margin-bottom: 24px;
+  }
+
+  #activitySearchForm label {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    padding-left: 16px;
+  }
+
+  #activitySearchForm label::before {
+    width: 6px;
+    height: 6px;
+  }
+
+  #user_text {
+    min-height: 110px;
+    padding: 14px 16px;
+  }
+
+  #activity_type {
+    padding: 14px 42px 14px 16px;
+    background-position: right 12px center;
+    background-size: 18px;
+  }
+
+  #activitySearchForm button[type="submit"] {
+    padding: 14px 24px;
+    font-size: 0.95rem;
+  }
+
+  #activitySearchForm button[type="submit"]::after {
+    font-size: 1rem;
+  }
+}
+
+/* =====================================================
+   ADDITIONAL ENHANCEMENTS
+   ===================================================== */
+
+/* Smooth scrollbar for containers if needed */
+.activity-search-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activity-search-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.activity-search-container::-webkit-scrollbar-thumb {
+  background: rgba(230, 57, 70, 0.3);
+  border-radius: 3px;
+}
+
+.activity-search-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 57, 70, 0.5);
+}
+
+/* Focus visible for accessibility */
+#user_text:focus-visible,
+#activity_type:focus-visible,
+#activitySearchForm button[type="submit"]:focus-visible {
+  outline: 3px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .activity-search-container,
+  #activitySearchForm > div,
+  #activitySearchForm label::before,
+  #activitySearchForm button[type="submit"]::before,
+  #activitySearchForm button[type="submit"]::after {
+    animation: none;
+  }
+  
+  .activity-search-container::before {
+    animation: none;
+    background-position: 0% 50%;
+  }
+  
+  #activitySearchForm button[type="submit"],
+  #user_text,
+  #activity_type {
+    transition: none;
+  }
+}

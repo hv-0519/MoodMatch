@@ -1,13 +1,9 @@
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-    jsonify,
-    redirect,
-    url_for,
-    session,
-    flash,
-)
+"""
+MoodMatch - User Routes
+Clean Flask route definitions for rendering user templates.
+"""
+
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session, flash
 from flask_login import login_required, current_user
 import sqlite3
 
@@ -26,18 +22,83 @@ def get_db():
 
 
 # ===============================
-# USER DASHBOARD
+# PAGE ROUTES (Template Rendering Only)
 # ===============================
+
 @user_bp.route("/user_dashboard")
 @login_required
 def user_dashboard():
     """Render the main user dashboard"""
-    return render_template("user/user_dashboard.html", user=current_user)
+    return render_template("user/user_dashboard.html")
+
+
+@user_bp.route("/activity/search")
+@login_required
+def activity_search():
+    """Render the activity search page"""
+    return render_template("user/activity_search.html")
+
+
+@user_bp.route("/recommend/results", methods=["GET", "POST"])
+@login_required
+def recommend_results():
+    """Render the recommendation results page"""
+    return render_template("user/recommend_results.html")
+
+
+@user_bp.route("/editor")
+@login_required
+def editor():
+    """Render the writing editor page"""
+    return render_template("user/editor.html")
+
+
+@user_bp.route("/reading")
+@login_required
+def reading():
+    """Render the reading resources page"""
+    return render_template("user/reading.html")
+
+
+@user_bp.route("/cooking")
+@login_required
+def cooking():
+    """Render the cooking recipes page"""
+    return render_template("user/cooking.html")
+
+
+@user_bp.route("/game")
+@login_required
+def game():
+    """Render the games page"""
+    return render_template("user/game.html")
+
+
+@user_bp.route("/travel")
+@login_required
+def travel():
+    """Render the travel destinations page"""
+    return render_template("user/travel.html")
+
+
+@user_bp.route("/favorites")
+@login_required
+def favorites():
+    """Render the favorites page"""
+    return render_template("user/favorites.html")
+
+
+@user_bp.route("/history")
+@login_required
+def history():
+    """Render the activity history page"""
+    return render_template("user/history.html")
 
 
 # ===============================
-# ACTIVITIES PAGE (NEW)
+# EXISTING API ROUTES (Keep as-is)
 # ===============================
+
 @user_bp.route("/activities")
 @login_required
 def activities_page():
@@ -45,9 +106,6 @@ def activities_page():
     return render_template("user/activities.html", user=current_user)
 
 
-# ===============================
-# ACTIVITY RECOMMENDATION (UPDATED)
-# ===============================
 @user_bp.route("/recommend", methods=["POST"])
 @login_required
 def recommend_activity():
@@ -55,7 +113,6 @@ def recommend_activity():
     UPDATED: Now redirects to activity page instead of returning JSON
     Can be called with form data or JSON
     """
-    # Handle both form data and JSON
     if request.is_json:
         data = request.get_json()
     else:
@@ -111,21 +168,15 @@ def recommend_activity():
     results = [dict(row) for row in cur.fetchall()]
     conn.close()
 
-    # If no results found
     if not results:
-        flash(
-            "No matching activities found. Try a different mood or filters!", "warning"
-        )
+        flash("No matching activities found. Try a different mood or filters!", "warning")
         return redirect(url_for("user.activities_page"))
 
-    # Get top recommendation
     top_activity = results[0]
     execution_type = top_activity["execution_type"]
 
-    # Store in session for activity page to use
     session["recommended_activity"] = top_activity
 
-    # Map execution type to route
     route_map = {
         "writing": "activities.writing_editor",
         "reading": "activities.reading_resources",
@@ -140,16 +191,10 @@ def recommend_activity():
     return redirect(url_for(target_route))
 
 
-# ===============================
-# API: GET RECOMMENDATIONS (JSON)
-# ===============================
 @user_bp.route("/api/recommend", methods=["POST"])
 @login_required
 def api_recommend_activity():
-    """
-    JSON API endpoint for getting recommendations
-    Use this if you need JSON response for AJAX
-    """
+    """JSON API endpoint for getting recommendations"""
     data = request.get_json(silent=True)
 
     if not data or "mood_id" not in data:
@@ -205,8 +250,9 @@ def api_recommend_activity():
 
 
 # ===============================
-# EDITOR – SAVE
+# EDITOR API ROUTES
 # ===============================
+
 @user_bp.route("/editor/save", methods=["POST"])
 @login_required
 def save_writing():
@@ -237,9 +283,6 @@ def save_writing():
     return jsonify({"message": "Writing saved"}), 201
 
 
-# ===============================
-# EDITOR – UPDATE
-# ===============================
 @user_bp.route("/editor/update", methods=["PUT"])
 @login_required
 def update_writing():
@@ -257,7 +300,6 @@ def update_writing():
     conn = get_db()
     cur = conn.cursor()
 
-    # ownership check
     cur.execute(
         """
         SELECT id FROM user_writings
@@ -290,9 +332,6 @@ def update_writing():
     return jsonify({"message": "Writing updated successfully"})
 
 
-# ===============================
-# EDITOR – DELETE
-# ===============================
 @user_bp.route("/editor/delete", methods=["DELETE"])
 @login_required
 def delete_writing():
@@ -329,9 +368,6 @@ def delete_writing():
     return jsonify({"message": "Writing deleted successfully"})
 
 
-# ===============================
-# EDITOR – LIST
-# ===============================
 @user_bp.route("/editor/list", methods=["GET"])
 @login_required
 def list_writings():
@@ -354,9 +390,6 @@ def list_writings():
     return jsonify([dict(row) for row in rows])
 
 
-# ===============================
-# EDITOR – GET SINGLE
-# ===============================
 @user_bp.route("/editor/<int:writing_id>", methods=["GET"])
 @login_required
 def get_writing(writing_id):
