@@ -133,7 +133,7 @@
   <div class="activity-search-container">
     <h2>Find an Activity</h2>
 
-    <form id="activitySearchForm" method="post">
+    <form id="activitySearchForm" method="get" action="{{ url_for('user.recommend_results') }}">
       <!-- Free text input -->
       <div>
         <label for="user_text"
@@ -169,4 +169,48 @@
     </form>
   </div>
 </div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const toggleBtn     = document.getElementById('sidebarToggle');
+  const sidebar       = document.getElementById('userSidebar');
+  const overlay       = document.getElementById('sidebarOverlay');
+  const contentArea   = document.querySelector('.content-with-collapsed-sidebar');
+
+  if (!toggleBtn || !sidebar || !overlay) return;
+
+  function openSidebar() {
+    sidebar.classList.remove('user-sidebar-collapsed');
+    sidebar.classList.add('user-sidebar-expanded');     // you'll need this class
+    overlay.classList.add('active');
+    contentArea.classList.add('content-with-expanded-sidebar');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('user-sidebar-expanded');
+    sidebar.classList.add('user-sidebar-collapsed');
+    overlay.classList.remove('active');
+    contentArea.classList.remove('content-with-expanded-sidebar');
+  }
+
+  toggleBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (sidebar.classList.contains('user-sidebar-collapsed')) {
+      openSidebar();
+    } else {
+      closeSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+
+  // Optional: close on Escape key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSidebar();
+  });
+});
+</script>
+{% endblock %}
+
 {% endblock %}

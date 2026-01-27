@@ -1,0 +1,263 @@
+{% extends "admin_base.html" %}
+
+{% block sidebar_class %}static-expanded{% endblock %}
+
+{% block admin_styles %}
+<style>
+    .activity-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+        font-size: 0.95rem;
+    }
+
+    .activity-table th,
+    .activity-table td {
+        border: 1px solid #d1d5db;
+        padding: 12px 16px;
+        text-align: left;
+    }
+
+    .activity-table thead th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #1e293b;
+        border-bottom: 2px solid #cbd5e1;
+    }
+
+    .activity-table tbody tr:hover {
+        background: #f1f5f9;
+    }
+
+    .badge-active {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+    }
+
+    .badge-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+    }
+
+    .action-btn {
+        padding: 6px 12px;
+        margin-right: 6px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-toggle-on {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-toggle-off {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-edit {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-create {
+        background: #6366f1;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+
+<!-- Main Content -->
+<div class="admin-container" style="max-width: 1200px; margin: 20px auto; padding: 2rem;">
+    <h1 style="margin-bottom: 1.5rem;">Manage Activities</h1>
+
+    <!-- Create New Activity Form -->
+    <button id="showCreateForm" class="btn-create">+ Create New Activity</button>
+
+    <div id="createForm"
+        style="display: none; background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h3>Create New Activity</h3>
+        <form id="createActivityForm">
+            <div class="form-group">
+                <label for="name">Activity Name *</label>
+                <input type="text" id="name" name="name" required placeholder="e.g. Journaling">
+            </div>
+
+            <div class="form-group">
+                <label for="execution_type">Execution Type *</label>
+                <select id="execution_type" name="execution_type" required>
+                    <option value="">Select Type</option>
+                    <option value="editor">editor (Writing)</option>
+                    <option value="resource">resource (Reading)</option>
+                    <option value="steps">steps (Cooking / DIY)</option>
+                    <option value="game">game (Games / Sports)</option>
+                    <option value="travel">travel (Travel)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priority (higher = shown first)</label>
+                <input type="number" id="priority" name="priority" min="0" max="10" value="0">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description (optional)</label>
+                <textarea id="description" name="description" rows="3" placeholder="Brief description..."></textarea>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <button type="submit" class="btn-create">Save Activity</button>
+                <button type="button" id="cancelCreate"
+                    style="margin-left: 1rem; background:#6b7280; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Activities Table -->
+    <table class="activity-table" id="activitiesTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for act in activities %}
+        <tr>
+            <td>{{ act.id }}</td>
+            <td>{{ act.name }}</td>
+            <td>{{ act.execution_type }}</td>
+            <td>{{ act.priority }}</td>
+            <td>
+                <span class="badge {{ 'badge-active' if act.is_active else 'badge-inactive' }}">
+                    {{ 'Active' if act.is_active else 'Inactive' }}
+                </span>
+            </td>
+            <td>{{ act.created_at[:10] }}</td>
+            <td>
+                <button class="action-btn toggle-btn {{ 'btn-toggle-off' if act.is_active else 'btn-toggle-on' }}" 
+                        data-id="{{ act.id }}" 
+                        data-active="{{ '0' if act.is_active else '1' }}">
+                    {{ 'Deactivate' if act.is_active else 'Activate' }}
+                </button>
+                <button class="action-btn btn-edit">Edit</button>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function initializePageScripts() {
+        // ==========================================
+        // ACTIVITY MANAGEMENT
+        // ==========================================
+
+        // 1. Handle Status Toggle
+        document.querySelectorAll('.toggle-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const id = this.getAttribute('data-id');
+                const newStatus = parseInt(this.getAttribute('data-active'));
+                const actionText = newStatus === 1 ? 'activate' : 'deactivate';
+
+                if (confirm(`Are you sure you want to ${actionText} this activity?`)) {
+                    try {
+                        const res = await fetch("{{ url_for('admin.manage_activity') }}", {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ activity_id: id, is_active: newStatus })
+                        });
+
+                        if (res.ok) {
+                            window.location.reload();
+                        } else {
+                            alert("Failed to update status");
+                        }
+                    } catch (err) {
+                        alert("Error: " + err.message);
+                    }
+                }
+            });
+        });
+
+        // 2. Show/hide create form
+        document.getElementById("showCreateForm").addEventListener("click", () => {
+            document.getElementById("createForm").style.display = "block";
+            document.getElementById("showCreateForm").style.display = "none";
+        });
+
+        document.getElementById("cancelCreate").addEventListener("click", () => {
+            document.getElementById("createForm").style.display = "none";
+            document.getElementById("showCreateForm").style.display = "inline-block";
+        });
+
+        // 3. Create new activity form submission
+        document.getElementById("createActivityForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById("name").value.trim(),
+                execution_type: document.getElementById("execution_type").value,
+                priority: parseInt(document.getElementById("priority").value) || 0,
+                description: document.getElementById("description").value.trim()
+            };
+
+            const res = await fetch("{{ url_for('admin.manage_activity') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
+
+            if (res.ok) {
+                window.location.reload();
+            } else {
+                alert("Failed to create activity");
+            }
+        });
+    }
+</script>
+
+{% endblock %}

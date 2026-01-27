@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block head %}
+<!-- Admin CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+<style>
+  .footer {
+    display: none !important;
+  }
+
+  .navbar {
+    display: none !important;
+  }
+
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Ensure hamburger is always visible */
+  .hamburger-btn {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+</style>
+
+<!-- Admin specific styles can be added here per page -->
+{% block admin_styles %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+
+<!-- Hamburger Menu Button -->
+<!-- <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">
+  <span></span>
+  <span></span>
+  <span></span>
+</button> -->
+
+<!-- Overlay for mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar - Collapsible -->
+<aside class="admin-sidebar {% block sidebar_class %}{% endblock %}" id="adminSidebar">
+  <!-- Sidebar Profile -->
+  <div class="admin-sidebar-profile">
+    <!-- Avatar -->
+    <div class="admin-profile-avatar">
+      <div class="avatar-circle">👤</div>
+    </div>
+
+    <!-- Role badge -->
+    <div class="admin-profile-role">Administrator</div>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="admin-sidebar-nav">
+    <!-- Main Menu -->
+    <div class="admin-nav-section">
+      <div class="admin-nav-label">Main Menu</div>
+      <ul class="admin-nav-list">
+        <li class="admin-nav-item">
+          <a href="{{ url_for('admin.admin_dashboard') }}" class="admin-nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}">
+            <span class="admin-nav-icon">📊</span>
+            <span class="admin-nav-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="{{ url_for('admin.manage_users') }}" class="admin-nav-link {% if request.endpoint == 'admin.manage_users' %}active{% endif %}">
+            <span class="admin-nav-icon">👥</span>
+            <span class="admin-nav-text">Manage Users</span>
+            <span class="admin-nav-badge">12</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="{{ url_for('admin.manage_activity') }}" class="admin-nav-link {% if request.endpoint == 'admin.manage_activity' %}active{% endif %}">
+            <span class="admin-nav-icon">🎯</span>
+            <span class="admin-nav-text">Manage Activities</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">📈</span>
+            <span class="admin-nav-text">View Analytics</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">🏷️</span>
+            <span class="admin-nav-text">Manage Categories</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Account Menu -->
+    <div class="admin-nav-section">
+      <div class="admin-nav-label">Account</div>
+      <ul class="admin-nav-list">
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">👤</span>
+            <span class="admin-nav-text">View Profile</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">⚙️</span>
+            <span class="admin-nav-text">Settings</span>
+          </a>
+        </li>
+        <li class="admin-nav-item">
+          <a href="#" class="admin-nav-link">
+            <span class="admin-nav-icon">📊</span>
+            <span class="admin-nav-text">Generate Reports</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="admin-sidebar-footer">
+    <a href="{{ url_for('auth.logout') }}" class="admin-logout-btn">
+      <span>🚪</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Page Content Block -->
+{% block admin_content %}{% endblock %}
+
+<!-- Common Admin Scripts -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // ==========================================
+    // SIDEBAR TOGGLE FUNCTIONALITY
+    // ==========================================
+
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const adminSidebar = document.getElementById('adminSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    // Toggle sidebar on hamburger click
+    hamburgerBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      adminSidebar.classList.toggle('expanded');
+      hamburgerBtn.classList.toggle('active');
+      sidebarOverlay.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking overlay
+    sidebarOverlay.addEventListener('click', function () {
+      adminSidebar.classList.remove('expanded');
+      hamburgerBtn.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+    });
+
+    // Close sidebar when clicking anywhere on page (except sidebar and button)
+    document.addEventListener('click', function (e) {
+      if (!adminSidebar.contains(e.target) &&
+        !hamburgerBtn.contains(e.target) &&
+        adminSidebar.classList.contains('expanded')) {
+        adminSidebar.classList.remove('expanded');
+        hamburgerBtn.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+
+    // Close sidebar on ESC key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && adminSidebar.classList.contains('expanded')) {
+        adminSidebar.classList.remove('expanded');
+        hamburgerBtn.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+
+    // Trigger page-specific scripts if they exist
+    if (typeof initializePageScripts === 'function') {
+      initializePageScripts();
+    }
+  });
+</script>
+
+{% endblock %}

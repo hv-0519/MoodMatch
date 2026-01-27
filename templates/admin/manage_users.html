@@ -1,0 +1,83 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block admin_styles %}
+<!-- Additional styles for manage users -->
+<style>
+  .text-id {
+    font-family: 'Courier New', Courier, monospace;
+    color: #fa709a;
+    font-weight: bold;
+  }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+
+<!-- Main Content -->
+<div class="admin-container">
+  <h1>👥 Manage Users</h1>
+
+  {% if error %}
+    <div class="alert alert-danger" style="border-radius: 10px;">{{ error }}</div>
+  {% endif %}
+  
+  {% if users %}
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User Info</th>
+            <th>Contact</th>
+            <th>Gender</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+            <tr>
+              <td class="text-id">#{{ user['id'] }}</td>
+              <td>
+                <span class="user-name">{{ user['first_name'] or '' }} {{ user['last_name'] or '' }}</span>
+                <span class="user-email">@{{ user['username'] or 'n/a' }}</span>
+              </td>
+              <td>
+                <div style="font-size: 0.9rem;">{{ user['email'] or '—' }}</div>
+                <small class="text-muted">{{ user['phone_number'] or '—' }}</small>
+              </td>
+              <td>{{ user['gender']|capitalize or '—' }}</td>
+              <td>
+                <span style="color: #2d3436;">{{ user['created_at'][:10] }}</span>
+                <br>
+                <small class="text-muted">{{ user['created_at'][11:16] }}</small>
+              </td>
+              <td>
+                <span class="badge {% if user['status_tag'] == 'New' %}bg-success{% else %}bg-secondary{% endif %}">
+                  {{ user['status_tag'] }}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary" style="border-radius: 8px; font-size: 0.75rem;">Edit</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center p-5">
+      <p class="text-muted">No users found in the database.</p>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  function initializePageScripts() {
+    // Manage users specific scripts can go here
+    console.log("[v0] Manage Users page initialized");
+  }
+</script>
+
+{% endblock %}

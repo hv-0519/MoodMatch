@@ -101,7 +101,11 @@
 
   /* Hide footer for admin pages */
   .footer {
-    display: none important;
+    display: none !important;
+  }
+
+  .navbar {
+    display: none !important;
   }
 </style>
 {% endblock %} {% block content %}
@@ -147,7 +151,7 @@
               </a>
             </li>
             <li class="admin-nav-item">
-              <a href="{{ url_for('user.activity_search') }}" class="admin-nav-link">
+              <a href="#" class="admin-nav-link">
                 <span class="admin-nav-icon">🎨</span>
                 <span class="admin-nav-text">Find Activities</span>
                 <span class="admin-nav-badge">12</span>
