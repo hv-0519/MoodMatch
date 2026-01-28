@@ -1,83 +1,67 @@
 {% extends 'admin/admin_base.html' %}
 
+{% block sidebar_class %}static-expanded{% endblock %}
+
 {% block admin_styles %}
-<!-- Additional styles for manage users -->
-<style>
-  .text-id {
-    font-family: 'Courier New', Courier, monospace;
-    color: #fa709a;
-    font-weight: bold;
-  }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
 {% endblock %}
 
 {% block admin_content %}
 
-<!-- Main Content -->
-<div class="admin-container">
-  <h1>👥 Manage Users</h1>
+<!-- Main Content Area -->
+<div class="admin-dashboard-wrapper with-static-sidebar">
+  <div class="admin-header-us">
+    <div class="admin-header-content">
+      <div class="admin-title-section">
+        <h1>Manage Users</h1>
+        <p class="admin-subtitle">
+          Welcome back <b style="color:white;">"{{ admins|capitalize }}"</b> ! Here's an overview of all registered
+          users.
+        </p>
+      </div>
+    </div>
+  </div>
 
-  {% if error %}
-    <div class="alert alert-danger" style="border-radius: 10px;">{{ error }}</div>
-  {% endif %}
-  
+  <!-- Horizontal Card Grid -->
   {% if users %}
-    <div class="table-responsive">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>User Info</th>
-            <th>Contact</th>
-            <th>Gender</th>
-            <th>Joined</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for user in users %}
-            <tr>
-              <td class="text-id">#{{ user['id'] }}</td>
-              <td>
-                <span class="user-name">{{ user['first_name'] or '' }} {{ user['last_name'] or '' }}</span>
-                <span class="user-email">@{{ user['username'] or 'n/a' }}</span>
-              </td>
-              <td>
-                <div style="font-size: 0.9rem;">{{ user['email'] or '—' }}</div>
-                <small class="text-muted">{{ user['phone_number'] or '—' }}</small>
-              </td>
-              <td>{{ user['gender']|capitalize or '—' }}</td>
-              <td>
-                <span style="color: #2d3436;">{{ user['created_at'][:10] }}</span>
-                <br>
-                <small class="text-muted">{{ user['created_at'][11:16] }}</small>
-              </td>
-              <td>
-                <span class="badge {% if user['status_tag'] == 'New' %}bg-success{% else %}bg-secondary{% endif %}">
-                  {{ user['status_tag'] }}
-                </span>
-              </td>
-              <td>
-                <button class="btn btn-sm btn-outline-primary" style="border-radius: 8px; font-size: 0.75rem;">Edit</button>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="users-grid">
+    {% for user in users %}
+    <div class="user-card">
+      <div class="avatar-wrapper">
+        {% if user['profile_picture'] %}
+        <img src="{{ url_for('static', filename='uploads/' ~ user['profile_picture']) }}"
+          alt="{{ user['first_name'] or user['username'] or 'User' }}">
+        {% else %}
+        <div
+          style="width:100%; height:100%; background:linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%); color:white; font-size:3.5rem; font-weight:bold; display:flex; align-items:center; justify-content:center;">
+          {{ (user['first_name'][:1] + user['last_name'][:1]) | upper | default('U') }}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="user-name">
+        {{ user['first_name'] or '' }} {{ user['last_name'] or '' }}
+        {% if not user['first_name'] and not user['last_name'] %}
+        {{ user['username'] or 'Unknown User' }}
+        {% endif %}
+      </div>
+
+      <div class="user-username">
+        @{{ user['username'] or 'n/a' }}
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-view" onclick="viewUser({{ user['id'] | e }})">View</button>
+        <button class="btn btn-edit" onclick="editUser({{ user['id'] | e }})">Edit</button>
+      </div>
     </div>
+    {% endfor %}
+  </div>
   {% else %}
-    <div class="text-center p-5">
-      <p class="text-muted">No users found in the database.</p>
-    </div>
+  <div class="no-users">
+    <h2>No users found</h2>
+    <p>There are currently no registered users in the system.</p>
+  </div>
   {% endif %}
 </div>
-
-<script>
-  function initializePageScripts() {
-    // Manage users specific scripts can go here
-    console.log("[v0] Manage Users page initialized");
-  }
-</script>
-
 {% endblock %}

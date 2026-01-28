@@ -1,263 +1,477 @@
-{% extends "admin_base.html" %}
+{% extends 'admin/admin_base.html' %}
 
 {% block sidebar_class %}static-expanded{% endblock %}
 
 {% block admin_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
 <style>
-    .activity-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 2rem 0;
-        font-size: 0.95rem;
-    }
+/* Modal Base Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 
-    .activity-table th,
-    .activity-table td {
-        border: 1px solid #d1d5db;
-        padding: 12px 16px;
-        text-align: left;
-    }
+.modal.active {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+}
 
-    .activity-table thead th {
-        background: #f8fafc;
-        font-weight: 600;
-        color: #1e293b;
-        border-bottom: 2px solid #cbd5e1;
-    }
+.modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
 
-    .activity-table tbody tr:hover {
-        background: #f1f5f9;
-    }
+.modal.active .modal-content {
+    transform: scale(1);
+}
 
-    .badge-active {
-        background: #d1fae5;
-        color: #065f46;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 0.85rem;
-    }
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+}
 
-    .badge-inactive {
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 0.85rem;
-    }
+.modal-body {
+    padding: 20px;
+}
 
-    .action-btn {
-        padding: 6px 12px;
-        margin-right: 6px;
-        border-radius: 6px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        border: none;
-    }
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
 
-    .btn-toggle-on {
-        background: #10b981;
-        color: white;
-    }
+.form-group {
+    margin-bottom: 16px;
+}
 
-    .btn-toggle-off {
-        background: #ef4444;
-        color: white;
-    }
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+}
 
-    .btn-edit {
-        background: #3b82f6;
-        color: white;
-    }
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
 
-    .btn-create {
-        background: #6366f1;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        margin-bottom: 1.5rem;
-    }
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
 
-    .form-group {
-        margin-bottom: 1.2rem;
-    }
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
 
-    .form-group label {
-        display: block;
-        margin-bottom: 6px;
-        font-weight: 500;
-        color: #374151;
-    }
+.btn-cancel,
+.btn-submit {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
 
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        font-size: 0.95rem;
-    }
+.btn-cancel {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.btn-cancel:hover {
+    background-color: #e5e7eb;
+}
+
+.btn-submit {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.btn-submit:hover {
+    background-color: #2563eb;
+}
+
+.form-group p {
+    margin: 0;
+    padding: 10px 0;
+    font-size: 14px;
+    color: #111827;
+}
 </style>
 {% endblock %}
 
 {% block admin_content %}
 
-<!-- Main Content -->
-<div class="admin-container" style="max-width: 1200px; margin: 20px auto; padding: 2rem;">
-    <h1 style="margin-bottom: 1.5rem;">Manage Activities</h1>
+<div class="admin-dashboard-wrapper with-static-sidebar">
+  <div class="admin-header-ac">
+    <div class="admin-header-content">
+      <div class="admin-title-section">
+        <h1>Manage Activities</h1>
+        <p class="admin-subtitle">
+          Welcome back <b style="color:white;">"{{ admins|capitalize }}"</b>! Here's an overview of all activities.
+        </p>
+      </div>
+    </div>
+  </div>
 
-    <!-- Create New Activity Form -->
-    <button id="showCreateForm" class="btn-create">+ Create New Activity</button>
+  <div class="admin-content">
+    <div class="admin-table-card">
+      <div class="admin-table-header">
+        <h2 class="admin-card-title">All Activities</h2>
+        <div class="admin-header-actions">
+          <div class="admin-search-box">
+            <input type="text" class="admin-search-input" id="activitySearch" placeholder="Search activities..." />
+            <span class="admin-search-icon">🔍</span>
+          </div>
+          <button class="admin-btn admin-btn-primary" id="addActivityBtn">
+            <span>➕</span> <span>Add Activity</span>
+          </button>
+        </div>
+      </div>
 
-    <div id="createForm"
-        style="display: none; background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-        <h3>Create New Activity</h3>
-        <form id="createActivityForm">
-            <div class="form-group">
-                <label for="name">Activity Name *</label>
-                <input type="text" id="name" name="name" required placeholder="e.g. Journaling">
+      {% if activities %}
+      <table class="admin-table" id="activitiesTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Activity Name</th>
+            <th>Type</th>
+            <th>Priority</th>
+            <th>Created At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="activitiesTableBody">
+          {% for activity in activities %}
+          <tr data-id="{{ activity.id }}" data-name="{{ activity.name }}" data-type="{{ activity.execution_type }}" data-priority="{{ activity.priority or 0 }}">
+            <td><strong>#{{ activity.id }}</strong></td>
+            <td><strong>{{ activity.name or 'Untitled Activity' }}</strong></td>
+            <td>{{ activity.execution_type | capitalize }}</td>
+            <td style="padding-left:45px">{{ activity.priority or 0 }}</td>
+            <td>{{ activity.created_at[:10] if activity.created_at else '—' }}</td>
+            <td>
+              <div class="admin-table-actions">
+                <button class="admin-icon-btn view-btn" title="View">👁️</button>
+                <button class="admin-icon-btn edit-btn" title="Edit">✏️</button>
+                <button class="admin-icon-btn delete-btn" title="Delete">🗑️</button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="admin-empty-state">
+        <div class="admin-empty-icon">📋</div>
+        <h3>No activities found</h3>
+        <button class="admin-btn admin-btn-primary" id="addFirstActivityBtn">
+          <span>➕</span> <span>Add First Activity</span>
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ADD ACTIVITY MODAL -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Add New Activity</div>
+        <form action="{{ url_for('admin.manage_activity') }}" method="POST">
+            <input type="hidden" name="action" value="add">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="add_name">Activity Name *</label>
+                    <input type="text" id="add_name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="add_type">Type *</label>
+                    <select id="add_type" name="execution_type" required>
+                        <option value="">Select Type</option>
+                        <option value="physical">Physical</option>
+                        <option value="mental">Mental</option>
+                        <option value="social">Social</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="add_priority">Priority (1-10)</label>
+                    <input type="number" id="add_priority" name="priority" min="1" max="10" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="add_description">Description</label>
+                    <textarea id="add_description" name="description" rows="3"></textarea>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="execution_type">Execution Type *</label>
-                <select id="execution_type" name="execution_type" required>
-                    <option value="">Select Type</option>
-                    <option value="editor">editor (Writing)</option>
-                    <option value="resource">resource (Reading)</option>
-                    <option value="steps">steps (Cooking / DIY)</option>
-                    <option value="game">game (Games / Sports)</option>
-                    <option value="travel">travel (Travel)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="priority">Priority (higher = shown first)</label>
-                <input type="number" id="priority" name="priority" min="0" max="10" value="0">
-            </div>
-
-            <div class="form-group">
-                <label for="description">Description (optional)</label>
-                <textarea id="description" name="description" rows="3" placeholder="Brief description..."></textarea>
-            </div>
-
-            <div style="margin-top: 1.5rem;">
-                <button type="submit" class="btn-create">Save Activity</button>
-                <button type="button" id="cancelCreate"
-                    style="margin-left: 1rem; background:#6b7280; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="closeAddBtn">Cancel</button>
+                <button type="submit" class="btn-submit">Add Activity</button>
             </div>
         </form>
     </div>
+</div>
 
-    <!-- Activities Table -->
-    <table class="activity-table" id="activitiesTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for act in activities %}
-        <tr>
-            <td>{{ act.id }}</td>
-            <td>{{ act.name }}</td>
-            <td>{{ act.execution_type }}</td>
-            <td>{{ act.priority }}</td>
-            <td>
-                <span class="badge {{ 'badge-active' if act.is_active else 'badge-inactive' }}">
-                    {{ 'Active' if act.is_active else 'Inactive' }}
-                </span>
-            </td>
-            <td>{{ act.created_at[:10] }}</td>
-            <td>
-                <button class="action-btn toggle-btn {{ 'btn-toggle-off' if act.is_active else 'btn-toggle-on' }}" 
-                        data-id="{{ act.id }}" 
-                        data-active="{{ '0' if act.is_active else '1' }}">
-                    {{ 'Deactivate' if act.is_active else 'Activate' }}
-                </button>
-                <button class="action-btn btn-edit">Edit</button>
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<!-- EDIT ACTIVITY MODAL -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Edit Activity</div>
+        <form action="{{ url_for('admin.manage_activity') }}" method="POST">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="activity_id" id="edit_id">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit_name">Activity Name *</label>
+                    <input type="text" id="edit_name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_type">Type *</label>
+                    <select id="edit_type" name="execution_type" required>
+                        <option value="physical">Physical</option>
+                        <option value="mental">Mental</option>
+                        <option value="social">Social</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit_priority">Priority (1-10)</label>
+                    <input type="number" id="edit_priority" name="priority" min="1" max="10">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="closeEditBtn">Cancel</button>
+                <button type="submit" class="btn-submit">Update Activity</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DELETE ACTIVITY MODAL -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header" style="color: #ef4444;">Confirm Delete</div>
+        <form action="{{ url_for('admin.manage_activity') }}" method="POST">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="activity_id" id="delete_id">
+            <div class="modal-body">
+                <p>Are you sure you want to delete this activity? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="closeDeleteBtn">Cancel</button>
+                <button type="submit" class="btn-submit" style="background: #ef4444;">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- VIEW ACTIVITY MODAL -->
+<div id="viewModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Activity Details</div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>ID:</label>
+                <p id="view_id"></p>
+            </div>
+            <div class="form-group">
+                <label>Activity Name:</label>
+                <p id="view_name"></p>
+            </div>
+            <div class="form-group">
+                <label>Type:</label>
+                <p id="view_type"></p>
+            </div>
+            <div class="form-group">
+                <label>Priority:</label>
+                <p id="view_priority"></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" id="closeViewBtn">Close</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    function initializePageScripts() {
-        // ==========================================
-        // ACTIVITY MANAGEMENT
-        // ==========================================
-
-        // 1. Handle Status Toggle
-        document.querySelectorAll('.toggle-btn').forEach(button => {
-            button.addEventListener('click', async function() {
-                const id = this.getAttribute('data-id');
-                const newStatus = parseInt(this.getAttribute('data-active'));
-                const actionText = newStatus === 1 ? 'activate' : 'deactivate';
-
-                if (confirm(`Are you sure you want to ${actionText} this activity?`)) {
-                    try {
-                        const res = await fetch("{{ url_for('admin.manage_activity') }}", {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ activity_id: id, is_active: newStatus })
-                        });
-
-                        if (res.ok) {
-                            window.location.reload();
-                        } else {
-                            alert("Failed to update status");
-                        }
-                    } catch (err) {
-                        alert("Error: " + err.message);
-                    }
-                }
-            });
-        });
-
-        // 2. Show/hide create form
-        document.getElementById("showCreateForm").addEventListener("click", () => {
-            document.getElementById("createForm").style.display = "block";
-            document.getElementById("showCreateForm").style.display = "none";
-        });
-
-        document.getElementById("cancelCreate").addEventListener("click", () => {
-            document.getElementById("createForm").style.display = "none";
-            document.getElementById("showCreateForm").style.display = "inline-block";
-        });
-
-        // 3. Create new activity form submission
-        document.getElementById("createActivityForm").addEventListener("submit", async (e) => {
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing Activity Management...');
+    
+    // Get all modal elements
+    const addModal = document.getElementById('addModal');
+    const editModal = document.getElementById('editModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const viewModal = document.getElementById('viewModal');
+    
+    // Get all buttons
+    const addActivityBtn = document.getElementById('addActivityBtn');
+    const addFirstActivityBtn = document.getElementById('addFirstActivityBtn');
+    const closeAddBtn = document.getElementById('closeAddBtn');
+    const closeEditBtn = document.getElementById('closeEditBtn');
+    const closeDeleteBtn = document.getElementById('closeDeleteBtn');
+    const closeViewBtn = document.getElementById('closeViewBtn');
+    
+    // Modal functions
+    function openAddModal() {
+        console.log('Opening Add Modal');
+        addModal.classList.add('active');
+    }
+    
+    function closeAddModal() {
+        console.log('Closing Add Modal');
+        addModal.classList.remove('active');
+        document.getElementById('add_name').value = '';
+        document.getElementById('add_type').value = '';
+        document.getElementById('add_priority').value = '1';
+        const descField = document.getElementById('add_description');
+        if (descField) descField.value = '';
+    }
+    
+    function openEditModal(id, name, type, priority) {
+        console.log('Opening Edit Modal for ID:', id);
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_type').value = type;
+        document.getElementById('edit_priority').value = priority;
+        editModal.classList.add('active');
+    }
+    
+    function closeEditModal() {
+        console.log('Closing Edit Modal');
+        editModal.classList.remove('active');
+    }
+    
+    function openDeleteModal(id) {
+        console.log('Opening Delete Modal for ID:', id);
+        document.getElementById('delete_id').value = id;
+        deleteModal.classList.add('active');
+    }
+    
+    function closeDeleteModal() {
+        console.log('Closing Delete Modal');
+        deleteModal.classList.remove('active');
+    }
+    
+    function openViewModal(id, name, type, priority) {
+        console.log('Opening View Modal for ID:', id);
+        document.getElementById('view_id').textContent = '#' + id;
+        document.getElementById('view_name').textContent = name;
+        document.getElementById('view_type').textContent = type.charAt(0).toUpperCase() + type.slice(1);
+        document.getElementById('view_priority').textContent = priority;
+        viewModal.classList.add('active');
+    }
+    
+    function closeViewModal() {
+        console.log('Closing View Modal');
+        viewModal.classList.remove('active');
+    }
+    
+    // Attach button listeners
+    if (addActivityBtn) {
+        addActivityBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            const formData = {
-                name: document.getElementById("name").value.trim(),
-                execution_type: document.getElementById("execution_type").value,
-                priority: parseInt(document.getElementById("priority").value) || 0,
-                description: document.getElementById("description").value.trim()
-            };
-
-            const res = await fetch("{{ url_for('admin.manage_activity') }}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
-            });
-
-            if (res.ok) {
-                window.location.reload();
-            } else {
-                alert("Failed to create activity");
+            openAddModal();
+        });
+    }
+    
+    if (addFirstActivityBtn) {
+        addFirstActivityBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAddModal();
+        });
+    }
+    
+    if (closeAddBtn) closeAddBtn.addEventListener('click', closeAddModal);
+    if (closeEditBtn) closeEditBtn.addEventListener('click', closeEditModal);
+    if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', closeDeleteModal);
+    if (closeViewBtn) closeViewBtn.addEventListener('click', closeViewModal);
+    
+    // Table action buttons
+    const tableBody = document.getElementById('activitiesTableBody');
+    if (tableBody) {
+        tableBody.addEventListener('click', function(e) {
+            const button = e.target.closest('.admin-icon-btn');
+            if (!button) return;
+            
+            e.preventDefault();
+            
+            const row = button.closest('tr');
+            const id = row.getAttribute('data-id');
+            const name = row.getAttribute('data-name');
+            const type = row.getAttribute('data-type');
+            const priority = row.getAttribute('data-priority');
+            
+            if (button.classList.contains('view-btn')) {
+                openViewModal(id, name, type, priority);
+            } else if (button.classList.contains('edit-btn')) {
+                openEditModal(id, name, type, priority);
+            } else if (button.classList.contains('delete-btn')) {
+                openDeleteModal(id);
             }
         });
     }
+    
+    // Close modals on backdrop click
+    [addModal, editModal, deleteModal, viewModal].forEach(modal => {
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        }
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('activitySearch');
+    if (searchInput && tableBody) {
+        searchInput.addEventListener('keyup', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = tableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+    
+    console.log('✓ Initialization complete!');
+});
 </script>
 
 {% endblock %}
