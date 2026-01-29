@@ -55,6 +55,7 @@ class User(UserMixin):
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        # 1. Capture basic form data
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
         email = request.form.get("email")
@@ -66,7 +67,11 @@ def register():
         state = request.form.get("state")
         postal_code = request.form.get("postal_code")
         country = request.form.get("country")
+        
+        # --- NEW: Capture Interests ---
+        selected_interests = request.form.getlist("interests") 
 
+        # 2. Handle Profile Picture
         file = request.files.get("profile_picture")
         profile_picture = None
         if file and file.filename:
@@ -76,52 +81,86 @@ def register():
             file.save(os.path.join(upload_path, filename))
             profile_picture = filename
 
+        # 3. Security and Identity
         username = generate_username(first_name, last_name)
         password_hash = generate_password_hash(request.form.get("password"))
 
+        # 4. Database Operations
         conn = sqlite3.connect("models/mood.db")
+        # Use row_factory to access columns by name if needed later
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT INTO users (
-                first_name, last_name, username, email,
-                phone_number, gender, date_of_birth,
-                street_address, city, state,
-                postal_code, country, profile_picture,
-                password_hash
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-            """,
-            (
-                first_name,
-                last_name,
-                username,
-                email,
-                phone_number,
-                gender,
-                date_of_birth,
-                street_address,
-                city,
-                state,
-                postal_code,
-                country,
-                profile_picture,
-                password_hash,
-            ),
-        )
-        conn.commit()
-        conn.close()
+        
+        try:
+            # Insert User
+            cursor.execute(
+                """
+                INSERT INTO users (
+                    first_name, last_name, username, email,
+                    phone_number, gender, date_of_birth,
+                    street_address, city, state,
+                    postal_code, country, profile_picture,
+                    password_hash
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    first_name, last_name, username, email,
+                    phone_number, gender, date_of_birth,
+                    street_address, city, state,
+                    postal_code, country, profile_picture,
+                    password_hash,
+                ),
+            )
+            
+            # --- NEW: Get User ID and Save Interests ---
+            new_user_id = cursor.lastrowid
+            
+            for interest_name in selected_interests:
+                # Get the ID of the interest from the master 'interests' table
+                cursor.execute("SELECT id FROM interests WHERE name = ?", (interest_name,))
+                row = cursor.fetchone()
+                
+                if row:
+                    interest_id = row['id']
+                    # Insert into the bridge/junction table
+                    cursor.execute(
+                        "INSERT INTO user_interests (user_id, interest_id) VALUES (?, ?)",
+                        (new_user_id, interest_id)
+                    )
 
-        send_email(
-            to_email=email,
-            subject="Welcome to MoodMatch",
-            body=f"Hello {first_name},\n\nUsername: {username}",
-        )
+            conn.commit()
+            
+            # 5. Send Welcome Email
+            send_email(
+                to_email=email,
+                subject="Welcome to MoodMatch",
+                body=f"""Hello {first_name},
+
+We’re glad that you’ve registered with MoodMatch 🎉
+
+Your account has been created successfully.
+Below is your auto-generated username, which you’ll need to log in.
+You can change this later from your profile settings.
+
+Username: {username}
+
+Kindly enter this username on the login page to continue.
+
+Enjoy your journey with us 💙
+Team MoodMatch"""
+            )
+            
+        except sqlite3.Error as e:
+            conn.rollback()
+            print(f"Registration Error: {e}")
+            # Optional: flash an error message to the user here
+            return render_template("auth/registration.html", error="An error occurred during registration.")
+        finally:
+            conn.close()
 
         return redirect(url_for("auth.login"))
 
     return render_template("auth/registration.html")
-
-
 # ---------------------------
 # LOGIN (FIXED)
 # ---------------------------

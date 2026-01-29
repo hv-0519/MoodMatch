@@ -3,14 +3,14 @@
 {% block sidebar_class %}static-expanded{% endblock %}
 
 {% block admin_styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+<!-- Additional styles for manage users -->
 {% endblock %}
 
 {% block admin_content %}
 
 <!-- Main Content Area -->
 <div class="admin-dashboard-wrapper with-static-sidebar">
-  <div class="admin-header-us">
+  <div class="admin-header">
     <div class="admin-header-content">
       <div class="admin-title-section">
         <h1>Manage Users</h1>
@@ -22,7 +22,21 @@
     </div>
   </div>
 
-  <!-- Horizontal Card Grid -->
+  {% if error %}
+  <div class="alert alert-danger" style="border-radius: 10px; margin: 2rem;">{{ error }}</div>
+  {% endif %}
+  <div class="admin-content">
+    <div class="admin-table-card">
+      <div class="admin-table-header">
+        <h2 class="admin-card-title">All Users</h2>
+        <div class="admin-header-actions">
+          <div class="admin-search-box">
+            <input type="text" class="admin-search-input" id="activitySearch" placeholder="Search Users..." />
+            <span class="admin-search-icon">🔍</span>
+          </div>
+        </div>
+      </div>
+  <!-- Card Grid -->
   {% if users %}
   <div class="users-grid">
     {% for user in users %}
@@ -51,17 +65,130 @@
       </div>
 
       <div class="action-buttons">
-        <button class="btn btn-view" onclick="viewUser({{ user['id'] | e }})">View</button>
-        <button class="btn btn-edit" onclick="editUser({{ user['id'] | e }})">Edit</button>
+        <button class="btn-view" data-user='{{ user | tojson | safe }}' onclick="viewUser(this)">
+          View
+        </button>
       </div>
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <div class="no-users">
-    <h2>No users found</h2>
-    <p>There are currently no registered users in the system.</p>
+  <div class="admin-empty-state">
+    <div class="admin-empty-icon">🧑</div>
+    <h3>No Users found</h3>
+    {% endif %}
   </div>
-  {% endif %}
+<div id="viewUserModal" class="admin-modal-overlay">
+  <div class="admin-modal-content premium-modal">
+    <div class="modal-header">
+      <h2>User Profile</h2>
+      <button class="close-btn" onclick="closeViewModal()">X</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="profile-header">
+        <div class="avatar-wrapper">
+          <div id="detailAvatar" class="avatar"></div>
+          <span id="detailBadge" class="status-badge" style="display: none;"></span>
+        </div>
+        <div class="user-meta">
+          <h3 id="detailFullName" class="user-name"></h3>
+          <p id="detailUsername" class="user-handle"></p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Email</label>
+          <p id="detailEmail"></p>
+        </div>
+        <div class="detail-item">
+          <label>Phone</label>
+          <p id="detailPhone"></p>
+        </div>
+        <div class="detail-item">
+          <label>Gender / DOB</label>
+          <p id="detailGenderDOB"></p>
+        </div>
+        <div class="detail-item full-width">
+          <label>Location / Address</label>
+          <p id="detailAddress"></p>
+        </div>
+      </div>
+
+      <div class="interests-section full-width">
+        <label>Selected Interests</label>
+        <div id="detailInterests" class="interests-tags"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-view" onclick="closeViewModal()">Close</button>
+    </div>
+  </div>
 </div>
-{% endblock %}
+
+  <script>
+    function viewUser(buttonElement) {
+      const user = JSON.parse(buttonElement.getAttribute('data-user'));
+      const modal = document.getElementById('viewUserModal');
+      if (!modal) return;
+
+      document.getElementById('detailFullName').innerText = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username;
+      document.getElementById('detailUsername').innerText = `@${user.username}`;
+      document.getElementById('detailEmail').innerText = user.email;
+      document.getElementById('detailPhone').innerText = user.phone_number || 'N/A';
+      document.getElementById('detailGenderDOB').innerText = `${user.gender || 'N/A'} | ${user.date_of_birth || 'N/A'}`;
+
+      const badge = document.getElementById('detailBadge');
+      badge.innerText = user.status_tag;
+      badge.className = `admin-badge ${user.status_tag.toLowerCase()}`;
+
+      const addressParts = [user.street_address, user.city, user.state, user.postal_code, user.country].filter(Boolean);
+      document.getElementById('detailAddress').innerText = addressParts.length > 0 ? addressParts.join(', ') : 'No address provided';
+
+      const interestsDiv = document.getElementById('detailInterests');
+      interestsDiv.innerHTML = '';
+      if (user.user_interests) {
+        user.user_interests.split(', ').forEach(interest => {
+          const span = document.createElement('span');
+          span.className = 'interest-pill';
+          span.innerText = interest;
+          interestsDiv.appendChild(span);
+        });
+      } else {
+        interestsDiv.innerHTML = '<em>No interests selected</em>';
+      }
+
+      const avatarDiv = document.getElementById('detailAvatar');
+      if (user.profile_picture) {
+        avatarDiv.innerHTML = `<img src="/static/uploads/${user.profile_picture}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`;
+      } else {
+        const initials = (user.first_name?.[0] || '') + (user.last_name?.[0] || user.username[0]);
+        avatarDiv.innerHTML = `<div class="default-avatar-placeholder">${initials.toUpperCase()}</div>`;
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeViewModal() {
+      document.getElementById('viewUserModal').style.display = 'none';
+    }
+
+    function initializePageScripts() {
+      console.log("[v0] Manage Users page initialized");
+    }
+
+    const searchInput = document.querySelector(".admin-search-input");
+    if (searchInput) {
+      searchInput.addEventListener("input", function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const tableRows = document.querySelectorAll(".admin-table tbody tr");
+        tableRows.forEach((row) => {
+          row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? "" : "none";
+        });
+      });
+    }
+  </script>
+
+  {% endblock %}

@@ -249,3 +249,13 @@ ON activity_rules (activity_id);
 -- Travel places lookup
 CREATE INDEX idx_activity_places_activity
 ON activity_places (activity_id);
+
+
+-- 1. Insert Categories
+INSERT INTO interest_categories (name) VALUES ('Creative'), ('Lifestyle'), ('Action');
+
+-- 2. Insert Interests linked to categories
+-- Assuming Creative is ID 1, Lifestyle is ID 2, Action is ID 3
+INSERT INTO interests (category_id, name) VALUES (1, 'writing'), (1, 'drawing'), (1, 'photography');
+INSERT INTO interests (category_id, name) VALUES (2, 'music'), (2, 'reading'), (2, 'cooking'), (2, 'travel');
+INSERT INTO interests (category_id, name) VALUES (3, 'gaming'), (3, 'sports'), (3, 'fitness');

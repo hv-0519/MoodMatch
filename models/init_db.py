@@ -14,16 +14,20 @@ def init_db():
 
     cursor.execute("PRAGMA foreign_keys = ON;")
 
-    with open(SQL_FILE,'r') as f:
-        sql_script = f.read()
-
-    cursor.executescript(sql_script)
-
-    conn.commit()
-    conn.close()
-
-    print("Database initialized successfully.")
+    # ADDED encoding='utf-8' HERE
+    try:
+        with open(SQL_FILE, 'r', encoding='utf-8') as f:
+            sql_script = f.read()
+        
+        cursor.executescript(sql_script)
+        conn.commit()
+        print("Database initialized successfully.")
+    except UnicodeDecodeError:
+        print("Error: Could not decode the SQL file. Ensure it is saved with UTF-8 encoding.")
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     init_db()
-            

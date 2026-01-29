@@ -6,147 +6,19 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
 <style>
 /* Modal Base Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
 
-.modal.active {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    opacity: 1;
-}
-
-.modal-content {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-}
-
-.modal.active .modal-content {
-    transform: scale(1);
-}
-
-.modal-header {
-    padding: 20px;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 20px;
-    font-weight: 600;
-    color: #111827;
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-.modal-footer {
-    padding: 20px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-    color: #374151;
-    font-size: 14px;
-}
-
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: border-color 0.2s;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-.btn-cancel,
-.btn-submit {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-cancel {
-    background-color: #f3f4f6;
-    color: #374151;
-}
-
-.btn-cancel:hover {
-    background-color: #e5e7eb;
-}
-
-.btn-submit {
-    background-color: #3b82f6;
-    color: white;
-}
-
-.btn-submit:hover {
-    background-color: #2563eb;
-}
-
-.form-group p {
-    margin: 0;
-    padding: 10px 0;
-    font-size: 14px;
-    color: #111827;
-}
 </style>
 {% endblock %}
 
 {% block admin_content %}
 
 <div class="admin-dashboard-wrapper with-static-sidebar">
-  <div class="admin-header-ac">
+  <div class="admin-header">
     <div class="admin-header-content">
       <div class="admin-title-section">
         <h1>Manage Activities</h1>
         <p class="admin-subtitle">
-          Welcome back <b style="color:white;">"{{ admins|capitalize }}"</b>! Here's an overview of all activities.
+          Welcome back <b style="color: white;">"{{ admins|capitalize }}"</b>! Here's an overview of all activities.
         </p>
       </div>
     </div>
@@ -182,7 +54,7 @@
         <tbody id="activitiesTableBody">
           {% for activity in activities %}
           <tr data-id="{{ activity.id }}" data-name="{{ activity.name }}" data-type="{{ activity.execution_type }}" data-priority="{{ activity.priority or 0 }}">
-            <td><strong>#{{ activity.id }}</strong></td>
+            <td><strong><span style="color: rgb(208, 0, 255);">#</span>{{ loop.index }}</strong></td>
             <td><strong>{{ activity.name or 'Untitled Activity' }}</strong></td>
             <td>{{ activity.execution_type | capitalize }}</td>
             <td style="padding-left:45px">{{ activity.priority or 0 }}</td>
@@ -257,11 +129,11 @@
             <input type="hidden" name="activity_id" id="edit_id">
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="edit_name">Activity Name *</label>
+                    <label for="edit_name">Activity Name <b><span style="color: red;">*</span></b></label>
                     <input type="text" id="edit_name" name="name" required>
                 </div>
                 <div class="form-group">
-                    <label for="edit_type">Type *</label>
+                    <label for="edit_type">Type <b><span style="color: red;">*</span></b></label>
                     <select id="edit_type" name="execution_type" required>
                         <option value="physical">Physical</option>
                         <option value="mental">Mental</option>
@@ -269,7 +141,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="edit_priority">Priority (1-10)</label>
+                    <label for="edit_priority">Priority (1-10) <b><span style="color: red;">*</span></b></label>
                     <input type="number" id="edit_priority" name="priority" min="1" max="10">
                 </div>
             </div>
@@ -304,7 +176,7 @@
     <div class="modal-content">
         <div class="modal-header">Activity Details</div>
         <div class="modal-body">
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label>ID:</label>
                 <p id="view_id"></p>
             </div>
@@ -327,151 +199,7 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing Activity Management...');
-    
-    // Get all modal elements
-    const addModal = document.getElementById('addModal');
-    const editModal = document.getElementById('editModal');
-    const deleteModal = document.getElementById('deleteModal');
-    const viewModal = document.getElementById('viewModal');
-    
-    // Get all buttons
-    const addActivityBtn = document.getElementById('addActivityBtn');
-    const addFirstActivityBtn = document.getElementById('addFirstActivityBtn');
-    const closeAddBtn = document.getElementById('closeAddBtn');
-    const closeEditBtn = document.getElementById('closeEditBtn');
-    const closeDeleteBtn = document.getElementById('closeDeleteBtn');
-    const closeViewBtn = document.getElementById('closeViewBtn');
-    
-    // Modal functions
-    function openAddModal() {
-        console.log('Opening Add Modal');
-        addModal.classList.add('active');
-    }
-    
-    function closeAddModal() {
-        console.log('Closing Add Modal');
-        addModal.classList.remove('active');
-        document.getElementById('add_name').value = '';
-        document.getElementById('add_type').value = '';
-        document.getElementById('add_priority').value = '1';
-        const descField = document.getElementById('add_description');
-        if (descField) descField.value = '';
-    }
-    
-    function openEditModal(id, name, type, priority) {
-        console.log('Opening Edit Modal for ID:', id);
-        document.getElementById('edit_id').value = id;
-        document.getElementById('edit_name').value = name;
-        document.getElementById('edit_type').value = type;
-        document.getElementById('edit_priority').value = priority;
-        editModal.classList.add('active');
-    }
-    
-    function closeEditModal() {
-        console.log('Closing Edit Modal');
-        editModal.classList.remove('active');
-    }
-    
-    function openDeleteModal(id) {
-        console.log('Opening Delete Modal for ID:', id);
-        document.getElementById('delete_id').value = id;
-        deleteModal.classList.add('active');
-    }
-    
-    function closeDeleteModal() {
-        console.log('Closing Delete Modal');
-        deleteModal.classList.remove('active');
-    }
-    
-    function openViewModal(id, name, type, priority) {
-        console.log('Opening View Modal for ID:', id);
-        document.getElementById('view_id').textContent = '#' + id;
-        document.getElementById('view_name').textContent = name;
-        document.getElementById('view_type').textContent = type.charAt(0).toUpperCase() + type.slice(1);
-        document.getElementById('view_priority').textContent = priority;
-        viewModal.classList.add('active');
-    }
-    
-    function closeViewModal() {
-        console.log('Closing View Modal');
-        viewModal.classList.remove('active');
-    }
-    
-    // Attach button listeners
-    if (addActivityBtn) {
-        addActivityBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            openAddModal();
-        });
-    }
-    
-    if (addFirstActivityBtn) {
-        addFirstActivityBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            openAddModal();
-        });
-    }
-    
-    if (closeAddBtn) closeAddBtn.addEventListener('click', closeAddModal);
-    if (closeEditBtn) closeEditBtn.addEventListener('click', closeEditModal);
-    if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', closeDeleteModal);
-    if (closeViewBtn) closeViewBtn.addEventListener('click', closeViewModal);
-    
-    // Table action buttons
-    const tableBody = document.getElementById('activitiesTableBody');
-    if (tableBody) {
-        tableBody.addEventListener('click', function(e) {
-            const button = e.target.closest('.admin-icon-btn');
-            if (!button) return;
-            
-            e.preventDefault();
-            
-            const row = button.closest('tr');
-            const id = row.getAttribute('data-id');
-            const name = row.getAttribute('data-name');
-            const type = row.getAttribute('data-type');
-            const priority = row.getAttribute('data-priority');
-            
-            if (button.classList.contains('view-btn')) {
-                openViewModal(id, name, type, priority);
-            } else if (button.classList.contains('edit-btn')) {
-                openEditModal(id, name, type, priority);
-            } else if (button.classList.contains('delete-btn')) {
-                openDeleteModal(id);
-            }
-        });
-    }
-    
-    // Close modals on backdrop click
-    [addModal, editModal, deleteModal, viewModal].forEach(modal => {
-        if (modal) {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('active');
-                }
-            });
-        }
-    });
-    
-    // Search functionality
-    const searchInput = document.getElementById('activitySearch');
-    if (searchInput && tableBody) {
-        searchInput.addEventListener('keyup', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = tableBody.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        });
-    }
-    
-    console.log('✓ Initialization complete!');
-});
-</script>
+<script src="{{ url_for('static', filename='js/activities.js') }}"></script>
+
 
 {% endblock %}
