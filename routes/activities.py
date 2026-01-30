@@ -9,7 +9,7 @@ import sqlite3
 
 activities_bp = Blueprint("activities", __name__, url_prefix="/activities")
 
-DB_PATH = "models/mood.db"
+DB_PATH = "models/instance/moodmatch.db"
 
 
 # ===============================

@@ -67,9 +67,9 @@ def register():
         state = request.form.get("state")
         postal_code = request.form.get("postal_code")
         country = request.form.get("country")
-        
+
         # --- NEW: Capture Interests ---
-        selected_interests = request.form.getlist("interests") 
+        selected_interests = request.form.getlist("interests")
 
         # 2. Handle Profile Picture
         file = request.files.get("profile_picture")
@@ -86,11 +86,11 @@ def register():
         password_hash = generate_password_hash(request.form.get("password"))
 
         # 4. Database Operations
-        conn = sqlite3.connect("models/mood.db")
+        conn = sqlite3.connect("models/instance/moodmatch.db")
         # Use row_factory to access columns by name if needed later
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        
+
         try:
             # Insert User
             cursor.execute(
@@ -104,63 +104,80 @@ def register():
                 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 (
-                    first_name, last_name, username, email,
-                    phone_number, gender, date_of_birth,
-                    street_address, city, state,
-                    postal_code, country, profile_picture,
+                    first_name,
+                    last_name,
+                    username,
+                    email,
+                    phone_number,
+                    gender,
+                    date_of_birth,
+                    street_address,
+                    city,
+                    state,
+                    postal_code,
+                    country,
+                    profile_picture,
                     password_hash,
                 ),
             )
-            
+
             # --- NEW: Get User ID and Save Interests ---
             new_user_id = cursor.lastrowid
-            
+
             for interest_name in selected_interests:
                 # Get the ID of the interest from the master 'interests' table
-                cursor.execute("SELECT id FROM interests WHERE name = ?", (interest_name,))
+                cursor.execute(
+                    "SELECT id FROM interests WHERE name = ?", (interest_name,)
+                )
                 row = cursor.fetchone()
-                
+
                 if row:
-                    interest_id = row['id']
+                    interest_id = row["id"]
                     # Insert into the bridge/junction table
                     cursor.execute(
                         "INSERT INTO user_interests (user_id, interest_id) VALUES (?, ?)",
-                        (new_user_id, interest_id)
+                        (new_user_id, interest_id),
                     )
 
             conn.commit()
-            
+
             # 5. Send Welcome Email
             send_email(
                 to_email=email,
-                subject="Welcome to MoodMatch",
+                subject="Welcome to MoodMatch 🎉 Your Account Is Ready",
                 body=f"""Hello {first_name},
 
-We’re glad that you’ve registered with MoodMatch 🎉
+We’re excited to have you join MoodMatch 🎉
+Your account has been created successfully, and you’re all set to begin your journey with us.
 
-Your account has been created successfully.
-Below is your auto-generated username, which you’ll need to log in.
-You can change this later from your profile settings.
+To get started, here’s your auto-generated username (you’ll need this to log in):
 
-Username: {username}
+👤 Username: {username}
 
-Kindly enter this username on the login page to continue.
+Please enter this username on the login page to access your account.
+You can always change it later from your profile settings once you’re logged in.
 
-Enjoy your journey with us 💙
-Team MoodMatch"""
+If you ever need help, we’re just a step away — we’ve got your back 💙
+
+Welcome aboard, and enjoy your experience with MoodMatch!
+— Team MoodMatch""",
             )
-            
+
         except sqlite3.Error as e:
             conn.rollback()
             print(f"Registration Error: {e}")
             # Optional: flash an error message to the user here
-            return render_template("auth/registration.html", error="An error occurred during registration.")
+            return render_template(
+                "auth/registration.html", error="An error occurred during registration."
+            )
         finally:
             conn.close()
 
         return redirect(url_for("auth.login"))
 
     return render_template("auth/registration.html")
+
+
 # ---------------------------
 # LOGIN (FIXED)
 # ---------------------------
@@ -173,7 +190,7 @@ def login():
         # ✅ FIX: checkbox handling
         remember = True if request.form.get("remember") == "on" else False
 
-        conn = sqlite3.connect("models/mood.db")
+        conn = sqlite3.connect("models/instance/moodmatch.db")
         cursor = conn.cursor()
 
         # ---------------------------
@@ -250,10 +267,11 @@ def forget_password():
         username = request.form.get("username")
         email = request.form.get("email")
 
-        conn = sqlite3.connect("models/mood.db")
+        conn = sqlite3.connect("models/instance/moodmatch.db")
         cursor = conn.cursor()
+
         cursor.execute(
-            "SELECT id FROM users WHERE username = ? AND email = ?",
+            "SELECT id, first_name FROM users WHERE username = ? AND email = ?",
             (username, email),
         )
         row = cursor.fetchone()
@@ -265,24 +283,42 @@ def forget_password():
                 error="Invalid username or email",
             )
 
+        user_id, first_name = row
+
         reset_code = "".join(random.choices(string.digits, k=6))
 
         cursor.execute(
-            "UPDATE users SET reset_code = ? WHERE username = ?",
-            (reset_code, username),
+            "UPDATE users SET reset_code = ? WHERE id = ?",
+            (reset_code, user_id),
         )
         conn.commit()
         conn.close()
 
         send_email(
             to_email=email,
-            subject="Password Reset Code",
-            body=f"Your reset code is: {reset_code}",
+            subject="Your MoodMatch Password Reset Code",
+            body=f"""Hello {{ first_name or "there" }},
+
+We received a request to reset the password for your MoodMatch account ✨
+
+To continue, please use the verification code below:
+
+🔐 Password Reset Code: {{ reset_code }}
+
+Enter this code in the app to securely reset your password.
+For your safety, please do not share this code with anyone — even if they claim to be from MoodMatch.
+
+If you didn’t request a password reset, you can safely ignore this email. Your account remains protected.
+
+Thanks for being part of MoodMatch 💙
+— Team MoodMatch
+""",
         )
 
         return redirect(url_for("auth.verify_code", username=username))
 
     return render_template("auth/forget_password.html")
+
 
 
 # ---------------------------
@@ -296,7 +332,7 @@ def verify_code():
         username = request.form.get("username")
         code = request.form.get("reset_code")
 
-        conn = sqlite3.connect("models/mood.db")
+        conn = sqlite3.connect("models/instance/moodmatch.db")
         cursor = conn.cursor()
         cursor.execute(
             "SELECT reset_code FROM users WHERE username = ?",
@@ -338,7 +374,7 @@ def reset_password():
 
         password_hash = generate_password_hash(new_password)
 
-        conn = sqlite3.connect("models/mood.db")
+        conn = sqlite3.connect("models/instance/moodmatch.db")
         cursor = conn.cursor()
         cursor.execute(
             """

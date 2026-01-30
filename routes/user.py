@@ -19,7 +19,7 @@ from datetime import datetime
 
 user_bp = Blueprint("user", __name__)
 
-DB_PATH = "models/mood.db"
+DB_PATH = "models/instance/moodmatch.db"
 
 
 # ===============================

@@ -5,82 +5,124 @@
 {% block admin_styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
 <style>
-/* Modal Base Styles */
-
+    /* Modal Base Styles */
+    
 </style>
 {% endblock %}
 
 {% block admin_content %}
 
 <div class="admin-dashboard-wrapper with-static-sidebar">
-  <div class="admin-header">
-    <div class="admin-header-content">
-      <div class="admin-title-section">
-        <h1>Manage Activities</h1>
-        <p class="admin-subtitle">
-          Welcome back <b style="color: white;">"{{ admins|capitalize }}"</b>! Here's an overview of all activities.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <div class="admin-content">
-    <div class="admin-table-card">
-      <div class="admin-table-header">
-        <h2 class="admin-card-title">All Activities</h2>
-        <div class="admin-header-actions">
-          <div class="admin-search-box">
-            <input type="text" class="admin-search-input" id="activitySearch" placeholder="Search activities..." />
-            <span class="admin-search-icon">🔍</span>
-          </div>
-          <button class="admin-btn admin-btn-primary" id="addActivityBtn">
-            <span>➕</span> <span>Add Activity</span>
-          </button>
+    <div class="admin-header">
+        <div class="decorative-shapes-us">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
         </div>
-      </div>
-
-      {% if activities %}
-      <table class="admin-table" id="activitiesTable">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Activity Name</th>
-            <th>Type</th>
-            <th>Priority</th>
-            <th>Created At</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="activitiesTableBody">
-          {% for activity in activities %}
-          <tr data-id="{{ activity.id }}" data-name="{{ activity.name }}" data-type="{{ activity.execution_type }}" data-priority="{{ activity.priority or 0 }}">
-            <td><strong><span style="color: rgb(208, 0, 255);">#</span>{{ loop.index }}</strong></td>
-            <td><strong>{{ activity.name or 'Untitled Activity' }}</strong></td>
-            <td>{{ activity.execution_type | capitalize }}</td>
-            <td style="padding-left:45px">{{ activity.priority or 0 }}</td>
-            <td>{{ activity.created_at[:10] if activity.created_at else '—' }}</td>
-            <td>
-              <div class="admin-table-actions">
-                <button class="admin-icon-btn view-btn" title="View">👁️</button>
-                <button class="admin-icon-btn edit-btn" title="Edit">✏️</button>
-                <button class="admin-icon-btn delete-btn" title="Delete">🗑️</button>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="admin-empty-state">
-        <div class="admin-empty-icon">📋</div>
-        <h3>No activities found</h3>
-        <button class="admin-btn admin-btn-primary" id="addFirstActivityBtn">
-          <span>➕</span> <span>Add First Activity</span>
-        </button>
-      </div>
-      {% endif %}
+        <div class="admin-header-content">
+            <div class="admin-title-section">
+                <h1>Manage Activities</h1>
+                <p class="admin-subtitle">
+                    Welcome back <b style="color:white;">"{{ admins|capitalize }}"</b>! Here's an overview of all
+                    activities.
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <div class="admin-content">
+        <div class="admin-table-card">
+            <div class="admin-table-header">
+                <h2 class="admin-card-title">All Activities</h2>
+                <div class="admin-header-actions">
+                    <div class="admin-search-box">
+                        <input type="text" class="admin-search-input" id="activitySearch"
+                            placeholder="Search activities..." />
+                        <span class="admin-search-icon">🔍</span>
+                    </div>
+                    <button class="admin-btn admin-btn-primary" id="addActivityBtn">
+                        <span>➕</span> <span>Add Activity</span>
+                    </button>
+                </div>
+            </div>
+
+            {% if activities %}
+            <table class="admin-table" id="activitiesTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Activity</th>
+                        <th>Type</th>
+                        <th>Priority</th>
+                        <th>Energy</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="activitiesTableBody">
+                    {% for activity in activities %}
+                    <tr data-id="{{ activity.id }}" data-name="{{ activity.name }}"
+                        data-type="{{ activity.execution_type }}" data-priority="{{ activity.priority or 0 }}" data-category="{{ activity.category_id }}"
+                        data-energy="{{ activity.energy_level }}" data-location="{{ activity.location_type }}"
+                        data-active="{{ activity.is_active }}">
+                        <td><strong>#{{ loop.index }}</strong></td>
+
+                        <td>
+                            <strong>{{ activity.name or 'Untitled Activity' }}</strong><br>
+                            <small style="color:#64748b;">
+                                {{ activity.mood_tags or 'No tags' }}
+                            </small>
+                        </td>
+
+                        <td>{{ activity.execution_type | capitalize }}</td>
+
+                        <td style="text-align:center;">
+                            {{ activity.priority or 0 }}
+                        </td>
+
+                        <td>{{ activity.energy_level or '—' }}</td>
+
+                        <td>{{ activity.location_type or '—' }}</td>
+
+                        <td>
+                            {% if activity.is_active %}
+                            <span class="admin-badge success">Active</span>
+                            {% else %}
+                            <span class="admin-badge danger">Inactive</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ activity.created_at[:10] if activity.created_at else '—' }}
+                        </td>
+
+                        <td>
+                            <div class="admin-table-actions">
+                                <button class="admin-icon-btn view-btn" title="View">👁️</button>
+                                <button class="admin-icon-btn edit-btn" title="Edit">✏️</button>
+                                <button class="admin-icon-btn delete-btn" title="Delete">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% else %}
+            <div class="admin-empty-state">
+                <div class="admin-empty-icon">📋</div>
+                <h3>No activities found</h3>
+                <p>Get started by adding your first activity</p>
+                <button class="admin-btn admin-btn-primary" id="addFirstActivityBtn">
+                    <span>➕</span> <span>Add Activity</span>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
 <!-- ADD ACTIVITY MODAL -->
@@ -90,26 +132,119 @@
         <form action="{{ url_for('admin.manage_activity') }}" method="POST">
             <input type="hidden" name="action" value="add">
             <div class="modal-body">
+                <!-- Basic Information -->
                 <div class="form-group">
+                    <div class="form-group">
+                        <label for="add_category">Category *</label>
+                        <select id="add_category" name="category_id" required>
+                            <option value="">Select Category</option>
+                            {% if categories %}
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                            {% else %}
+                            <option value="1">Default Category</option>
+                            {% endif %}
+                        </select>
+                    </div>
                     <label for="add_name">Activity Name *</label>
                     <input type="text" id="add_name" name="name" required>
                 </div>
-                <div class="form-group">
-                    <label for="add_type">Type *</label>
-                    <select id="add_type" name="execution_type" required>
-                        <option value="">Select Type</option>
-                        <option value="physical">Physical</option>
-                        <option value="mental">Mental</option>
-                        <option value="social">Social</option>
-                    </select>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add_type">Execution Type *</label>
+                        <select id="add_type" name="execution_type" required>
+                            <option value="">Select Type</option>
+                            <option value="physical">Physical</option>
+                            <option value="mental">Mental</option>
+                            <option value="social">Social</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add_priority">Priority (0-10)</label>
+                        <input type="number" id="add_priority" name="priority" min="0" max="10" value="0">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="add_priority">Priority (1-10)</label>
-                    <input type="number" id="add_priority" name="priority" min="1" max="10" value="1">
-                </div>
+
                 <div class="form-group">
                     <label for="add_description">Description</label>
                     <textarea id="add_description" name="description" rows="3"></textarea>
+                </div>
+
+                <!-- Activity Details -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add_energy">Energy Level</label>
+                        <select id="add_energy" name="energy_level">
+                            <option value="">Select Energy</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add_location">Location Type</label>
+                        <select id="add_location" name="location_type">
+                            <option value="">Select Location</option>
+                            <option value="indoor">Indoor</option>
+                            <option value="outdoor">Outdoor</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add_social">Social Type</label>
+                        <select id="add_social" name="social_type">
+                            <option value="">Select Social</option>
+                            <option value="solo">Solo</option>
+                            <option value="group">Group</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add_mood_tags">Mood Tags</label>
+                        <input type="text" id="add_mood_tags" name="mood_tags" placeholder="happy, relaxed, energetic">
+                    </div>
+                </div>
+
+                <!-- Time and Budget -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add_min_time">Min Time (minutes)</label>
+                        <input type="number" id="add_min_time" name="min_time" min="0" placeholder="e.g., 15">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add_max_time">Max Time (minutes)</label>
+                        <input type="number" id="add_max_time" name="max_time" min="0" placeholder="e.g., 60">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="add_min_budget">Min Budget ($)</label>
+                        <input type="number" id="add_min_budget" name="min_budget" min="0" step="0.01"
+                            placeholder="e.g., 0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add_max_budget">Max Budget ($)</label>
+                        <input type="number" id="add_max_budget" name="max_budget" min="0" step="0.01"
+                            placeholder="e.g., 50">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="add_is_active" name="is_active" value="1" checked>
+                        <label for="add_is_active" style="margin: 0;">Active</label>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -129,11 +264,23 @@
             <input type="hidden" name="activity_id" id="edit_id">
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="edit_name">Activity Name <b><span style="color: red;">*</span></b></label>
+                    <div class="form-group">
+                    <label for="edit_category">Category *</label>
+                    <select id="edit_category" name="category_id" required>
+                        {% if categories %}
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="1">Default Category</option>
+                        {% endif %}
+                    </select>
+                </div>
+                    <label for="edit_name">Activity Name *</label>
                     <input type="text" id="edit_name" name="name" required>
                 </div>
                 <div class="form-group">
-                    <label for="edit_type">Type <b><span style="color: red;">*</span></b></label>
+                    <label for="edit_type">Type *</label>
                     <select id="edit_type" name="execution_type" required>
                         <option value="physical">Physical</option>
                         <option value="mental">Mental</option>
@@ -141,8 +288,12 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="edit_priority">Priority (1-10) <b><span style="color: red;">*</span></b></label>
-                    <input type="number" id="edit_priority" name="priority" min="1" max="10">
+                    <label for="edit_priority">Priority (0-10)</label>
+                    <input type="number" id="edit_priority" name="priority" min="0" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="edit_description">Description</label>
+                    <textarea id="edit_description" name="description" rows="3"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -176,10 +327,6 @@
     <div class="modal-content">
         <div class="modal-header">Activity Details</div>
         <div class="modal-body">
-            <div class="form-group" style="display: none;">
-                <label>ID:</label>
-                <p id="view_id"></p>
-            </div>
             <div class="form-group">
                 <label>Activity Name:</label>
                 <p id="view_name"></p>
@@ -199,7 +346,149 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='js/activities.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Initializing Activity Management...');
 
+        // Get all modal elements
+        const addModal = document.getElementById('addModal');
+        const editModal = document.getElementById('editModal');
+        const deleteModal = document.getElementById('deleteModal');
+        const viewModal = document.getElementById('viewModal');
+
+        // Get all buttons
+        const addActivityBtn = document.getElementById('addActivityBtn');
+        const addFirstActivityBtn = document.getElementById('addFirstActivityBtn');
+        const closeAddBtn = document.getElementById('closeAddBtn');
+        const closeEditBtn = document.getElementById('closeEditBtn');
+        const closeDeleteBtn = document.getElementById('closeDeleteBtn');
+        const closeViewBtn = document.getElementById('closeViewBtn');
+
+        // Modal functions
+        function openAddModal() {
+            console.log('Opening Add Modal');
+            addModal.classList.add('active');
+        }
+
+        function closeAddModal() {
+            console.log('Closing Add Modal');
+            addModal.classList.remove('active');
+            // Reset form
+            document.querySelector('#addModal form').reset();
+        }
+
+        function openEditModal(id, name, type, priority, category) {
+            console.log('Opening Edit Modal for ID:', id);
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_type').value = type;
+            document.getElementById('edit_priority').value = priority;
+            document.getElementById('edit_category').value = category || '1';
+            editModal.classList.add('active');
+        }
+
+        function closeEditModal() {
+            console.log('Closing Edit Modal');
+            editModal.classList.remove('active');
+        }
+
+        function openDeleteModal(id) {
+            console.log('Opening Delete Modal for ID:', id);
+            document.getElementById('delete_id').value = id;
+            deleteModal.classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            console.log('Closing Delete Modal');
+            deleteModal.classList.remove('active');
+        }
+
+        function openViewModal(id, name, type, priority) {
+            console.log('Opening View Modal for ID:', id);
+            document.getElementById('view_name').textContent = name;
+            document.getElementById('view_type').textContent = type.charAt(0).toUpperCase() + type.slice(1);
+            document.getElementById('view_priority').textContent = priority;
+            viewModal.classList.add('active');
+        }
+
+        function closeViewModal() {
+            console.log('Closing View Modal');
+            viewModal.classList.remove('active');
+        }
+
+        // Attach button listeners
+        if (addActivityBtn) {
+            addActivityBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openAddModal();
+            });
+        }
+
+        if (addFirstActivityBtn) {
+            addFirstActivityBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openAddModal();
+            });
+        }
+
+        if (closeAddBtn) closeAddBtn.addEventListener('click', closeAddModal);
+        if (closeEditBtn) closeEditBtn.addEventListener('click', closeEditModal);
+        if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', closeDeleteModal);
+        if (closeViewBtn) closeViewBtn.addEventListener('click', closeViewModal);
+
+        // Table action buttons
+        const tableBody = document.getElementById('activitiesTableBody');
+        if (tableBody) {
+            tableBody.addEventListener('click', function (e) {
+                const button = e.target.closest('.admin-icon-btn');
+                if (!button) return;
+
+                e.preventDefault();
+
+                const row = button.closest('tr');
+                const id = row.getAttribute('data-id');
+                const name = row.getAttribute('data-name');
+                const type = row.getAttribute('data-type');
+                const priority = row.getAttribute('data-priority');
+                const category = row.getAttribute('data-category');
+
+                if (button.classList.contains('view-btn')) {
+                    openViewModal(id, name, type, priority);
+                } else if (button.classList.contains('edit-btn')) {
+                    openEditModal(id, name, type, priority, category);
+                } else if (button.classList.contains('delete-btn')) {
+                    openDeleteModal(id);
+                }
+            });
+        }
+
+        // Close modals on backdrop click
+        [addModal, editModal, deleteModal, viewModal].forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('activitySearch');
+        if (searchInput && tableBody) {
+            searchInput.addEventListener('keyup', function (e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = tableBody.querySelectorAll('tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+
+        console.log('✓ Initialization complete!');
+    });
+</script>
 
 {% endblock %}

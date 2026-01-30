@@ -15,7 +15,7 @@ from flask_login import login_required
 
 admin_bp = Blueprint("admin", __name__)
 
-DB_PATH = "models/mood.db"
+DB_PATH = "models/instance/moodmatch.db"
 
 
 def get_db():
@@ -68,19 +68,9 @@ def admin_dashboard():
             chart_data.append(reg_stats.get(day.isoformat(), 0))
 
         # Mood Chart
-        cursor.execute(
-            """
-            SELECT m.name, COUNT(am.activity_id) as count FROM moods m
-            JOIN activity_moods am ON m.id = am.mood_id
-            GROUP BY m.name ORDER BY count DESC LIMIT 5
-        """
-        )
-        mood_rows = cursor.fetchall()
-        mood_labels = [r[0] for r in mood_rows]
-        mood_data = [r[1] for r in mood_rows]
 
         cursor.execute(
-            "SELECT id, username, email, created_at FROM users ORDER BY created_at DESC LIMIT 5"
+            "SELECT id, username, email, created_at, profile_picture FROM users ORDER BY created_at DESC LIMIT 5"
         )
         users = [dict(row) for row in cursor.fetchall()]
 
@@ -93,8 +83,6 @@ def admin_dashboard():
             users=users,
             chart_labels=chart_labels,
             chart_data=chart_data,
-            mood_labels=mood_labels,
-            mood_data=mood_data,
             mood_colors=["#8ec5fc", "#e0c3fc", "#a8d5fc", "#ead5fc", "#cbd5e1"],
         )
     finally:
@@ -143,7 +131,7 @@ def manage_users():
 
 
 # ===============================
-# Manage Activities (CRUD)
+# Manage Activities (CRUD) - FIXED WITH CATEGORY_ID
 # ===============================
 @admin_bp.route("/manage_activity", methods=["GET", "POST"])
 @login_required
@@ -153,41 +141,107 @@ def manage_activity():
 
     if request.method == "POST":
         action = request.form.get("action")
+
+        # DEBUG LOGGING
+        print(f"\n{'='*60}")
+        print(f"POST REQUEST RECEIVED")
+        print(f"Action: {action}")
+        print(f"Form Data: {dict(request.form)}")
+        print(f"{'='*60}\n")
+
         try:
+            # ---------- ADD ----------
             if action == "add":
                 name = request.form.get("name", "").strip()
                 ex_type = request.form.get("execution_type", "").strip()
                 desc = request.form.get("description", "").strip()
+                mood_tags = request.form.get("mood_tags", "").strip()
+                energy_level = request.form.get("energy_level", "").strip()
+                location_type = request.form.get("location_type", "").strip()
+                social_type = request.form.get("social_type", "").strip()
+                min_time = request.form.get("min_time", "").strip()
+                max_time = request.form.get("max_time", "").strip()
+                min_budget = request.form.get("min_budget", "").strip()
+                max_budget = request.form.get("max_budget", "").strip()
+                is_active = 1 if request.form.get("is_active") else 0
                 prio = int(request.form.get("priority") or 0)
 
-                if name and ex_type:
-                    cursor.execute(
-                        """
-                        INSERT INTO activities (name, execution_type, description, priority, is_active)
-                        VALUES (?, ?, ?, ?, 1)
-                    """,
-                        (name, ex_type, desc, prio),
-                    )
-                    conn.commit()
-                    flash("Activity added successfully!", "success")
+                # CRITICAL FIX: Get category_id
+                category_id = request.form.get("category_id", "").strip()
 
+                if not name or not ex_type:
+                    flash("Name and Execution Type are required", "error")
+                    return redirect(url_for("admin.manage_activity"))
+
+                # CRITICAL FIX: Check if category_id is required
+                if not category_id:
+                    flash("Category is required", "error")
+                    return redirect(url_for("admin.manage_activity"))
+
+                print(f"Attempting INSERT with category_id={category_id}")
+
+                cursor.execute(
+                    """
+                    INSERT INTO activities (
+                        name,
+                        execution_type,
+                        description,
+                        priority,
+                        is_active,
+                        mood_tags,
+                        energy_level,
+                        location_type,
+                        social_type,
+                        min_time,
+                        max_time,
+                        min_budget,
+                        max_budget,
+                        category_id
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        name,
+                        ex_type,
+                        desc,
+                        prio,
+                        is_active,
+                        mood_tags,
+                        energy_level,
+                        location_type,
+                        social_type,
+                        min_time,
+                        max_time,
+                        min_budget,
+                        max_budget,
+                        category_id,  # CRITICAL FIX
+                    ),
+                )
+                conn.commit()
+                print(f"✓ Activity inserted successfully! ID: {cursor.lastrowid}")
+                flash("Activity added successfully!", "success")
+
+            # ---------- EDIT ----------
             elif action == "edit":
                 act_id = request.form.get("activity_id")
                 name = request.form.get("name", "").strip()
                 ex_type = request.form.get("execution_type", "").strip()
                 desc = request.form.get("description", "").strip()
                 prio = int(request.form.get("priority") or 0)
+                category_id = request.form.get("category_id", "").strip()
 
                 cursor.execute(
                     """
-                    UPDATE activities SET name=?, execution_type=?, description=?, priority=?
+                    UPDATE activities
+                    SET name=?, execution_type=?, description=?, priority=?, category_id=?
                     WHERE id=?
-                """,
-                    (name, ex_type, desc, prio, act_id),
+                    """,
+                    (name, ex_type, desc, prio, category_id, act_id),
                 )
                 conn.commit()
                 flash("Activity updated successfully!", "success")
 
+            # ---------- DELETE ----------
             elif action == "delete":
                 act_id = request.form.get("activity_id")
                 cursor.execute("DELETE FROM activities WHERE id=?", (act_id,))
@@ -196,30 +250,40 @@ def manage_activity():
 
         except sqlite3.Error as e:
             conn.rollback()
-            flash(f"Database error: {str(e)}", "error")
+            print(f"✗ DATABASE ERROR: {e}")
+            flash(f"Database error: {e}", "error")
+
         finally:
             conn.close()
+
         return redirect(url_for("admin.manage_activity"))
 
-    # GET Request
+    # ---------- GET ----------
     try:
         admins = get_admin_name(cursor)
-        cursor.execute("SELECT * FROM activities ORDER BY created_at DESC")
+        
+        # ADDED: Fetch categories for dropdown
+        cursor.execute("SELECT id, name FROM categories ORDER BY name")
+        categories = [dict(row) for row in cursor.fetchall()]
+        
+        cursor.execute("SELECT * FROM activities ORDER BY created_at")
         activities_list = [dict(row) for row in cursor.fetchall()]
 
-        # Adding a UI display ID (sequential number)
         for i, item in enumerate(activities_list, start=1):
             item["ui_id"] = i
 
         return render_template(
-            "admin/manage_activities.html", activities=activities_list, admins=admins
+            "admin/manage_activities.html",
+            activities=activities_list,
+            categories=categories,  # ADDED: Pass categories to template
+            admins=admins,
         )
     finally:
         conn.close()
 
 
 # ===============================
-# Reports
+# Reports (unchanged)
 # ===============================
 @admin_bp.route("/export_users_report")
 @login_required

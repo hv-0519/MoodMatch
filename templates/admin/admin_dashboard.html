@@ -10,6 +10,11 @@
 
 <div class="admin-dashboard-wrapper with-static-sidebar">
   <div class="admin-header">
+    <div class="decorative-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
     <div class="admin-header-content">
       <div class="admin-title-section">
         <h1>Admin Dashboard</h1>
@@ -95,81 +100,84 @@
 
       <!-- REPLACED: Recent Activity with Generate Reports -->
       <div class="admin-activity-card">
-    <div class="admin-card-header" style="padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-        <div>
+        <div class="admin-card-header"
+          style="padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+          <div>
             <h2 class="admin-card-title" style="margin:0; font-size: 18px;">Generate Reports</h2>
             <p style="font-size: 12px; color: #5b6471; margin: 0; font-weight:bolder">Export platform data to CSV</p>
+          </div>
         </div>
-    </div>
-    
-    <div class="admin-reports-list">
-        
-        <div class="report-card">
+
+        <div class="admin-reports-list">
+
+          <div class="report-card">
             <div style="display: flex; align-items: center; min-width: 0;">
-                <div class="report-icon">👥</div>
-                <div class="report-info">
-                    <div class="report-title">Users Report</div>
-                    <p class="report-description">Full registration details</p>
-                </div>
+              <div class="report-icon">👥</div>
+              <div class="report-info">
+                <div class="report-title">Users Report</div>
+                <p class="report-description">Full registration details</p>
+              </div>
             </div>
             <a href="{{ url_for('admin.export_users_report') }}" class="report-button">📥 Download</a>
-        </div>
+          </div>
 
-        <div class="report-card">
+          <div class="report-card">
             <div style="display: flex; align-items: center; min-width: 0;">
-                <div class="report-icon">🎯</div>
-                <div class="report-info">
-                    <div class="report-title">Activities Report</div>
-                    <p class="report-description">Types and priorities</p>
-                </div>
+              <div class="report-icon">🎯</div>
+              <div class="report-info">
+                <div class="report-title">Activities Report</div>
+                <p class="report-description">Types and priorities</p>
+              </div>
             </div>
             <a href="{{ url_for('admin.export_activities_report') }}" class="report-button">📥 Download</a>
-        </div>
+          </div>
 
-        <div class="report-card">
+          <div class="report-card">
             <div style="display: flex; align-items: center; min-width: 0;">
-                <div class="report-icon">💡</div>
-                <div class="report-info">
-                    <div class="report-title">Interests Report</div>
-                    <p class="report-description">User preference mappings</p>
-                </div>
+              <div class="report-icon">💡</div>
+              <div class="report-info">
+                <div class="report-title">Interests Report</div>
+                <p class="report-description">User preference mappings</p>
+              </div>
             </div>
             <a href="{{ url_for('admin.export_user_interests_report') }}" class="report-button">📥 Download</a>
-        </div>
+          </div>
 
-        <div class="report-card">
+          <div class="report-card">
             <div style="display: flex; align-items: center; min-width: 0;">
-                <div class="report-icon">😊</div>
-                <div class="report-info">
-                    <div class="report-title">Moods Report</div>
-                    <p class="report-description">Mood activity associations</p>
-                </div>
+              <div class="report-icon">😊</div>
+              <div class="report-info">
+                <div class="report-title">Moods Report</div>
+                <p class="report-description">Mood activity associations</p>
+              </div>
             </div>
             <a href="{{ url_for('admin.export_moods_report') }}" class="report-button">📥 Download</a>
-        </div>
+          </div>
 
-        <div class="report-card" style="border: 1px dashed #10b981; background: #f0fdf4;">
+          <div class="report-card" style="border: 1px dashed #10b981; background: #f0fdf4;">
             <div style="display: flex; align-items: center; min-width: 0;">
-                <div class="report-icon" style="background:white; border-color: #10b981;">📊</div>
-                <div class="report-info">
-                    <div class="report-title">Platform Summary</div>
-                    <p class="report-description">Key platform metrics</p>
-                </div>
+              <div class="report-icon" style="background:white; border-color: #10b981;">📊</div>
+              <div class="report-info">
+                <div class="report-title">Platform Summary</div>
+                <p class="report-description">Key platform metrics</p>
+              </div>
             </div>
             <a href="{{ url_for('admin.export_summary_report') }}" class="report-button">📥 Download</a>
-        </div>
+          </div>
 
-    </div>
-</div>
+        </div>
+      </div>
 
       <div class="admin-table-card">
         <div class="admin-table-header">
           <h2 class="admin-card-title">Recent Users</h2>
+
           <div class="admin-search-box">
             <span class="admin-search-icon">🔍</span>
-            <input type="text" class="admin-search-input" placeholder="Search users..." />
+            <input type="text" class="admin-search-input" id="activitySearch" placeholder="Search users..." />
           </div>
         </div>
+
         {% if users %}
         <table class="admin-table">
           <thead>
@@ -184,9 +192,10 @@
             {% for user in users %}
             <tr>
               <td>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <div class="admin-activity-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">
-                    {{ user.username[:2]|upper }}
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div class="admin-activity-avatar" style="width:32px; height:32px; font-size:.75rem;">
+                    <img src="{{ url_for('static', filename='uploads/' ~ user['profile_picture']) }}"
+                      alt="{{ user['first_name'] or user['username'] or '👤' }}">
                   </div>
                   <strong>{{ user.username }}</strong>
                 </div>
@@ -194,94 +203,180 @@
               <td>{{ user.email }}</td>
               <td>{{ user.created_at[:10] }}</td>
               <td>
-                <div class="admin-table-actions">
-                  <button class="admin-icon-btn" onclick="viewUser({{ user.id }})">👁️</button>
-                </div>
+                <button data-user='{{ user | tojson | safe }}' onclick="viewUser(this)">
+                  👁️
+                </button>
               </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
         {% else %}
-        <p style="text-align:center; color:#64748b; padding:2rem;">No users found.</p>
+        <p style="text-align:center; color:#64748b; padding:2rem;">
+          No users found.
+        </p>
         {% endif %}
       </div>
-      
+
+      <!-- ================= MODAL ================= -->
+      <div id="viewUserModal" class="admin-modal-overlay" style="display:none;">
+        <div class="admin-modal-content premium-modal">
+
+          <div class="modal-header">
+            <h2>User Profile</h2>
+            <button class="close-btn" onclick="closeViewModal()">❌</button>
+          </div>
+
+          <div class="modal-body" style="position:relative; overflow:hidden;">
+            {% set colors = ['decorative-shapes-us','decorative-shapes-ac','decorative-shapes'] %}
+            <div class="{{ colors | random }}" style="position:absolute; inset:0; z-index:0; pointer-events:none;">
+              <div class="shape shape-1"></div>
+              <div class="shape shape-2"></div>
+              <div class="shape shape-3"></div>
+            </div>
+
+            <div style="position:relative; z-index:1;">
+              <div class="profile-header">
+                <div class="avatar-wrapper">
+                  <div id="detailAvatar" class="avatar"></div>
+                </div>
+                <div class="user-meta">
+                  <h3 id="detailFullName" style="color: white;"></h3>
+                  <p id="detailUsername" style="color: white;"></p>
+                </div>
+              </div>
+
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <label>Email</label>
+                  <p id="detailEmail"></p>
+                </div>
+                <div class="detail-item" style="display: none;">
+                  <label>Phone</label>
+                  <p id="detailPhone"></p>
+                </div>
+                <div class="detail-item" style="display: none;">
+                  <label>Gender / DOB</label>
+                  <p id="detailGenderDOB"></p>
+                </div>
+                <div class="detail-item full-width" style="display: none;">
+                  <label>Location / Address</label>
+                  <p id="detailAddress"></p>
+                </div>
+              </div>
+
+              <div class="interests-section full-width" style="display: none;">
+                <label>Selected Interests</label>
+                <div id="detailInterests"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn-view" onclick="closeViewModal()">Close</button>
+          </div>
+
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-    </div>
-  </div>
-</div>
+      <script>
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function () {
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          // 1. Initialize Registration Chart
+          const ctx = document.getElementById('registrationChart').getContext('2d');
+          const chartLabels = {{ chart_labels | tojson | safe
+        }};
+        const chartData = {{ chart_data | tojson | safe }};
 
-<script>
-  // Wait for the DOM to be fully loaded
-  document.addEventListener('DOMContentLoaded', function () {
-
-    // 1. Initialize Registration Chart
-    const ctx = document.getElementById('registrationChart').getContext('2d');
-    const chartLabels = {{ chart_labels | tojson | safe
-  }};
-  const chartData = {{ chart_data | tojson | safe }};
-
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: chartLabels,
-      datasets: [{
-        label: 'New Users',
-        data: chartData,
-        borderColor: '#8ec5fc',
-        backgroundColor: 'rgba(142, 197, 252, 0.2)',
-        borderWidth: 3,
-        tension: 0.4,
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, ticks: { stepSize: 1 } },
-        x: { grid: { display: false } }
-      }
-    }
-  });
-
-  // 2. Initialize Filter and Search Logic
-  initializePageScripts();
-  });
-
-  // User Action Functions
-  function viewUser(userId) {
-    console.log('Viewing user:', userId);
-    // Add your modal logic here
-  }
-
-  function initializePageScripts() {
-    // Filter Buttons
-    const filterBtns = document.querySelectorAll(".admin-filter-btn");
-    filterBtns.forEach((btn) => {
-      btn.addEventListener("click", function () {
-        filterBtns.forEach((b) => b.classList.remove("active"));
-        this.classList.add("active");
-      });
-    });
-
-    // Search Logic
-    const searchInput = document.querySelector(".admin-search-input");
-    if (searchInput) {
-      searchInput.addEventListener("input", function (e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const tableRows = document.querySelectorAll(".admin-table tbody tr");
-        tableRows.forEach((row) => {
-          row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? "" : "none";
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: chartLabels,
+            datasets: [{
+              label: 'New Users',
+              data: chartData,
+              borderColor: '#8ec5fc',
+              backgroundColor: 'rgba(142, 197, 252, 0.2)',
+              borderWidth: 3,
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, ticks: { stepSize: 1 } },
+              x: { grid: { display: false } }
+            }
+          }
         });
-      });
-    }
-  }
-</script>
 
-{% endblock %}
+        // 2. Initialize Filter and Search Logic
+        initializePageScripts();
+  });
+
+        // User Action Functions
+        /* ===== VIEW USER ===== */
+        function viewUser(btn) {
+          const user = JSON.parse(btn.dataset.user);
+
+          document.getElementById("detailFullName").innerText =
+            `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username;
+
+          document.getElementById("detailUsername").innerText = `@${user.username}`;
+          document.getElementById("detailEmail").innerText = user.email || "—";
+          document.getElementById("detailPhone").innerText = user.phone_number || "—";
+          document.getElementById("detailGenderDOB").innerText =
+            `${user.gender || "—"} | ${user.date_of_birth || "—"}`;
+
+          document.getElementById("detailAddress").innerText =
+            [user.street_address, user.city, user.state, user.country]
+              .filter(Boolean).join(", ") || "No address";
+
+          const interests = document.getElementById("detailInterests");
+          interests.innerHTML = "";
+
+          if (user.user_interests) {
+            user.user_interests.split(",").forEach(i => {
+              const span = document.createElement("span");
+              span.className = "interest-pill";
+              span.innerText = i.trim();
+              interests.appendChild(span);
+            });
+          } else {
+            interests.innerHTML = "<em>No interests</em>";
+          }
+
+          const avatar = document.getElementById("detailAvatar");
+          avatar.innerHTML = user.profile_picture
+            ? `<img src="/static/uploads/${user.profile_picture}">`
+            : `<div class="default-avatar-lg">${user.username[0].toUpperCase()}</div>`;
+
+          document.getElementById("viewUserModal").style.display = "flex";
+        }
+
+        function closeViewModal() {
+          document.getElementById("viewUserModal").style.display = "none";
+        }
+
+        /* ===== TABLE SEARCH ===== */
+        const searchInput = document.getElementById("activitySearch");
+        if (searchInput) {
+          searchInput.addEventListener("input", e => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll(".admin-table tbody tr").forEach(row => {
+              row.style.display = row.textContent.toLowerCase().includes(term)
+                ? ""
+                : "none";
+            });
+          });
+        }
+      </script>
+
+      {% endblock %}

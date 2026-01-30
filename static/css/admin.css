@@ -518,7 +518,7 @@ body {
 .admin-title-section h1 {
   font-size: var(--font-size-4xl);
   font-weight: 800;
-  color: black;
+  color: white;
   margin: 0 0 12px 0;
   letter-spacing: -0.02em;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -526,7 +526,7 @@ body {
 
 .admin-subtitle {
   font-size: 1.2rem;
-  color: black;
+  color: white;
   margin: 0;
   font-weight: 400;
   line-height: 1.6;
@@ -1059,13 +1059,68 @@ body {
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+.decorative-shapes {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: linear-gradient(120deg, #1e40af 0%, #6d28d9 50%, #4c1d95 100%);
+}
+
+.decorative-shapes-ac {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: linear-gradient(120deg, #1f2937 0%, #7f1d1d 50%, #4c1d95 100%);
+}
+
+.decorative-shapes-us {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: linear-gradient(120deg, #0f766e 0%, #1e293b 50%, #111827 100%);
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.shape-1 {
+  width: 400px;
+  height: 400px;
+  top: -100px;
+  right: -100px;
+  animation: float 5s ease-in-out infinite;
+}
+
+.shape-2 {
+  width: 300px;
+  height: 300px;
+  bottom: -50px;
+  left: -50px;
+  animation: float 15s ease-in-out infinite reverse;
+}
+
+.shape-3 {
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: float 18s ease-in-out infinite;
 }
 
 .user-card::before {
@@ -1075,18 +1130,15 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(190, 18, 60, 0.1) 0%, rgba(120, 53, 15, 0.05) 100%);
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
 }
 
-.user-card:hover {
+.user-card:hover { 
   transform: translateY(-12px);
-  /* box-shadow: 0 20px 40px rgba(190, 18, 60, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6); */
-  border-color: rgba(190, 18, 60, 0.2);
   background: linear-gradient(135deg, #ffffff 0%, #fef5f7 100%);
-}
+ }
 
 .user-card:hover::before {
   opacity: 1;
@@ -1098,8 +1150,6 @@ body {
   margin-bottom: 16px;
   border-radius: 50%;
   overflow: hidden;
-  
-  box-shadow: 0 8px 24px rgba(190, 18, 60, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1117,7 +1167,7 @@ body {
 .user-name {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #ffffff;
   margin-bottom: 6px;
   display: block;
   position: relative;
@@ -1126,7 +1176,7 @@ body {
 
 .user-username {
   font-size: 0.9rem;
-  color: #64748b;
+  color: #ffffff;
   margin-bottom: 16px;
   display: block;
   position: relative;
@@ -1149,7 +1199,7 @@ body {
   background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
   color: black;
   font-size: x-large;
-  font-weight: 300;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -1827,19 +1877,17 @@ body.modal-open {
   width: 36px;
   height: 36px;
   border: none;
-  background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
   font-size: 1.6rem;
   font-weight: 600;
-  border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .close-btn:hover {
-  background: #ef4444;
-  color: white;
-  transform: rotate(90deg);
+  background: #f1f5f9;
+  color: #f1f5f9;
+  transform: rotate(360deg);
 }
 
 .profile-header {
@@ -1882,13 +1930,13 @@ body.modal-open {
   margin: 0 0 4px;
   font-size: 1.6rem;
   font-weight: 700;
-  color: #0f172a;
+  /* color: #0f172a; */
 }
 
 .user-handle {
   margin: 0;
   font-size: 0.95rem;
-  color: #64748b;
+  color: white;
 }
 
 .modal-body {
@@ -1910,7 +1958,7 @@ body.modal-open {
 .detail-item label {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #64748b;
+  color: white;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -1918,7 +1966,7 @@ body.modal-open {
 .detail-item p {
   margin: 0;
   font-size: 1rem;
-  color: #1e293b;
+  color: white;
   font-weight: 500;
 }
 
@@ -1942,7 +1990,7 @@ body.modal-open {
 /* Example tag style — populate dynamically */
 .interests-tags span {
   background: rgba(99, 102, 241, 0.1);
-  color: #4f46e5;
+  color: white;
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 0.9rem;
@@ -2241,3 +2289,150 @@ body.modal-open {
 
   /* Hide description on mobile to save space */
 }
+
+.modal {
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal.active {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
+
+    .modal.active .modal-content {
+        transform: scale(1);
+    }
+
+    .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 20px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+    }
+
+    .btn-cancel,
+    .btn-submit {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-cancel:hover {
+        background-color: #e5e7eb;
+    }
+
+    .btn-submit {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        background-color: #2563eb;
+    }
+
+    .form-group p {
+        margin: 0;
+        padding: 10px 0;
+        font-size: 14px;
+        color: #111827;
+    }

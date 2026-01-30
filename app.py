@@ -42,7 +42,7 @@ def load_user(user_id):
         return User(id=0, username="admin", first_name="Admin")
 
     # Normal users from 'users' table
-    conn = sqlite3.connect("models/mood.db")
+    conn = sqlite3.connect("models/instance/moodmatch.db")
     cursor = conn.cursor()
 
     # Query with correct column order

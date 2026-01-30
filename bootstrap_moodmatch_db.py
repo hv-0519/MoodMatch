@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_PATH = "models/mood.db"
+DB_PATH = "models/instance/moodmatch.db"
 
 
 def main():

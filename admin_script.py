@@ -1,7 +1,7 @@
 import sqlite3
 from werkzeug.security import generate_password_hash
 
-DB_PATH = "models/mood.db"
+DB_PATH = "models/instance/moodmatch.db"
 
 username = "admin"          # used as email
 password = "admin123"
