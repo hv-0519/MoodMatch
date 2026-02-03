@@ -1,0 +1,224 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block sidebar_class %}static-expanded{% endblock %}
+
+{% block admin_styles %}
+<style>
+    .admin-dashboard-wrapper.with-static-sidebar {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        min-height: 100vh;
+        background: transparent;
+    }
+
+    .decorative-bg {
+        position: fixed;
+        inset: 0;
+        left: 280px;
+        z-index: 0;
+        background: radial-gradient(at 0% 0%, #fed7aa 0%, transparent 50%),
+            radial-gradient(at 100% 0%, #fecdd3 0%, transparent 50%),
+            radial-gradient(at 100% 100%, #fbcfe8 0%, transparent 50%),
+            radial-gradient(at 0% 100%, #e0e7ff 0%, transparent 50%),
+            #f8fafc;
+        pointer-events: none;
+    }
+
+    .shape {
+        position: absolute;
+        user-select: none;
+        pointer-events: none;
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+    }
+
+    .shape-1::before { content: "👤"; font-size: 140px; }
+    .shape-2::before { content: "🔐"; font-size: 120px; }
+    .shape-3::before { content: "⚙️"; font-size: 100px; }
+    .shape-4::before { content: "📧"; font-size: 110px; }
+
+    .shape-1 { top: 10%; left: 10%; opacity: 0.08; animation: roam1 35s linear infinite; }
+    .shape-2 { top: 70%; left: 75%; opacity: 0.1; animation: roam2 40s linear infinite; }
+    .shape-3 { top: 40%; left: 20%; opacity: 0.07; animation: roam3 30s ease-in-out infinite; }
+    .shape-4 { top: 15%; right: 10%; opacity: 0.09; animation: roam1 45s linear infinite reverse; }
+
+    @keyframes roam1 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(30vw, 20vh) rotate(180deg); }
+    }
+
+    @keyframes roam2 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(-30vw, -30vh) rotate(-180deg); }
+    }
+
+    @keyframes roam3 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(20vw, 30vh) scale(1.15); }
+    }
+
+    .admin-main-content {
+        position: relative;
+        z-index: 2;
+        padding: 40px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .profile-card {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 28px;
+        padding: 40px;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+        margin-bottom: 25px;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 35px;
+    }
+
+    .avatar-wrapper {
+        position: relative;
+    }
+
+    .admin-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #be123c, #fb7185);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        color: white;
+        box-shadow: 0 15px 30px -5px rgba(190, 18, 60, 0.3);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .info-item {
+        background: rgba(241, 245, 249, 0.5);
+        padding: 18px;
+        border-radius: 16px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #be123c, #fb7185);
+        color: white;
+        padding: 12px 28px;
+        border-radius: 14px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 8px 15px -3px rgba(190, 18, 60, 0.3);
+    }
+
+    .btn-edit:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 20px -5px rgba(190, 18, 60, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .admin-dashboard-wrapper.with-static-sidebar {
+            margin-left: 0;
+            width: 100%;
+        }
+        .decorative-bg { left: 0; }
+        .info-grid { grid-template-columns: 1fr; }
+        .profile-header { flex-direction: column; text-align: center; }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="admin-dashboard-wrapper with-static-sidebar">
+    <div class="decorative-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+
+    <div class="admin-main-content">
+        <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin-bottom: 30px;">Admin Profile</h1>
+
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="avatar-wrapper">
+                    <div class="admin-avatar">👨‍💼</div>
+                </div>
+                <div style="flex: 1;">
+                    <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0;">{{ admin.username|capitalize if admin else 'Admin' }}</h2>
+                    <p style="color: #64748b; margin: 5px 0;">System Administrator</p>
+                    <span style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;">Active</span>
+                </div>
+                <button class="btn-edit" onclick="window.location.href='{{ url_for('admin.admin_settings') }}'">✏️ Edit Profile</button>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">👤 Username</div>
+                    <div class="info-value">{{ admin.username if admin else 'admin' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">📧 Email</div>
+                    <div class="info-value">{{ admin.email if admin and admin.email else 'admin@moodmatch.com' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">🔑 Role</div>
+                    <div class="info-value">Super Administrator</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">📅 Last Login</div>
+                    <div class="info-value">{{ admin.last_login if admin and admin.last_login else 'Just now' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-card">
+            <h3 style="font-size: 1.4rem; font-weight: 800; color: #1e293b; margin-bottom: 20px;">📊 Activity Summary</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Total Users</div>
+                    <div class="info-value">{{ total_users or 0 }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Total Activities</div>
+                    <div class="info-value">{{ total_activities or 0 }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Total Categories</div>
+                    <div class="info-value">{{ total_categories or 0 }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Total Interactions</div>
+                    <div class="info-value">{{ total_history or 0 }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

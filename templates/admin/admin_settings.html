@@ -1,0 +1,250 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block sidebar_class %}static-expanded{% endblock %}
+
+{% block admin_styles %}
+<style>
+    .admin-dashboard-wrapper.with-static-sidebar {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        min-height: 100vh;
+        background: transparent;
+    }
+
+    .decorative-bg {
+        position: fixed;
+        inset: 0;
+        left: 280px;
+        z-index: 0;
+        background: radial-gradient(at 0% 0%, #fed7aa 0%, transparent 50%),
+            radial-gradient(at 100% 0%, #fecdd3 0%, transparent 50%),
+            radial-gradient(at 100% 100%, #fbcfe8 0%, transparent 50%),
+            radial-gradient(at 0% 100%, #e0e7ff 0%, transparent 50%),
+            #f8fafc;
+        pointer-events: none;
+    }
+
+    .shape {
+        position: absolute;
+        user-select: none;
+        pointer-events: none;
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+    }
+
+    .shape-1::before { content: "⚙️"; font-size: 150px; }
+    .shape-2::before { content: "🔐"; font-size: 130px; }
+    .shape-3::before { content: "🛡️"; font-size: 110px; }
+
+    .shape-1 { top: 8%; left: 8%; opacity: 0.09; animation: roam1 38s linear infinite; }
+    .shape-2 { top: 65%; left: 70%; opacity: 0.08; animation: roam2 42s linear infinite; }
+    .shape-3 { top: 35%; left: 15%; opacity: 0.07; animation: roam3 33s ease-in-out infinite; }
+
+    @keyframes roam1 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(25vw, 18vh) rotate(180deg); }
+    }
+
+    @keyframes roam2 {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(-28vw, -25vh) rotate(-180deg); }
+    }
+
+    @keyframes roam3 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(18vw, 28vh) scale(1.12); }
+    }
+
+    .admin-main-content {
+        position: relative;
+        z-index: 2;
+        padding: 40px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .settings-card {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 28px;
+        padding: 35px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid rgba(226, 232, 240, 0.8);
+        border-radius: 14px;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #be123c;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.1);
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #be123c, #fb7185);
+        color: white;
+        padding: 14px 32px;
+        border-radius: 14px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 8px 15px -3px rgba(190, 18, 60, 0.3);
+        width: 100%;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 25px -5px rgba(190, 18, 60, 0.4);
+    }
+
+    .alert {
+        padding: 14px 18px;
+        border-radius: 14px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .alert-success {
+        background: rgba(220, 252, 231, 0.9);
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+
+    .alert-error {
+        background: rgba(254, 226, 226, 0.9);
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+
+    @media (max-width: 768px) {
+        .admin-dashboard-wrapper.with-static-sidebar {
+            margin-left: 0;
+            width: 100%;
+        }
+        .decorative-bg { left: 0; }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="admin-dashboard-wrapper with-static-sidebar">
+    <div class="decorative-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="admin-main-content">
+        <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin-bottom: 30px;">⚙️ Settings</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ '✅' if category == 'success' else '❌' }} {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Profile Settings -->
+        <div class="settings-card">
+            <h3 class="card-title">👤 Profile Information</h3>
+            <form method="POST" action="{{ url_for('admin.admin_settings') }}">
+                <input type="hidden" name="action" value="update_profile">
+                
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" value="{{ admin.username if admin else 'admin' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" value="{{ admin.email if admin and admin.email else '' }}" placeholder="admin@moodmatch.com">
+                </div>
+
+                <button type="submit" class="btn-save">💾 Save Changes</button>
+            </form>
+        </div>
+
+        <!-- Password Settings -->
+        <div class="settings-card">
+            <h3 class="card-title">🔐 Change Password</h3>
+            <form method="POST" action="{{ url_for('admin.admin_settings') }}">
+                <input type="hidden" name="action" value="change_password">
+                
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" name="current_password" required>
+                </div>
+
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" minlength="6" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password" minlength="6" required>
+                </div>
+
+                <button type="submit" class="btn-save">🔒 Update Password</button>
+            </form>
+        </div>
+
+        <!-- System Info -->
+        <div class="settings-card">
+            <h3 class="card-title">ℹ️ System Information</h3>
+            <div style="display: grid; gap: 15px;">
+                <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(241, 245, 249, 0.6); border-radius: 12px;">
+                    <span style="color: #64748b; font-weight: 600;">Application Version</span>
+                    <span style="color: #0f172a; font-weight: 700;">MoodMatch v1.0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(241, 245, 249, 0.6); border-radius: 12px;">
+                    <span style="color: #64748b; font-weight: 600;">Database Status</span>
+                    <span style="color: #16a34a; font-weight: 700;">● Connected</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(241, 245, 249, 0.6); border-radius: 12px;">
+                    <span style="color: #64748b; font-weight: 600;">Last Backup</span>
+                    <span style="color: #0f172a; font-weight: 700;">{{ last_backup if last_backup else 'Never' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

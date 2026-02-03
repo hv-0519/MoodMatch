@@ -1,0 +1,969 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block sidebar_class %}static-expanded{% endblock %}
+
+{% block admin_styles %}
+<style>
+    /* 1. LAYOUT FIX */
+    .admin-dashboard-wrapper.with-static-sidebar {
+        position: relative;
+        margin-left: 280px;
+        min-height: 100vh;
+        width: calc(100% - 280px);
+        background: transparent;
+    }
+
+    .decorative-bg {
+        position: fixed;
+        inset: 0;
+        left: 280px;
+        z-index: 0;
+        background: radial-gradient(at 0% 0%, #fed7aa 0%, transparent 50%),
+            radial-gradient(at 100% 0%, #fecdd3 0%, transparent 50%),
+            radial-gradient(at 100% 100%, #fbcfe8 0%, transparent 50%),
+            radial-gradient(at 0% 100%, #e0e7ff 0%, transparent 50%),
+            #f8fafc;
+        pointer-events: none;
+    }
+
+    /* 2. FLOATING EMOJIS - Analytics themed */
+    .shape {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        pointer-events: none;
+        z-index: 1;
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+    }
+
+    .shape-1::before {
+        content: "📊";
+        font-size: 180px;
+    }
+
+    .shape-2::before {
+        content: "📈";
+        font-size: 140px;
+    }
+
+    .shape-3::before {
+        content: "💹";
+        font-size: 100px;
+    }
+
+    .shape-4::before {
+        content: "🎯";
+        font-size: 120px;
+    }
+
+    .shape-5::before {
+        content: "📉";
+        font-size: 90px;
+    }
+
+    .shape-6::before {
+        content: "💡";
+        font-size: 110px;
+    }
+
+    .shape-1 {
+        top: -50px;
+        right: -20px;
+        opacity: 0.2;
+        animation: floatEmoji 8s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        bottom: 50px;
+        left: 20px;
+        opacity: 0.15;
+        animation: floatEmoji 12s ease-in-out infinite reverse;
+    }
+
+    .shape-3 {
+        top: 40%;
+        left: 15%;
+        opacity: 0.1;
+        animation: floatEmoji 10s ease-in-out infinite;
+    }
+
+    .shape-4 {
+        bottom: 10%;
+        right: 10%;
+        opacity: 0.15;
+        animation: floatEmoji 15s ease-in-out infinite;
+    }
+
+    .shape-5 {
+        top: 20%;
+        right: 25%;
+        opacity: 0.12;
+        animation: floatEmoji 9s ease-in-out infinite reverse;
+    }
+
+    .shape-6 {
+        bottom: 30%;
+        left: 8%;
+        opacity: 0.13;
+        animation: floatEmoji 11s ease-in-out infinite;
+    }
+
+    @keyframes floatEmoji {
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(-5deg) scale(1);
+        }
+
+        50% {
+            transform: translateY(-40px) rotate(10deg) scale(1.1);
+        }
+    }
+
+    /* 3. CONTENT AREA */
+    .admin-main-content {
+        position: relative;
+        z-index: 2;
+        padding: 40px;
+    }
+
+    /* 4. PREMIUM CARDS */
+    .premium-card {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 24px;
+        padding: 25px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        margin-bottom: 25px;
+    }
+
+    .premium-card:hover {
+        background: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* 5. SECTION HEADERS */
+    .section-header {
+        margin: 40px 0 25px 0;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #1e293b;
+        margin: 0 0 5px 0;
+    }
+
+    .section-subtitle {
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* 6. METRICS GRID */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .metric-card {
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .metric-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #be123c;
+    }
+
+    /* 7. CHARTS */
+    .chart-container {
+        background: rgba(248, 250, 252, 0.5);
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 15px;
+    }
+
+    canvas {
+        max-width: 100%;
+    }
+
+    /* 8. TABLE STYLES */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    .data-table th {
+        background: rgba(255, 255, 255, 0.5);
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        color: #1e293b;
+    }
+
+    .data-table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* 9. PROGRESS BARS */
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #be123c 0%, #f43f5e 100%);
+        transition: width 0.3s ease;
+    }
+
+    /* 10. RECENT ACTIVITY FEED */
+    .activity-feed {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        margin-bottom: 12px;
+        transition: 0.2s;
+    }
+
+    .activity-item:hover {
+        background: rgba(255, 255, 255, 0.5);
+        transform: translateX(5px);
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-text {
+        color: #1e293b;
+        font-weight: 500;
+        margin: 0 0 4px 0;
+    }
+
+    .activity-time {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    /* 11. BADGE STYLES */
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-positive {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-negative {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-neutral {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    /* 12. TWO COLUMN LAYOUT */
+    .two-col-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 25px;
+    }
+
+    @media (max-width: 768px) {
+        .admin-dashboard-wrapper.with-static-sidebar {
+            margin-left: 70px;
+            width: calc(100% - 70px);
+        }
+
+        .decorative-bg {
+            left: 70px;
+        }
+
+        .admin-main-content {
+            padding: 20px;
+        }
+
+        .two-col-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .admin-dashboard-wrapper.with-static-sidebar {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .decorative-bg {
+            left: 0;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .activities-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+            padding: 24px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="admin-dashboard-wrapper with-static-sidebar">
+    <div class="decorative-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+        <div class="shape shape-6"></div>
+    </div>
+
+    <div class="admin-main-content">
+        <!-- PAGE HEADER -->
+        <div style="margin-bottom: 40px;">
+            <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin: 0;">📊 Analytics Dashboard</h1>
+            <p style="color: #64748b; margin: 5px 0 0 0;">Comprehensive insights into user behavior, activities, and
+                engagement.</p>
+        </div>
+
+        <!-- ===================== -->
+        <!-- 1. ACTIVITY METRICS -->
+        <!-- ===================== -->
+        <center>
+            <div class="section-header">
+                <h2 class="section-title">🎯 Activity Metrics</h2>
+                <p class="section-subtitle">Performance and usage statistics for all activities</p>
+            </div>
+        </center>
+
+        <div class="two-col-grid">
+            <!-- Most Recommended Activities -->
+            <div class="premium-card">
+                <h3 class="card-title">🔥 Most Recommended</h3>
+                {% if most_recommended %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Times Recommended</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in most_recommended[:5] %}
+                        <tr>
+                            <td><strong>{{ activity.name }}</strong></td>
+                            <td>{{ activity.recommendation_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="text-align: center; color: #64748b; padding: 40px;">No data yet</p>
+                {% endif %}
+            </div>
+
+            <!-- Most Favorited Activities -->
+            <div class="premium-card">
+                <h3 class="card-title">⭐ Most Favorited</h3>
+                {% if most_favorited %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Favorites</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in most_favorited[:5] %}
+                        <tr>
+                            <td><strong>{{ activity.name }}</strong></td>
+                            <td>{{ activity.favorite_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="text-align: center; color: #64748b; padding: 40px;">No favorites yet</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Activity Completion Rates -->
+        <div class="premium-card">
+            <h3 class="card-title">✅ Activity Completion Rates</h3>
+            {% if completion_rates %}
+            {% for activity in completion_rates[:8] %}
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-weight: 600; color: #1e293b;">{{ activity.name }}</span>
+                    <span style="color: #be123c; font-weight: 700;">{{ activity.completion_rate }}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ activity.completion_rate }}%;"></div>
+                </div>
+                <small style="color: #64748b;">{{ activity.completed }} completed out of {{ activity.total }}
+                    tries</small>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="text-align: center; color: #64748b; padding: 40px;">No completion data yet</p>
+            {% endif %}
+        </div>
+
+        <!-- Activities by Category Usage -->
+        <div class="premium-card">
+            <h3 class="card-title">📊 Category Usage Distribution</h3>
+            <div class="chart-container">
+                <canvas id="categoryUsageChart" height="80"></canvas>
+            </div>
+        </div>
+
+        <!-- Least Used Activities -->
+        <div class="premium-card">
+            <h3 class="card-title">⚠️ Least Used Activities (To Improve)</h3>
+            {% if least_used %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Activity</th>
+                        <th>Usage Count</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in least_used[:8] %}
+                    <tr>
+                        <td><strong>{{ activity.name }}</strong></td>
+                        <td>{{ activity.usage_count }}</td>
+                        <td>
+                            {% if activity.usage_count == 0 %}
+                            <span class="badge badge-negative">Never Used</span>
+                            {% else %}
+                            <span class="badge badge-neutral">Low Usage</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="text-align: center; color: #64748b; padding: 40px;">All activities are being used!</p>
+            {% endif %}
+        </div>
+
+        <!-- ===================== -->
+        <!-- 2. MOOD ANALYTICS -->
+        <!-- ===================== -->
+        <center>
+            <div class="section-header">
+                <h2 class="section-title">😊 Mood Analytics</h2>
+                <p class="section-subtitle">User sentiment analysis and mood tracking</p>
+            </div>
+        </center>
+
+        <!-- Mood Distribution + Trends -->
+        <div class="two-col-grid">
+            <!-- Mood Distribution Pie Chart -->
+            <div class="premium-card">
+                <h3 class="card-title">🎭 Mood Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="moodDistChart"></canvas>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center;">
+                    <div>
+                        <span class="badge badge-positive">Positive: {{ mood_distribution.positive }}</span>
+                    </div>
+                    <div>
+                        <span class="badge badge-neutral">Neutral: {{ mood_distribution.neutral }}</span>
+                    </div>
+                    <div>
+                        <span class="badge badge-negative">Negative: {{ mood_distribution.negative }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Most Common Mood Inputs -->
+            <div class="premium-card">
+                <h3 class="card-title">💭 Common Mood Inputs</h3>
+                {% if common_moods %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mood Input</th>
+                            <th>Frequency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mood in common_moods[:8] %}
+                        <tr>
+                            <td><strong>{{ mood.mood_input }}</strong></td>
+                            <td>{{ mood.frequency }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="text-align: center; color: #64748b; padding: 40px;">No mood data yet</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Mood Trends Over Time -->
+        <div class="premium-card">
+            <h3 class="card-title">📈 Mood Trends (Last 7 Days)</h3>
+            <div class="chart-container">
+                <canvas id="moodTrendsChart" height="80"></canvas>
+            </div>
+        </div>
+
+        <!-- Mood-Activity-Feedback Correlation -->
+        <div class="premium-card">
+            <h3 class="card-title">🔗 Mood → Activity → Feedback Correlation</h3>
+            <p style="color: #64748b; margin-bottom: 15px;">Which activities work best for different moods</p>
+            {% if mood_activity_correlation %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mood</th>
+                        <th>Activity</th>
+                        <th>Avg Rating</th>
+                        <th>Try Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in mood_activity_correlation[:10] %}
+                    <tr>
+                        <td>
+                            {% if item.mood == 'Positive' %}
+                            <span class="badge badge-positive">{{ item.mood }}</span>
+                            {% elif item.mood == 'Negative' %}
+                            <span class="badge badge-negative">{{ item.mood }}</span>
+                            {% else %}
+                            <span class="badge badge-neutral">{{ item.mood }}</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ item.activity }}</strong></td>
+                        <td>⭐ {{ item.avg_rating|round(1) }}/5</td>
+                        <td>{{ item.try_count }} tries</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="text-align: center; color: #64748b; padding: 40px;">Not enough data yet</p>
+            {% endif %}
+        </div>
+
+        <!-- ===================== -->
+        <!-- 3. ENGAGEMENT METRICS -->
+        <!-- ===================== -->
+        <center><div class="section-header">
+            <h2 class="section-title">💪 Engagement Metrics</h2>
+            <p class="section-subtitle">User interaction and platform usage statistics</p>
+        </div></center>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Avg Activities Per User</div>
+                <div class="metric-value">{{ avg_activities_per_user }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Activity Tries</div>
+                <div class="metric-value">{{ total_history_records }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Average Feedback Rating</div>
+                <div class="metric-value">{{ avg_feedback_rating }} ⭐</div>
+            </div>
+        </div>
+
+        <!-- Feedback Ratings Distribution -->
+        <div class="premium-card">
+            <h3 class="card-title">⭐ Feedback Ratings Distribution</h3>
+            <div class="chart-container">
+                <canvas id="feedbackChart" height="80"></canvas>
+            </div>
+        </div>
+
+        <!-- ===================== -->
+        <!-- 4. INTEREST ANALYTICS -->
+        <!-- ===================== -->
+        <center><div class="section-header">
+            <h2 class="section-title">💡 Interest Analytics</h2>
+            <p class="section-subtitle">User interests and their correlation with activities</p>
+        </div></center>
+
+        <div class="two-col-grid">
+            <!-- Top 10 Interests -->
+            <div class="premium-card">
+                <h3 class="card-title">🔝 Top 10 Interests</h3>
+                {% if top_interests %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Interest</th>
+                            <th>Users</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interest in top_interests %}
+                        <tr>
+                            <td><strong>{{ interest.interest_name|capitalize }}</strong></td>
+                            <td>{{ interest.user_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="text-align: center; color: #64748b; padding: 40px;">No interest data</p>
+                {% endif %}
+            </div>
+
+            <!-- Interest Category Distribution -->
+            <div class="premium-card">
+                <h3 class="card-title">📊 Interest Categories</h3>
+                {% if interest_category_dist %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Users</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in interest_category_dist %}
+                        <tr>
+                            <td><strong>{{ cat.category_name }}</strong></td>
+                            <td>{{ cat.user_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="text-align: center; color: #64748b; padding: 40px;">No data</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Interests vs Activities Correlation -->
+        <div class="premium-card">
+            <h3 class="card-title">🔗 Interests → Activity Usage Correlation</h3>
+            <p style="color: #64748b; margin-bottom: 15px;">Which interests lead to more platform engagement</p>
+            {% if interest_activity_correlation %}
+            <div class="chart-container">
+                <canvas id="interestActivityChart" height="80"></canvas>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: #64748b; padding: 40px;">Not enough data</p>
+            {% endif %}
+        </div>
+
+        <!-- ===================== -->
+        <!-- 5. RECENT ACTIVITY FEED -->
+        <!-- ===================== -->
+        <center><div class="section-header">
+            <h2 class="section-title">🔔 Recent Activity</h2>
+            <p class="section-subtitle">Live feed of user actions and system events</p>
+        </div></center>
+
+        <div class="premium-card">
+            <div class="activity-feed">
+                {% if recent_activities %}
+                {% for activity in recent_activities %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        {% if activity.activity_type == 'user_registered' %}
+                        👤
+                        {% elif activity.activity_type == 'activity_added' %}
+                        🎯
+                        {% elif activity.activity_type == 'activity_tried' %}
+                        ✅
+                        {% endif %}
+                    </div>
+                    <div class="activity-content">
+                        <p class="activity-text">
+                            {% if activity.activity_type == 'user_registered' %}
+                            <strong>{{ activity.user_name }}</strong> registered as <strong>@{{ activity.username
+                                }}</strong>
+                            {% elif activity.activity_type == 'activity_added' %}
+                            New activity <strong>{{ activity.activity_name }}</strong> was added
+                            {% elif activity.activity_type == 'activity_tried' %}
+                            <strong>{{ activity.user_name }}</strong> tried <strong>{{ activity.activity_name
+                                }}</strong>
+                            {% endif %}
+                        </p>
+                        <small class="activity-time">{{ activity.timestamp }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p style="text-align: center; color: #64748b; padding: 40px;">No recent activity</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // =====================================
+        // 1. CATEGORY USAGE CHART (Bar)
+        // =====================================
+        const categoryCtx = document.getElementById('categoryUsageChart').getContext('2d');
+        new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ category_labels | tojson | safe }},
+        datasets: [{
+            label: 'Usage Count',
+            data: {{ category_counts | tojson | safe }},
+        backgroundColor: 'rgba(190, 18, 60, 0.7)',
+        borderColor: '#be123c',
+        borderWidth: 2,
+        borderRadius: 8
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+    });
+
+    // =====================================
+    // 2. MOOD DISTRIBUTION CHART (Doughnut)
+    // =====================================
+    const moodDistCtx = document.getElementById('moodDistChart').getContext('2d');
+    new Chart(moodDistCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positive', 'Neutral', 'Negative'],
+            datasets: [{
+                data: [
+                    {{ mood_distribution.positive }},
+            {{ mood_distribution.neutral }},
+                    {{ mood_distribution.negative }}
+                ],
+        backgroundColor: ['#10b981', '#6366f1', '#ef4444'],
+        borderColor: '#ffffff',
+        borderWidth: 3
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: false }
+        },
+        cutout: '65%'
+    }
+    });
+
+    // =====================================
+    // 3. MOOD TRENDS CHART (Line)
+    // =====================================
+    const moodTrendsCtx = document.getElementById('moodTrendsChart').getContext('2d');
+    new Chart(moodTrendsCtx, {
+        type: 'line',
+        data: {
+            labels: {{ mood_trend_labels | tojson | safe }},
+        datasets: [
+        {
+            label: 'Positive',
+            data: {{ mood_trend_positive | tojson | safe }},
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        fill: true,
+        tension: 0.4
+                },
+        {
+            label: 'Neutral',
+            data: {{ mood_trend_neutral | tojson | safe }},
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        fill: true,
+        tension: 0.4
+                },
+        {
+            label: 'Negative',
+            data: {{ mood_trend_negative | tojson | safe }},
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        fill: true,
+        tension: 0.4
+                }
+    ]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: true }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+    });
+
+    // =====================================
+    // 4. FEEDBACK DISTRIBUTION CHART (Bar)
+    // =====================================
+    const feedbackCtx = document.getElementById('feedbackChart').getContext('2d');
+    new Chart(feedbackCtx, {
+        type: 'bar',
+        data: {
+            labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+            datasets: [{
+                label: 'Feedback Count',
+                data: [
+                    {{ feedback_distribution[1] }},
+            {{ feedback_distribution[2] }},
+                    {{ feedback_distribution[3] }},
+        {{ feedback_distribution[4] }},
+        {{ feedback_distribution[5] }}
+                ],
+        backgroundColor: [
+        'rgba(239, 68, 68, 0.7)',
+        'rgba(251, 146, 60, 0.7)',
+        'rgba(250, 204, 21, 0.7)',
+        'rgba(163, 230, 53, 0.7)',
+        'rgba(34, 197, 94, 0.7)'
+    ],
+        borderRadius: 8
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+    });
+
+    // =====================================
+    // 5. INTEREST-ACTIVITY CORRELATION (Bar)
+    // =====================================
+    {% if interest_activity_correlation %}
+    const interestActivityCtx = document.getElementById('interestActivityChart').getContext('2d');
+    new Chart(interestActivityCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ interest_activity_correlation | map(attribute = 'interest_name') | list | tojson | safe }},
+        datasets: [{
+            label: 'Activity Tries',
+            data: {{ interest_activity_correlation | map(attribute = 'activity_tries') | list | tojson | safe }},
+        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+        borderColor: '#6366f1',
+        borderWidth: 2,
+        borderRadius: 8
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+    });
+    {% endif %}
+});
+</script>
+
+{% endblock %}

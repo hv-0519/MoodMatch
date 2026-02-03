@@ -3,492 +3,1221 @@
 {% block sidebar_class %}static-expanded{% endblock %}
 
 {% block admin_styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
 <style>
-    /* Modal Base Styles */
-    
+    /* Layout & Background */
+    .admin-dashboard-wrapper.with-static-sidebar {
+        position: relative;
+        margin-left: 280px;
+        min-height: 100vh;
+        width: calc(100% - 280px);
+        background: transparent;
+    }
+
+    .decorative-bg {
+        position: fixed;
+        inset: 0;
+        left: 280px;
+        z-index: 0;
+        background: radial-gradient(at 0% 0%, #fed7aa 0%, transparent 50%),
+            radial-gradient(at 100% 0%, #fecdd3 0%, transparent 50%),
+            radial-gradient(at 100% 100%, #fbcfe8 0%, transparent 50%),
+            radial-gradient(at 0% 100%, #e0e7ff 0%, transparent 50%),
+            #f8fafc;
+        pointer-events: none;
+    }
+
+    /* Floating Emojis */
+    .shape {
+        position: absolute;
+        pointer-events: none;
+        user-select: none;
+        z-index: 1;
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+    }
+
+    .shape-1::before {
+        content: "🍳";
+        font-size: 160px;
+    }
+
+    .shape-2::before {
+        content: "🎮";
+        font-size: 130px;
+    }
+
+    .shape-3::before {
+        content: "✈️";
+        font-size: 100px;
+    }
+
+    .shape-4::before {
+        content: "📚";
+        font-size: 120px;
+    }
+
+    .shape-1 {
+        top: 5%;
+        left: 5%;
+        opacity: 0.1;
+        animation: float1 20s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        top: 60%;
+        left: 80%;
+        opacity: 0.08;
+        animation: float2 25s ease-in-out infinite;
+    }
+
+    .shape-3 {
+        top: 40%;
+        left: 15%;
+        opacity: 0.07;
+        animation: float3 30s ease-in-out infinite;
+    }
+
+    .shape-4 {
+        top: 80%;
+        left: 50%;
+        opacity: 0.09;
+        animation: float1 22s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+
+        0%,
+        100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        50% {
+            transform: translate(30px, -30px) rotate(10deg);
+        }
+    }
+
+    @keyframes float2 {
+
+        0%,
+        100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        50% {
+            transform: translate(-40px, 20px) rotate(-10deg);
+        }
+    }
+
+    @keyframes float3 {
+
+        0%,
+        100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        50% {
+            transform: translate(20px, 40px) rotate(15deg);
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .shape {
+            display: none;
+        }
+    }
+
+    /* Main Content */
+    .admin-main-content {
+        position: relative;
+        z-index: 2;
+        padding: 40px 30px;
+    }
+
+    /* Header Section */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin-bottom: 32px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+    }
+
+    .filter-input,
+    .filter-select {
+        width: 100%;
+        padding: 10px 14px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        background: white;
+        transition: all 0.2s;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+        border-color: #be123c;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.15);
+    }
+
+    /* Grid & Cards */
+    .activities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+    }
+
+    .premium-card {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 24px;
+        padding: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.7);
+    }
+
+    .act-icon-circle {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease;
+    }
+
+    .premium-card:hover .act-icon-circle {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    .act-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 8px;
+    }
+
+    .act-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .act-badge {
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: rgba(190, 18, 60, 0.1);
+        color: #be123c;
+    }
+
+    .act-desc {
+        color: #64748b;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        flex-grow: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        border: none;
+        font-size: 0.9rem;
+    }
+
+    .btn-view {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .btn-edit {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .btn-delete {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-main {
+        background: linear-gradient(135deg, #be123c, #fb7185);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 16px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 15px -3px rgba(190, 18, 60, 0.3);
+    }
+
+    .btn-main:hover {
+        transform: scale(1.05);
+        box-shadow: 0 20px 25px -5px rgba(190, 18, 60, 0.4);
+    }
+
+    /* Add Button */
+    .btn-add {
+        background: linear-gradient(135deg, #be123c 0%, #991b1b 100%);
+        color: white;
+        padding: 12px 28px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(190, 18, 60, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-add:hover {
+        background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(190, 18, 60, 0.4);
+    }
+
+    /* Modals */
+    .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 24px;
+        max-width: 900px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 32px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .close-btn {
+        background: #ff0000;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #ffffff;
+    }
+
+    .close-btn:hover {
+        background: #ffffff;
+        color: #ff0000;
+    }
+
+    /* Form Styles */
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #be123c;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 24px 0 16px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 2px solid #f1f5f9;
+    }
+
+    .btn-cancel {
+        padding: 12px 24px;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+    .btn-submit {
+        padding: 12px 28px;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(135deg, #be123c 0%, #991b1b 100%);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(190, 18, 60, 0.3);
+    }
+
+    /* View Modal Specific */
+    .view-body {
+        padding: 20px 0;
+    }
+
+    .view-icon {
+        text-align: center;
+        font-size: 4rem;
+        margin-bottom: 24px;
+    }
+
+    .view-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .view-info-item {
+        background: #f8fafc;
+        padding: 16px;
+        border-radius: 12px;
+        border-left: 4px solid #be123c;
+    }
+
+    .view-info-item strong {
+        display: block;
+        color: #64748b;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+
+    .view-info-item span {
+        color: #1e293b;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .view-section {
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 2px solid #f1f5f9;
+    }
+
+    .view-section h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 12px;
+    }
+
+    .view-section p {
+        color: #64748b;
+        line-height: 1.7;
+        margin: 8px 0;
+    }
+
+    .mood-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .mood-tag {
+        padding: 6px 14px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state svg {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .admin-dashboard-wrapper.with-static-sidebar {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .decorative-bg {
+            left: 0;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .activities-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+            padding: 24px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block admin_content %}
-
 <div class="admin-dashboard-wrapper with-static-sidebar">
-    <div class="admin-header">
-        <div class="decorative-shapes-us">
-            <div class="shape shape-1"></div>
-            <div class="shape shape-2"></div>
-            <div class="shape shape-3"></div>
-        </div>
-        <div class="admin-header-content">
-            <div class="admin-title-section">
-                <h1>Manage Activities</h1>
-                <p class="admin-subtitle">
-                    Welcome back <b style="color:white;">"{{ admins|capitalize }}"</b>! Here's an overview of all
-                    activities.
-                </p>
-            </div>
-        </div>
+    <div class="decorative-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
     </div>
 
-    <div class="admin-content">
-        <div class="admin-table-card">
-            <div class="admin-table-header">
-                <h2 class="admin-card-title">All Activities</h2>
-                <div class="admin-header-actions">
-                    <div class="admin-search-box">
-                        <input type="text" class="admin-search-input" id="activitySearch"
-                            placeholder="Search activities..." />
-                        <span class="admin-search-icon">🔍</span>
-                    </div>
-                    <button class="admin-btn admin-btn-primary" id="addActivityBtn">
-                        <span>➕</span> <span>Add Activity</span>
+    <div class="admin-main-content">
+        <!-- Header -->
+        <div class="admin-header-content"
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <div>
+                <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin: 0;">Activity Management</h1>
+                <p style="color: #64748b; margin: 5px 0 0 0;">Welcome back, <b style="color:#1e293b;">{{
+                        admins|capitalize if admins else 'Admin' }}</b>! Manage all activities of your application.</p>
+
+            </div>
+            <button class="btn-main" onclick="openModal('addModal')">
+                <span>➕ Add Activity</span>
+            </button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>🔍 Search Activities</label>
+                <input type="text" id="searchInput" class="filter-input" placeholder="Search by name...">
+            </div>
+            <div class="filter-group">
+                <label>📂 Category</label>
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>⚡ Energy Level</label>
+                <select id="energyFilter" class="filter-select">
+                    <option value="">All Levels</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📍 Location</label>
+                <select id="locationFilter" class="filter-select">
+                    <option value="">All Locations</option>
+                    <option value="indoor">Indoor</option>
+                    <option value="outdoor">Outdoor</option>
+                    <option value="both">Both</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Activities Grid -->
+        <div class="activities-grid" id="activitiesGrid">
+            {% for act in activities %}
+            <div class="premium-card" data-id="{{ act.id }}" data-name="{{ act.name }}"
+                data-type="{{ act.execution_type }}" data-category-id="{{ act.category_id }}"
+                data-category-name="{{ act.category_name }}" data-category-icon="{{ act.category_icon }}"
+                data-energy="{{ act.energy_level or 'N/A' }}" data-location="{{ act.location_type or 'N/A' }}"
+                data-social="{{ act.social_type or 'N/A' }}" data-min-time="{{ act.min_time or 0 }}"
+                data-max-time="{{ act.max_time or 0 }}" data-min-budget="{{ act.min_budget or 0 }}"
+                data-max-budget="{{ act.max_budget or 0 }}" data-mood-tags="{{ act.mood_tags }}"
+                data-priority="{{ act.priority }}" data-is-active="{{ act.is_active }}"
+                data-desc="{{ act.description or '' }}">
+
+                <div class="act-icon-circle" data-emoji-target>
+                    {{ act.category_icon or '🎯' }}
+                </div>
+
+                <div class="act-title">{{ act.name }}</div>
+
+                <div class="act-meta">
+                    <span class="act-badge">{{ act.category_name }}</span>
+                    <span class="act-badge">{{ act.execution_type }}</span>
+                </div>
+
+                <div class="act-desc">
+                    {{ act.description or 'No description provided' }}
+                </div>
+
+                <div class="card-actions">
+                    <button class="btn-action btn-view" onclick="viewActivity(this.closest('.premium-card'))">
+                        View
+                    </button>
+                    <button class="btn-action btn-edit" onclick="editActivity(this.closest('.premium-card'))">
+                        ✏️ Edit
+                    </button>
+                    <button class="btn-action btn-delete" onclick="deleteActivity(this.closest('.premium-card'))">
+                        🗑️ Delete
                     </button>
                 </div>
             </div>
-
-            {% if activities %}
-            <table class="admin-table" id="activitiesTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Activity</th>
-                        <th>Type</th>
-                        <th>Priority</th>
-                        <th>Energy</th>
-                        <th>Location</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody id="activitiesTableBody">
-                    {% for activity in activities %}
-                    <tr data-id="{{ activity.id }}" data-name="{{ activity.name }}"
-                        data-type="{{ activity.execution_type }}" data-priority="{{ activity.priority or 0 }}" data-category="{{ activity.category_id }}"
-                        data-energy="{{ activity.energy_level }}" data-location="{{ activity.location_type }}"
-                        data-active="{{ activity.is_active }}">
-                        <td><strong>#{{ loop.index }}</strong></td>
-
-                        <td>
-                            <strong>{{ activity.name or 'Untitled Activity' }}</strong><br>
-                            <small style="color:#64748b;">
-                                {{ activity.mood_tags or 'No tags' }}
-                            </small>
-                        </td>
-
-                        <td>{{ activity.execution_type | capitalize }}</td>
-
-                        <td style="text-align:center;">
-                            {{ activity.priority or 0 }}
-                        </td>
-
-                        <td>{{ activity.energy_level or '—' }}</td>
-
-                        <td>{{ activity.location_type or '—' }}</td>
-
-                        <td>
-                            {% if activity.is_active %}
-                            <span class="admin-badge success">Active</span>
-                            {% else %}
-                            <span class="admin-badge danger">Inactive</span>
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            {{ activity.created_at[:10] if activity.created_at else '—' }}
-                        </td>
-
-                        <td>
-                            <div class="admin-table-actions">
-                                <button class="admin-icon-btn view-btn" title="View">👁️</button>
-                                <button class="admin-icon-btn edit-btn" title="Edit">✏️</button>
-                                <button class="admin-icon-btn delete-btn" title="Delete">🗑️</button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            {% else %}
-            <div class="admin-empty-state">
-                <div class="admin-empty-icon">📋</div>
-                <h3>No activities found</h3>
-                <p>Get started by adding your first activity</p>
-                <button class="admin-btn admin-btn-primary" id="addFirstActivityBtn">
-                    <span>➕</span> <span>Add Activity</span>
-                </button>
-            </div>
-            {% endif %}
+            {% endfor %}
         </div>
+
+        {% if not activities %}
+        <div class="empty-state">
+            <div style="font-size: 80px; margin-bottom: 20px;">📭</div>
+            <h3 style="color: #64748b; margin-bottom: 12px;">No Activities Found</h3>
+            <p>Click "Add New Activity" to create your first activity!</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 
-<!-- ADD ACTIVITY MODAL -->
+<!-- ==================== ADD ACTIVITY MODAL ==================== -->
 <div id="addModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">Add New Activity</div>
-        <form action="{{ url_for('admin.manage_activity') }}" method="POST">
+        <div class="modal-header">
+            <h2>➕ Add New Activity</h2>
+            <button class="close-btn" onclick="closeModal('addModal')">&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('admin.manage_activity') }}">
             <input type="hidden" name="action" value="add">
-            <div class="modal-body">
-                <!-- Basic Information -->
+
+            <!-- Basic Information -->
+            <div class="form-section-title">📝 Basic Information</div>
+
+            <div class="form-row">
                 <div class="form-group">
-                    <div class="form-group">
-                        <label for="add_category">Category *</label>
-                        <select id="add_category" name="category_id" required>
-                            <option value="">Select Category</option>
-                            {% if categories %}
-                            {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                            {% endfor %}
-                            {% else %}
-                            <option value="1">Default Category</option>
-                            {% endif %}
-                        </select>
-                    </div>
-                    <label for="add_name">Activity Name *</label>
-                    <input type="text" id="add_name" name="name" required>
+                    <label>Activity Name *</label>
+                    <input type="text" name="name" required placeholder="e.g., Morning Yoga">
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="add_type">Execution Type *</label>
-                        <select id="add_type" name="execution_type" required>
-                            <option value="">Select Type</option>
-                            <option value="physical">Physical</option>
-                            <option value="mental">Mental</option>
-                            <option value="social">Social</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="add_priority">Priority (0-10)</label>
-                        <input type="number" id="add_priority" name="priority" min="0" max="10" value="0">
-                    </div>
-                </div>
-
                 <div class="form-group">
-                    <label for="add_description">Description</label>
-                    <textarea id="add_description" name="description" rows="3"></textarea>
-                </div>
-
-                <!-- Activity Details -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="add_energy">Energy Level</label>
-                        <select id="add_energy" name="energy_level">
-                            <option value="">Select Energy</option>
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="add_location">Location Type</label>
-                        <select id="add_location" name="location_type">
-                            <option value="">Select Location</option>
-                            <option value="indoor">Indoor</option>
-                            <option value="outdoor">Outdoor</option>
-                            <option value="both">Both</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="add_social">Social Type</label>
-                        <select id="add_social" name="social_type">
-                            <option value="">Select Social</option>
-                            <option value="solo">Solo</option>
-                            <option value="group">Group</option>
-                            <option value="both">Both</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="add_mood_tags">Mood Tags</label>
-                        <input type="text" id="add_mood_tags" name="mood_tags" placeholder="happy, relaxed, energetic">
-                    </div>
-                </div>
-
-                <!-- Time and Budget -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="add_min_time">Min Time (minutes)</label>
-                        <input type="number" id="add_min_time" name="min_time" min="0" placeholder="e.g., 15">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="add_max_time">Max Time (minutes)</label>
-                        <input type="number" id="add_max_time" name="max_time" min="0" placeholder="e.g., 60">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="add_min_budget">Min Budget ($)</label>
-                        <input type="number" id="add_min_budget" name="min_budget" min="0" step="0.01"
-                            placeholder="e.g., 0">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="add_max_budget">Max Budget ($)</label>
-                        <input type="number" id="add_max_budget" name="max_budget" min="0" step="0.01"
-                            placeholder="e.g., 50">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="add_is_active" name="is_active" value="1" checked>
-                        <label for="add_is_active" style="margin: 0;">Active</label>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" id="closeAddBtn">Cancel</button>
-                <button type="submit" class="btn-submit">Add Activity</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- EDIT ACTIVITY MODAL -->
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">Edit Activity</div>
-        <form action="{{ url_for('admin.manage_activity') }}" method="POST">
-            <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="activity_id" id="edit_id">
-            <div class="modal-body">
-                <div class="form-group">
-                    <div class="form-group">
-                    <label for="edit_category">Category *</label>
-                    <select id="edit_category" name="category_id" required>
-                        {% if categories %}
-                            {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                            {% endfor %}
-                        {% else %}
-                            <option value="1">Default Category</option>
-                        {% endif %}
+                    <label>Category *</label>
+                    <select name="category_id" required>
+                        <option value="">Select Category</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</option>
+                        {% endfor %}
                     </select>
                 </div>
-                    <label for="edit_name">Activity Name *</label>
-                    <input type="text" id="edit_name" name="name" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Execution Type *</label>
+                    <input type="text" name="execution_type" required placeholder="e.g., physical, mental, creative">
                 </div>
                 <div class="form-group">
-                    <label for="edit_type">Type *</label>
-                    <select id="edit_type" name="execution_type" required>
-                        <option value="physical">Physical</option>
-                        <option value="mental">Mental</option>
-                        <option value="social">Social</option>
+                    <label>Priority (0-10)</label>
+                    <input type="number" name="priority" min="0" max="10" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Mood Tags * <small>(comma-separated)</small></label>
+                <input type="text" name="mood_tags" required placeholder="e.g., happy, energetic, calm">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" placeholder="Brief description of the activity..." rows="3"></textarea>
+            </div>
+
+            <!-- Activity Filters -->
+            <div class="form-section-title">🎯 Activity Filters</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Energy Level</label>
+                    <select name="energy_level">
+                        <option value="">Select Level</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="edit_priority">Priority (0-10)</label>
-                    <input type="number" id="edit_priority" name="priority" min="0" max="10">
+                    <label>Location Type</label>
+                    <select name="location_type">
+                        <option value="">Select Location</option>
+                        <option value="indoor">Indoor</option>
+                        <option value="outdoor">Outdoor</option>
+                        <option value="both">Both</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="edit_description">Description</label>
-                    <textarea id="edit_description" name="description" rows="3"></textarea>
+                    <label>Social Type</label>
+                    <select name="social_type">
+                        <option value="">Select Type</option>
+                        <option value="solo">Solo</option>
+                        <option value="group">Group</option>
+                        <option value="both">Both</option>
+                    </select>
                 </div>
             </div>
+
+            <!-- Time & Budget -->
+            <div class="form-section-title">⏰ Time & Budget</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Min Time (minutes)</label>
+                    <input type="number" name="min_time" min="0" placeholder="e.g., 15">
+                </div>
+                <div class="form-group">
+                    <label>Max Time (minutes)</label>
+                    <input type="number" name="max_time" min="0" placeholder="e.g., 60">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Min Budget (₹)</label>
+                    <input type="number" name="min_budget" min="0" placeholder="e.g., 0">
+                </div>
+                <div class="form-group">
+                    <label>Max Budget (₹)</label>
+                    <input type="number" name="max_budget" min="0" placeholder="e.g., 500">
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="form-section-title">⚙️ Status</div>
+            <div class="checkbox-group">
+                <input type="checkbox" name="is_active" id="add_is_active" checked>
+                <label for="add_is_active">Mark as Active</label>
+            </div>
+
             <div class="modal-footer">
-                <button type="button" class="btn-cancel" id="closeEditBtn">Cancel</button>
-                <button type="submit" class="btn-submit">Update Activity</button>
+                <button type="button" class="btn-cancel" onclick="closeModal('addModal')">Cancel</button>
+                <button type="submit" class="btn-submit">Create Activity</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- DELETE ACTIVITY MODAL -->
-<div id="deleteModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header" style="color: #ef4444;">Confirm Delete</div>
-        <form action="{{ url_for('admin.manage_activity') }}" method="POST">
-            <input type="hidden" name="action" value="delete">
-            <input type="hidden" name="activity_id" id="delete_id">
-            <div class="modal-body">
-                <p>Are you sure you want to delete this activity? This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" id="closeDeleteBtn">Cancel</button>
-                <button type="submit" class="btn-submit" style="background: #ef4444;">Delete</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- VIEW ACTIVITY MODAL -->
+<!-- ==================== VIEW ACTIVITY MODAL ==================== -->
 <div id="viewModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">Activity Details</div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label>Activity Name:</label>
-                <p id="view_name"></p>
+        <div class="modal-header">
+            <h2 id="view-title">Activity Details</h2>
+            <button class="close-btn" onclick="closeModal('viewModal')">&times;</button>
+        </div>
+        <div class="view-body">
+            <div class="view-icon" id="view-emoji"></div>
+
+            <div class="view-info-grid">
+                <div class="view-info-item">
+                    <strong>📂 Category</strong>
+                    <span id="view-category"></span>
+                </div>
+                <div class="view-info-item">
+                    <strong>🎮 Execution Type</strong>
+                    <span id="view-type"></span>
+                </div>
+                <div class="view-info-item">
+                    <strong>⚡ Energy Level</strong>
+                    <span id="view-energy"></span>
+                </div>
+                <div class="view-info-item">
+                    <strong>📍 Location</strong>
+                    <span id="view-location"></span>
+                </div>
+                <div class="view-info-item">
+                    <strong>👥 Social Type</strong>
+                    <span id="view-social"></span>
+                </div>
+                <div class="view-info-item">
+                    <strong>⏰ Time Range</strong>
+                    <span id="view-time"></span>
+                </div>
+                <div class="view-info-item">
+                    <strong>💰 Budget Range</strong>
+                    <span id="view-budget"></span>
+                </div>
+                <div class="view-info-item">
+                    <strong>⭐ Priority</strong>
+                    <span id="view-priority"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Type:</label>
-                <p id="view_type"></p>
+
+            <div class="view-section">
+                <h3>📝 Description</h3>
+                <p id="view-description"></p>
             </div>
-            <div class="form-group">
-                <label>Priority:</label>
-                <p id="view_priority"></p>
+
+            <div class="view-section">
+                <h3>🎭 Mood Tags</h3>
+                <div class="mood-tags" id="view-mood-tags"></div>
+            </div>
+
+            <div class="view-section">
+                <h3>ℹ️ Activity Status</h3>
+                <p id="view-status"></p>
             </div>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-cancel" id="closeViewBtn">Close</button>
+    </div>
+</div>
+
+<!-- ==================== EDIT ACTIVITY MODAL ==================== -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>✏️ Edit Activity</h2>
+            <button class="close-btn" onclick="closeModal('editModal')">&times;</button>
         </div>
+        <form method="POST" action="{{ url_for('admin.manage_activity') }}">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="activity_id" id="edit_id">
+
+            <!-- Basic Information -->
+            <div class="form-section-title">📝 Basic Information</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Activity Name *</label>
+                    <input type="text" name="name" id="edit_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select name="category_id" id="edit_category_id" required>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Execution Type *</label>
+                    <input type="text" name="execution_type" id="edit_execution_type" required>
+                </div>
+                <div class="form-group">
+                    <label>Priority (0-10)</label>
+                    <input type="number" name="priority" id="edit_priority" min="0" max="10">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Mood Tags *</label>
+                <input type="text" name="mood_tags" id="edit_mood_tags" required>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" id="edit_description" rows="3"></textarea>
+            </div>
+
+            <!-- Activity Filters -->
+            <div class="form-section-title">🎯 Activity Filters</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Energy Level</label>
+                    <select name="energy_level" id="edit_energy_level">
+                        <option value="">Select Level</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location Type</label>
+                    <select name="location_type" id="edit_location_type">
+                        <option value="">Select Location</option>
+                        <option value="indoor">Indoor</option>
+                        <option value="outdoor">Outdoor</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Social Type</label>
+                    <select name="social_type" id="edit_social_type">
+                        <option value="">Select Type</option>
+                        <option value="solo">Solo</option>
+                        <option value="group">Group</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Time & Budget -->
+            <div class="form-section-title">⏰ Time & Budget</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Min Time (minutes)</label>
+                    <input type="number" name="min_time" id="edit_min_time" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Max Time (minutes)</label>
+                    <input type="number" name="max_time" id="edit_max_time" min="0">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Min Budget (₹)</label>
+                    <input type="number" name="min_budget" id="edit_min_budget" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Max Budget (₹)</label>
+                    <input type="number" name="max_budget" id="edit_max_budget" min="0">
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="form-section-title">⚙️ Status</div>
+            <div class="checkbox-group">
+                <input type="checkbox" name="is_active" id="edit_is_active">
+                <label for="edit_is_active">Mark as Active</label>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+                <button type="submit" class="btn-submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== DELETE MODAL ==================== -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content" style="max-width:500px; text-align:center;">
+        <div style="font-size:64px; margin-bottom:20px;">⚠️</div>
+        <h2 style="color:#ef4444; margin:0 0 16px; font-size: 1.75rem;">Confirm Deletion</h2>
+        <p style="color:#64748b; margin-bottom:28px; font-size: 1.05rem;">
+            Are you sure you want to delete<br>
+            <strong id="delete-name-preview" style="color:#1e293b; font-size: 1.2rem;"></strong>?
+        </p>
+        <p style="color:#991b1b; font-size: 0.9rem; margin-bottom: 24px;">
+            ⚠️ This action cannot be undone!
+        </p>
+        <form method="POST" action="{{ url_for('admin.manage_activity') }}">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="activity_id" id="delete_id">
+            <div class="modal-footer" style="justify-content: center;">
+                <button type="button" class="btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+                <button type="submit" class="btn-submit" style="background:#ef4444;">Yes, Delete</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('Initializing Activity Management...');
+    // ==================== MODAL CONTROLS ====================
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 
-        // Get all modal elements
-        const addModal = document.getElementById('addModal');
-        const editModal = document.getElementById('editModal');
-        const deleteModal = document.getElementById('deleteModal');
-        const viewModal = document.getElementById('viewModal');
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
 
-        // Get all buttons
-        const addActivityBtn = document.getElementById('addActivityBtn');
-        const addFirstActivityBtn = document.getElementById('addFirstActivityBtn');
-        const closeAddBtn = document.getElementById('closeAddBtn');
-        const closeEditBtn = document.getElementById('closeEditBtn');
-        const closeDeleteBtn = document.getElementById('closeDeleteBtn');
-        const closeViewBtn = document.getElementById('closeViewBtn');
+    // ==================== FILTERING ====================
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const energyFilter = document.getElementById('energyFilter');
+    const locationFilter = document.getElementById('locationFilter');
+    const grid = document.getElementById('activitiesGrid');
 
-        // Modal functions
-        function openAddModal() {
-            console.log('Opening Add Modal');
-            addModal.classList.add('active');
-        }
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedCategory = categoryFilter.value;
+        const selectedEnergy = energyFilter.value;
+        const selectedLocation = locationFilter.value;
 
-        function closeAddModal() {
-            console.log('Closing Add Modal');
-            addModal.classList.remove('active');
-            // Reset form
-            document.querySelector('#addModal form').reset();
-        }
+        const cards = grid.querySelectorAll('.premium-card');
 
-        function openEditModal(id, name, type, priority, category) {
-            console.log('Opening Edit Modal for ID:', id);
-            document.getElementById('edit_id').value = id;
-            document.getElementById('edit_name').value = name;
-            document.getElementById('edit_type').value = type;
-            document.getElementById('edit_priority').value = priority;
-            document.getElementById('edit_category').value = category || '1';
-            editModal.classList.add('active');
-        }
+        cards.forEach(card => {
+            const name = card.dataset.name.toLowerCase();
+            const categoryId = card.dataset.categoryId;
+            const energy = card.dataset.energy.toLowerCase();
+            const location = card.dataset.location.toLowerCase();
 
-        function closeEditModal() {
-            console.log('Closing Edit Modal');
-            editModal.classList.remove('active');
-        }
+            const matchesSearch = name.includes(searchTerm);
+            const matchesCategory = !selectedCategory || categoryId === selectedCategory;
+            const matchesEnergy = !selectedEnergy || energy === selectedEnergy;
+            const matchesLocation = !selectedLocation || location === selectedLocation;
 
-        function openDeleteModal(id) {
-            console.log('Opening Delete Modal for ID:', id);
-            document.getElementById('delete_id').value = id;
-            deleteModal.classList.add('active');
-        }
+            card.style.display = (matchesSearch && matchesCategory && matchesEnergy && matchesLocation) ? '' : 'none';
+        });
+    }
 
-        function closeDeleteModal() {
-            console.log('Closing Delete Modal');
-            deleteModal.classList.remove('active');
-        }
+    searchInput.addEventListener('input', applyFilters);
+    categoryFilter.addEventListener('change', applyFilters);
+    energyFilter.addEventListener('change', applyFilters);
+    locationFilter.addEventListener('change', applyFilters);
 
-        function openViewModal(id, name, type, priority) {
-            console.log('Opening View Modal for ID:', id);
-            document.getElementById('view_name').textContent = name;
-            document.getElementById('view_type').textContent = type.charAt(0).toUpperCase() + type.slice(1);
-            document.getElementById('view_priority').textContent = priority;
-            viewModal.classList.add('active');
-        }
+    // ==================== VIEW ACTIVITY ====================
+    function viewActivity(card) {
+        document.getElementById('view-title').innerText = card.dataset.name;
+        document.getElementById('view-emoji').innerText = card.dataset.categoryIcon;
+        document.getElementById('view-category').innerText = card.dataset.categoryName;
+        document.getElementById('view-type').innerText = card.dataset.type;
+        document.getElementById('view-energy').innerText = card.dataset.energy || 'Not specified';
+        document.getElementById('view-location').innerText = card.dataset.location || 'Not specified';
+        document.getElementById('view-social').innerText = card.dataset.social || 'Not specified';
 
-        function closeViewModal() {
-            console.log('Closing View Modal');
-            viewModal.classList.remove('active');
-        }
+        const minTime = card.dataset.minTime || 0;
+        const maxTime = card.dataset.maxTime || 0;
+        document.getElementById('view-time').innerText = minTime && maxTime ? `${minTime} - ${maxTime} mins` : 'Not specified';
 
-        // Attach button listeners
-        if (addActivityBtn) {
-            addActivityBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                openAddModal();
-            });
-        }
+        const minBudget = card.dataset.minBudget || 0;
+        const maxBudget = card.dataset.maxBudget || 0;
+        document.getElementById('view-budget').innerText = minBudget || maxBudget ? `₹${minBudget} - ₹${maxBudget}` : 'Free';
 
-        if (addFirstActivityBtn) {
-            addFirstActivityBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                openAddModal();
-            });
-        }
+        document.getElementById('view-priority').innerText = card.dataset.priority || '0';
+        document.getElementById('view-description').innerText = card.dataset.desc || 'No description provided';
 
-        if (closeAddBtn) closeAddBtn.addEventListener('click', closeAddModal);
-        if (closeEditBtn) closeEditBtn.addEventListener('click', closeEditModal);
-        if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', closeDeleteModal);
-        if (closeViewBtn) closeViewBtn.addEventListener('click', closeViewModal);
-
-        // Table action buttons
-        const tableBody = document.getElementById('activitiesTableBody');
-        if (tableBody) {
-            tableBody.addEventListener('click', function (e) {
-                const button = e.target.closest('.admin-icon-btn');
-                if (!button) return;
-
-                e.preventDefault();
-
-                const row = button.closest('tr');
-                const id = row.getAttribute('data-id');
-                const name = row.getAttribute('data-name');
-                const type = row.getAttribute('data-type');
-                const priority = row.getAttribute('data-priority');
-                const category = row.getAttribute('data-category');
-
-                if (button.classList.contains('view-btn')) {
-                    openViewModal(id, name, type, priority);
-                } else if (button.classList.contains('edit-btn')) {
-                    openEditModal(id, name, type, priority, category);
-                } else if (button.classList.contains('delete-btn')) {
-                    openDeleteModal(id);
-                }
-            });
-        }
-
-        // Close modals on backdrop click
-        [addModal, editModal, deleteModal, viewModal].forEach(modal => {
-            if (modal) {
-                modal.addEventListener('click', function (e) {
-                    if (e.target === this) {
-                        this.classList.remove('active');
-                    }
-                });
-            }
+        // Mood tags
+        const moodTagsContainer = document.getElementById('view-mood-tags');
+        moodTagsContainer.innerHTML = '';
+        const moodTags = card.dataset.moodTags.split(',').map(tag => tag.trim());
+        moodTags.forEach(tag => {
+            const span = document.createElement('span');
+            span.className = 'mood-tag';
+            span.textContent = tag;
+            moodTagsContainer.appendChild(span);
         });
 
-        // Search functionality
-        const searchInput = document.getElementById('activitySearch');
-        if (searchInput && tableBody) {
-            searchInput.addEventListener('keyup', function (e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const rows = tableBody.querySelectorAll('tr');
+        const isActive = card.dataset.isActive === '1';
+        document.getElementById('view-status').innerHTML = isActive
+            ? '<span style="color:#10b981; font-weight:700;">✅ Active</span>'
+            : '<span style="color:#ef4444; font-weight:700;">❌ Inactive</span>';
 
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                });
-            });
+        openModal('viewModal');
+    }
+
+    // ==================== EDIT ACTIVITY ====================
+    function editActivity(card) {
+        document.getElementById('edit_id').value = card.dataset.id;
+        document.getElementById('edit_name').value = card.dataset.name;
+        document.getElementById('edit_execution_type').value = card.dataset.type;
+        document.getElementById('edit_category_id').value = card.dataset.categoryId;
+        document.getElementById('edit_priority').value = card.dataset.priority;
+        document.getElementById('edit_mood_tags').value = card.dataset.moodTags;
+        document.getElementById('edit_description').value = card.dataset.desc;
+        document.getElementById('edit_energy_level').value = card.dataset.energy;
+        document.getElementById('edit_location_type').value = card.dataset.location;
+        document.getElementById('edit_social_type').value = card.dataset.social;
+        document.getElementById('edit_min_time').value = card.dataset.minTime;
+        document.getElementById('edit_max_time').value = card.dataset.maxTime;
+        document.getElementById('edit_min_budget').value = card.dataset.minBudget;
+        document.getElementById('edit_max_budget').value = card.dataset.maxBudget;
+        document.getElementById('edit_is_active').checked = card.dataset.isActive === '1';
+
+        openModal('editModal');
+    }
+
+    // ==================== DELETE ACTIVITY ====================
+    function deleteActivity(card) {
+        document.getElementById('delete_id').value = card.dataset.id;
+        document.getElementById('delete-name-preview').textContent = card.dataset.name;
+        openModal('deleteModal');
+    }
+
+    // ==================== CLOSE ON OUTSIDE CLICK ====================
+    window.onclick = function (e) {
+        if (e.target.classList.contains('modal')) {
+            e.target.classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
+    };
 
-        console.log('✓ Initialization complete!');
+    // ==================== ESCAPE KEY CLOSES MODAL ====================
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+            document.body.style.overflow = 'auto';
+        }
     });
 </script>
-
 {% endblock %}

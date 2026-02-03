@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 <!-- Admin CSS -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
 <style>
@@ -65,34 +65,37 @@
       <div class="admin-nav-label">Main Menu</div>
       <ul class="admin-nav-list">
         <li class="admin-nav-item">
-          <a href="{{ url_for('admin.admin_dashboard') }}" class="admin-nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}">
+          <a href="{{ url_for('admin.admin_dashboard') }}"
+            class="admin-nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}">
             <span class="admin-nav-icon">📊</span>
             <span class="admin-nav-text">Dashboard</span>
           </a>
         </li>
         <li class="admin-nav-item">
-          <a href="{{ url_for('admin.manage_users') }}" class="admin-nav-link {% if request.endpoint == 'admin.manage_users' %}active{% endif %}">
+          <a href="{{ url_for('admin.manage_users') }}"
+            class="admin-nav-link {% if request.endpoint == 'admin.manage_users' %}active{% endif %}">
             <span class="admin-nav-icon">👥</span>
             <span class="admin-nav-text">Manage Users</span>
             <span class="admin-nav-badge">12</span>
           </a>
         </li>
         <li class="admin-nav-item">
-          <a href="{{ url_for('admin.manage_activity') }}" class="admin-nav-link {% if request.endpoint == 'admin.manage_activity' %}active{% endif %}">
+          <a href="{{ url_for('admin.manage_activity') }}"
+            class="admin-nav-link {% if request.endpoint == 'admin.manage_activity' %}active{% endif %}">
             <span class="admin-nav-icon">🎯</span>
             <span class="admin-nav-text">Manage Activities</span>
           </a>
         </li>
         <li class="admin-nav-item">
-          <a href="#" class="admin-nav-link">
-            <span class="admin-nav-icon">📈</span>
-            <span class="admin-nav-text">View Analytics</span>
+          <a href="{{ url_for('admin.manage_categories') }}" class="admin-nav-link {% if request.endpoint == 'admin.manage_categories' %}active{% endif %}">
+            <span class="admin-nav-icon">🏷️</span>
+            <span class="admin-nav-text">Manage Categories</span>
           </a>
         </li>
         <li class="admin-nav-item">
-          <a href="#" class="admin-nav-link">
-            <span class="admin-nav-icon">🏷️</span>
-            <span class="admin-nav-text">Manage Categories</span>
+          <a href="{{ url_for('admin.view_analytics') }}" class="admin-nav-link {% if request.endpoint == 'admin.view_analytics' %}active{% endif %}">
+            <span class="admin-nav-icon">📈</span>
+            <span class="admin-nav-text">View Analytics</span>
           </a>
         </li>
       </ul>
@@ -103,19 +106,19 @@
       <div class="admin-nav-label">Account</div>
       <ul class="admin-nav-list">
         <li class="admin-nav-item">
-          <a href="#" class="admin-nav-link">
+          <a href="{{ url_for('admin.admin_profile') }}" class="admin-nav-link">
             <span class="admin-nav-icon">👤</span>
             <span class="admin-nav-text">View Profile</span>
           </a>
         </li>
         <li class="admin-nav-item">
-          <a href="#" class="admin-nav-link">
+          <a href="{{ url_for('admin.admin_settings') }}" class="admin-nav-link">
             <span class="admin-nav-icon">⚙️</span>
             <span class="admin-nav-text">Settings</span>
           </a>
         </li>
         <li class="admin-nav-item">
-          <a href="#" class="admin-nav-link">
+          <a href="{{ url_for('admin.generate_reports') }}" class="admin-nav-link">
             <span class="admin-nav-icon">📊</span>
             <span class="admin-nav-text">Generate Reports</span>
           </a>

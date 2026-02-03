@@ -44,7 +44,7 @@ CREATE TABLE users (
     username TEXT UNIQUE NOT NULL,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
+    email TEXT NOT NULL,
     phone_number TEXT,
     gender TEXT CHECK (gender IN ('male', 'female', 'other')),
     date_of_birth DATE,
@@ -430,6 +430,25 @@ INSERT INTO favorites (user_id, activity_id) VALUES
 INSERT INTO user_writings (user_id, activity_id, title, content, is_public) VALUES
 (1, 1, 'My Journey', 'Today I realized that life is about the small moments...', 1),
 (2, 1, 'Art and Soul', 'Creativity flows when the mind is at peace...', 1);
+
+INSERT OR IGNORE INTO user_history (user_id, activity_id, mood_input, sentiment_score, feedback_rating, created_at)
+VALUES 
+(1, 1, 'happy excited', 0.8, 5, datetime('now', '-5 days')),
+(1, 2, 'sad lonely', -0.6, 4, datetime('now', '-4 days')),
+(2, 1, 'stressed anxious', -0.4, 3, datetime('now', '-3 days')),
+(2, 3, 'calm peaceful', 0.3, 5, datetime('now', '-2 days')),
+(3, 4, 'energetic motivated', 0.7, 5, datetime('now', '-1 day')),
+(1, 5, 'tired bored', -0.2, 2, datetime('now')),
+(2, 2, 'happy content', 0.6, 4, datetime('now')),
+(3, 1, 'anxious worried', -0.5, 3, datetime('now'));
+
+INSERT OR IGNORE INTO favorites (user_id, activity_id, created_at)
+VALUES 
+(1, 1, datetime('now', '-3 days')),
+(1, 2, datetime('now', '-2 days')),
+(2, 1, datetime('now', '-1 day')),
+(2, 3, datetime('now')),
+(3, 4, datetime('now'));
 
 -- ============================================
 -- END OF SCHEMA

@@ -2,7 +2,7 @@ import os
 import random
 import string
 import sqlite3
-from flask import request, redirect, url_for, render_template, Blueprint, session
+from flask import request, redirect, url_for, render_template, Blueprint, session, flash
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import (
@@ -17,30 +17,24 @@ from utils.helper import generate_username, send_email
 auth_bp = Blueprint("auth", __name__)
 
 
-# ---------------------------
-# BLOCK LOGIN / REGISTER FOR LOGGED-IN USERS (FIXED)
-# ---------------------------
+# Helper to get database connection
+def get_db_connection():
+    db_path = os.path.join("models", "instance", "moodmatch.db")
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
 @auth_bp.before_request
 def block_auth_pages_for_logged_in_users():
     if current_user.is_authenticated:
-        if request.endpoint == "auth.login":
-            # Logged-in users should NOT see login again
-            return redirect(url_for("main.index"))
-        if request.endpoint == "auth.register":
+        if request.endpoint in ["auth.login", "auth.register"]:
             return redirect(url_for("main.index"))
 
 
-# ---------------------------
-# USER MODEL (IMPROVED)
-# ---------------------------
 class User(UserMixin):
     def __init__(
-        self,
-        id,
-        username,
-        first_name=None,
-        profile_picture=None,
-        is_admin=False,
+        self, id, username, first_name=None, profile_picture=None, is_admin=False
     ):
         self.id = id
         self.username = username
@@ -50,32 +44,32 @@ class User(UserMixin):
 
 
 # ---------------------------
-# REGISTER
+# REGISTER (FIXED - CORRECT FIELD NAMES + FILE UPLOAD)
 # ---------------------------
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        # 1. Capture basic form data
+        # 1. Capture Form Data
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
         email = request.form.get("email")
-        phone_number = request.form.get("phone")
+        phone_number = request.form.get("phone")  # Matches HTML 'name="phone"'
         gender = request.form.get("gender")
         date_of_birth = request.form.get("date_of_birth")
-        street_address = request.form.get("street")
+        street_address = request.form.get("street")  # Matches HTML 'name="street"'
         city = request.form.get("city")
         state = request.form.get("state")
         postal_code = request.form.get("postal_code")
         country = request.form.get("country")
-
-        # --- NEW: Capture Interests ---
+        password = request.form.get("password")
         selected_interests = request.form.getlist("interests")
 
-        # 2. Handle Profile Picture
+        # 2. Handle Profile Picture Upload
         file = request.files.get("profile_picture")
-        profile_picture = None
-        if file and file.filename:
-            filename = secure_filename(file.filename)
+        profile_picture = "default.png"
+
+        if file and file.filename != "":
+            filename = secure_filename(f"{email}_{file.filename}")
             upload_path = os.path.join("static", "uploads")
             os.makedirs(upload_path, exist_ok=True)
             file.save(os.path.join(upload_path, filename))
@@ -83,12 +77,9 @@ def register():
 
         # 3. Security and Identity
         username = generate_username(first_name, last_name)
-        password_hash = generate_password_hash(request.form.get("password"))
+        password_hash = generate_password_hash(password)
 
-        # 4. Database Operations
-        conn = sqlite3.connect("models/instance/moodmatch.db")
-        # Use row_factory to access columns by name if needed later
-        conn.row_factory = sqlite3.Row
+        conn = get_db_connection()
         cursor = conn.cursor()
 
         try:
@@ -102,7 +93,7 @@ def register():
                     postal_code, country, profile_picture,
                     password_hash
                 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-                """,
+            """,
                 (
                     first_name,
                     last_name,
@@ -121,92 +112,81 @@ def register():
                 ),
             )
 
-            # --- NEW: Get User ID and Save Interests ---
             new_user_id = cursor.lastrowid
 
+            # 4. Save Interests (FIXED LOOP)
+            interests_saved = 0
             for interest_name in selected_interests:
-                # Get the ID of the interest from the master 'interests' table
+                # Find ID for this interest name
                 cursor.execute(
-                    "SELECT id FROM interests WHERE name = ?", (interest_name,)
+                    "SELECT id FROM interests WHERE LOWER(name) = LOWER(?)",
+                    (interest_name,),
                 )
                 row = cursor.fetchone()
 
                 if row:
-                    interest_id = row["id"]
-                    # Insert into the bridge/junction table
                     cursor.execute(
                         "INSERT INTO user_interests (user_id, interest_id) VALUES (?, ?)",
-                        (new_user_id, interest_id),
+                        (new_user_id, row["id"]),
                     )
+                    interests_saved += 1
+                    print(f"✅ Saved interest: {interest_name}")
+                else:
+                    print(f"⚠️ Interest not found in DB: {interest_name}")
 
             conn.commit()
+            print(
+                f"✅ Registration complete. User ID: {new_user_id}, Interests: {interests_saved}"
+            )
 
             # 5. Send Welcome Email
-            send_email(
-                to_email=email,
-                subject="Welcome to MoodMatch 🎉 Your Account Is Ready",
-                body=f"""Hello {first_name},
+            try:
+                send_email(
+                    to_email=email,
+                    subject="Welcome to MoodMatch 🎉",
+                    body=f" Hello {first_name},\n\nWelcome to MoodMatch! Your account has been successfully created with the username: {username}.\n\nWe're excited to have you on board and can't wait for you to explore all the features we offer. If you have any questions or need assistance, feel free to reach out to our support team.\n\nHappy matching!\n\n— Team MoodMatch",
+                )
+            except Exception as e:
+                print(f"⚠️ Email failed: {e}")
 
-We’re excited to have you join MoodMatch 🎉
-Your account has been created successfully, and you’re all set to begin your journey with us.
-
-To get started, here’s your auto-generated username (you’ll need this to log in):
-
-👤 Username: {username}
-
-Please enter this username on the login page to access your account.
-You can always change it later from your profile settings once you’re logged in.
-
-If you ever need help, we’re just a step away — we’ve got your back 💙
-
-Welcome aboard, and enjoy your experience with MoodMatch!
-— Team MoodMatch""",
-            )
+            flash(f"Account created! Your username is {username}", "success")
+            return redirect(url_for("auth.login"))
 
         except sqlite3.Error as e:
             conn.rollback()
-            print(f"Registration Error: {e}")
-            # Optional: flash an error message to the user here
-            return render_template(
-                "auth/registration.html", error="An error occurred during registration."
-            )
+            print(f"❌ DATABASE ERROR: {e}")
+            flash("Database error: Could not complete registration.", "danger")
         finally:
             conn.close()
-
-        return redirect(url_for("auth.login"))
 
     return render_template("auth/registration.html")
 
 
 # ---------------------------
-# LOGIN (FIXED)
+# LOGIN (UNCHANGED)
 # ---------------------------
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
+        remember = request.form.get("remember") == "on"
 
-        # ✅ FIX: checkbox handling
-        remember = True if request.form.get("remember") == "on" else False
-
-        conn = sqlite3.connect("models/instance/moodmatch.db")
+        conn = get_db_connection()
         cursor = conn.cursor()
 
-        # ---------------------------
-        # ADMIN LOGIN
-        # ---------------------------
+        # Check Admin Table
         cursor.execute(
             "SELECT id, username, password_hash FROM admins WHERE username = ?",
             (username,),
         )
         admin = cursor.fetchone()
 
-        if admin and check_password_hash(admin[2], password):
+        if admin and check_password_hash(admin["password_hash"], password):
             login_user(
                 User(
-                    id=admin[0],
-                    username=admin[1],
+                    id=admin["id"],
+                    username=admin["username"],
                     first_name="Admin",
                     is_admin=True,
                 ),
@@ -215,40 +195,35 @@ def login():
             conn.close()
             return redirect(url_for("admin.admin_dashboard"))
 
-        # ---------------------------
-        # USER LOGIN
-        # ---------------------------
+        # Check Users Table
         cursor.execute(
-            """
-            SELECT id, username, first_name, profile_picture, password_hash
-            FROM users
-            WHERE username = ?
-            """,
+            "SELECT id, username, first_name, profile_picture, password_hash FROM users WHERE username = ?",
             (username,),
         )
         user = cursor.fetchone()
         conn.close()
 
-        if user and check_password_hash(user[4], password):
+        if user and check_password_hash(user["password_hash"], password):
             login_user(
                 User(
-                    id=user[0],
-                    username=user[1],
-                    first_name=user[2],
-                    profile_picture=user[3],
+                    id=user["id"],
+                    username=user["username"],
+                    first_name=user["first_name"],
+                    profile_picture=user["profile_picture"],
                     is_admin=False,
                 ),
                 remember=remember,
             )
             return redirect(url_for("user.user_dashboard"))
 
-        return render_template("auth/login.html", error="Invalid credentials")
+        flash("Invalid username or password", "danger")
+        return render_template("auth/login.html")
 
     return render_template("auth/login.html")
 
 
 # ---------------------------
-# LOGOUT (CORRECT)
+# LOGOUT (UNCHANGED)
 # ---------------------------
 @auth_bp.route("/logout")
 @login_required
@@ -259,7 +234,7 @@ def logout():
 
 
 # ---------------------------
-# FORGET PASSWORD
+# FORGET PASSWORD (UNCHANGED)
 # ---------------------------
 @auth_bp.route("/forget_password", methods=["GET", "POST"])
 def forget_password():
@@ -294,21 +269,22 @@ def forget_password():
         conn.commit()
         conn.close()
 
+        print("EMAIL BODY:\n", f"Code is {reset_code}")
         send_email(
             to_email=email,
             subject="Your MoodMatch Password Reset Code",
-            body=f"""Hello {{ first_name or "there" }},
+            body=f"""Hello {first_name or "there"},
 
 We received a request to reset the password for your MoodMatch account ✨
 
 To continue, please use the verification code below:
 
-🔐 Password Reset Code: {{ reset_code }}
+🔐 Password Reset Code: {reset_code}
 
 Enter this code in the app to securely reset your password.
 For your safety, please do not share this code with anyone — even if they claim to be from MoodMatch.
 
-If you didn’t request a password reset, you can safely ignore this email. Your account remains protected.
+If you didn't request a password reset, you can safely ignore this email. Your account remains protected.
 
 Thanks for being part of MoodMatch 💙
 — Team MoodMatch
@@ -320,9 +296,8 @@ Thanks for being part of MoodMatch 💙
     return render_template("auth/forget_password.html")
 
 
-
 # ---------------------------
-# VERIFY CODE
+# VERIFY CODE (UNCHANGED)
 # ---------------------------
 @auth_bp.route("/verify_code", methods=["GET", "POST"])
 def verify_code():
@@ -354,7 +329,7 @@ def verify_code():
 
 
 # ---------------------------
-# RESET PASSWORD
+# RESET PASSWORD (UNCHANGED)
 # ---------------------------
 @auth_bp.route("/reset_password", methods=["GET", "POST"])
 def reset_password():

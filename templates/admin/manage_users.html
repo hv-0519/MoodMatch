@@ -3,229 +3,579 @@
 {% block sidebar_class %}static-expanded{% endblock %}
 
 {% block admin_styles %}
-<!-- Additional styles for manage users -->
+<style>
+    
+
+    /* 1. LAYOUT & PREMIUM BACKGROUND */
+    .admin-dashboard-wrapper.with-static-sidebar {
+        position: relative;
+        margin-left: 280px;
+        min-height: 100vh;
+        width: calc(100% - 280px);
+        background: transparent;
+    }
+
+    .decorative-bg {
+        position: fixed;
+        inset: 0;
+        left: 280px;
+        z-index: 0;
+        /* Mesh-style gradient matching your best UI */
+        background: radial-gradient(at 0% 0%, #fed7aa 0%, transparent 50%),
+            radial-gradient(at 100% 0%, #fecdd3 0%, transparent 50%),
+            radial-gradient(at 100% 100%, #fbcfe8 0%, transparent 50%),
+            radial-gradient(at 0% 100%, #e0e7ff 0%, transparent 50%),
+            #f8fafc;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    /* 2. ENHANCED ROAMING EMOJIS (User Themed) */
+    .shape {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        pointer-events: none;
+        z-index: 1;
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+        will-change: transform;
+    }
+
+    .shape-1::before {
+        content: "👤";
+        font-size: 160px;
+    }
+
+    .shape-2::before {
+        content: "🧑‍💻";
+        font-size: 130px;
+    }
+
+    .shape-3::before {
+        content: "🌟";
+        font-size: 90px;
+    }
+
+    .shape-4::before {
+        content: "🛡️";
+        font-size: 110px;
+    }
+
+    .shape-5::before {
+        content: "📱";
+        font-size: 140px;
+    }
+
+    .shape-6::before {
+        content: "🤝";
+        font-size: 100px;
+    }
+
+    .shape-7::before {
+        content: "💬";
+        font-size: 120px;
+    }
+
+    .shape-8::before {
+        content: "⚡";
+        font-size: 115px;
+    }
+
+    /* Animation Paths */
+    .shape-1 {
+        top: 5%;
+        left: 5%;
+        opacity: 0.12;
+        animation: roam1 30s linear infinite;
+    }
+
+    .shape-2 {
+        top: 70%;
+        left: 80%;
+        opacity: 0.1;
+        animation: roam2 40s linear infinite reverse;
+    }
+
+    .shape-3 {
+        top: 40%;
+        left: 30%;
+        opacity: 0.08;
+        animation: roam3 25s ease-in-out infinite;
+    }
+
+    .shape-4 {
+        top: 80%;
+        left: 10%;
+        opacity: 0.1;
+        animation: roam1 45s linear infinite reverse;
+    }
+
+    .shape-5 {
+        top: 20%;
+        left: 60%;
+        opacity: 0.07;
+        animation: roam2 35s ease-in-out infinite;
+    }
+
+    .shape-6 {
+        top: 10%;
+        left: 85%;
+        opacity: 0.09;
+        animation: roam3 50s linear infinite;
+    }
+
+    .shape-7 {
+        top: 50%;
+        left: 50%;
+        opacity: 0.06;
+        animation: roam1 28s ease-in-out infinite;
+    }
+
+    .shape-8 {
+        top: 85%;
+        left: 45%;
+        opacity: 0.11;
+        animation: roam2 32s linear infinite;
+    }
+
+    @keyframes roam1 {
+        0% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+        }
+
+        33% {
+            transform: translate(30vw, 20vh) rotate(120deg) scale(1.1);
+        }
+
+        66% {
+            transform: translate(-10vw, 60vh) rotate(240deg) scale(0.9);
+        }
+
+        100% {
+            transform: translate(0, 0) rotate(360deg) scale(1);
+        }
+    }
+
+    @keyframes roam2 {
+        0% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        50% {
+            transform: translate(-40vw, -40vh) rotate(-180deg);
+        }
+
+        100% {
+            transform: translate(0, 0) rotate(-360deg);
+        }
+    }
+
+    @keyframes roam3 {
+        0% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+        }
+
+        25% {
+            transform: translate(15vw, -10vh) rotate(90deg) scale(1.2);
+        }
+
+        75% {
+            transform: translate(-20vw, 40vh) rotate(270deg) scale(0.8);
+        }
+
+        100% {
+            transform: translate(0, 0) rotate(360deg) scale(1);
+        }
+    }
+
+    /* 3. CONTENT AREA & GLASS CARDS */
+    .admin-main-content {
+        position: relative;
+        z-index: 2;
+        padding: 40px;
+    }
+
+    .users-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+    }
+
+    .premium-card {
+        background: rgba(255, 255, 255, 0.45);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 28px;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .premium-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(px);
+    }
+
+    .premium-card:hover .user-avatar {
+        transform: scale(1.1) rotate(0deg);
+        outline-offset: 4px;
+    }
+
+    .user-avatar {
+        width: 90px;
+        height: 90px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+        border: 3px solid white;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .user-name {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .user-username {
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 25px;
+    }
+
+    /* 4. MODALS (View Profile) */
+    .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        width: 90%;
+        max-width: 450px;
+        border-radius: 32px;
+        padding: 40px;
+        text-align: center;
+        animation: modalIn 0.3s ease-out;
+    }
+
+    @keyframes modalIn {
+        from {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .btn-main {
+        background: linear-gradient(135deg, #be123c, #fb7185);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 16px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 15px -3px rgba(190, 18, 60, 0.3);
+    }
+
+    .btn-main:hover {
+        transform: scale(1.02);
+        box-shadow: 0 20px 25px -5px rgba(190, 18, 60, 0.4);
+    }
+
+    .btn-ghost {
+        background: rgba(241, 245, 249, 0.8);
+        color: #475569;
+        padding: 12px 20px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        font-weight: 600;
+        transition: 0.2s;
+        margin-top: 10px;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .btn-ghost:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+     @media (max-width: 768px) {
+        .admin-dashboard-wrapper.with-static-sidebar {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .decorative-bg {
+            left: 0;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .activities-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+            padding: 24px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block admin_content %}
-
-<!-- Main Content Area -->
 <div class="admin-dashboard-wrapper with-static-sidebar">
-  <div class="admin-header">
-    <div class="decorative-shapes-ac">
-      <div class="shape shape-1"></div>
-      <div class="shape shape-2"></div>
-      <div class="shape shape-3"></div>
+    <div class="decorative-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+        <div class="shape shape-6"></div>
+        <div class="shape shape-7"></div>
+        <div class="shape shape-8"></div>
     </div>
-    <div class="admin-header-content">
-      <div class="admin-title-section">
-        <h1>Manage Users</h1>
-        <p class="admin-subtitle">
-          Welcome back <b style="color:white;">"{{ admins|capitalize }}"</b> ! Here's an overview of all registered
-          users.
-        </p>
-      </div>
-    </div>
-  </div>
 
-  {% if error %}
-  <div class="alert alert-danger" style="border-radius: 10px; margin: 2rem;">{{ error }}</div>
-  {% endif %}
-  <div class="admin-content">
-    <div class="admin-table-card">
-      <div class="admin-table-header" style="position:relative; overflow:hidden;">
-
-        {% set colors = ['decorative-shapes-us', 'decorative-shapes-ac', 'decorative-shapes'] %}
-        <div class="{{ colors | random }}" style="position:absolute; inset:0; z-index:0; pointer-events:none;">
-          <div class="shape shape-1"></div>
-          <div class="shape shape-2"></div>
-          <div class="shape shape-3"></div>
+    <div class="admin-main-content">
+        <div style="margin-bottom: 40px;">
+            <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin: 0;">User Management</h1>
+            <p style="color: #64748b;">Oversee your community of <b style="color:#1e293b;">{{ users|length }}</b>
+                registered users.</p>
         </div>
 
-        <div style="position:relative; z-index:1;">
-          <h2 class="admin-card-title" style="color: white; font-size:xx-large">All Users</h2>
+        {% if users %}
+        <div class="users-grid">
+            {% for user in users %}
+            <div class="premium-card" onclick="viewUser(this)" data-user='{{ user | tojson | safe }}'>
+                <div class="user-avatar">
+                    {% if user['profile_picture'] %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ user['profile_picture']) }}" alt="Avatar"
+                        style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                    <span>👤</span>
+                    {% endif %}
+                </div>
 
-          <div class="admin-header-actions">
-            <div class="admin-search-box" style="align-items:end;">
-              <input type="text" class="admin-search-input" id="activitySearch" placeholder="Search Users..."
-                style="align-items: center;" />
-              <span class="admin-search-icon">🔍</span>
+                <div class="user-name">
+                    {{ user['first_name'] or '' }} {{ user['last_name'] or user['username'] }}
+                </div>
+
+                <div class="user-username">@{{ user['username'] }}</div>
+
+                <button class="btn-ghost" style="pointer-events: none;">View Detailed Profile</button>
             </div>
-          </div>
+            {% endfor %}
         </div>
-
-      </div>
-
-      <!-- Card Grid -->
-      {% if users %}
-      <div class="users-grid">
-        {% for user in users %}
-        <div class="user-card">
-          {% set colors = ['decorative-shapes-us', 'decorative-shapes-ac', 'decorative-shapes'] %}
-          <div class="{{ colors | random }}">
-            <div class="shape shape-1"></div>
-            <div class="shape shape-2"></div>
-            <div class="shape shape-3"></div>
-          </div>
-          <div class="avatar-wrapper">
-            {% if user['profile_picture'] %}
-            <img src="{{ url_for('static', filename='uploads/' ~ user['profile_picture']) }}"
-              alt="{{ user['first_name'] or user['username'] or '👤' }}">
-            {% else %}
-            <div
-              style="width:100%; height:100%; background:linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%); color:white; font-size:3.5rem; font-weight:bold; display:flex; align-items:center; justify-content:center;">
-              <span>👤</span>
-
-            </div>
-            {% endif %}
-          </div>
-
-          <div class="user-name">
-            {{ user['first_name'] or '' }} {{ user['last_name'] or '' }}
-            {% if not user['first_name'] and not user['last_name'] %}
-            {{ user['username'] or 'Unknown User' }}
-            {% endif %}
-          </div>
-
-          <div class="user-username">
-            @{{ user['username'] or 'n/a' }}
-          </div>
-
-          <div class="action-buttons">
-            <button class="btn-view" data-user='{{ user | tojson | safe }}' onclick="viewUser(this)">
-              View
-            </button>
-          </div>
+        {% else %}
+        <div style="text-align: center; padding: 100px 20px; position: relative; z-index: 2;">
+            <span style="font-size: 80px;">Empty</span>
+            <h2 style="color: #475569;">No users found</h2>
         </div>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="admin-empty-state">
-        <div class="admin-empty-icon">🧑</div>
-        <h3>No Users found</h3>
         {% endif %}
-      </div>
-      <div id="viewUserModal" class="admin-modal-overlay">
-        <div class="admin-modal-content premium-modal">
-          <div class="modal-header">
-            <h2>User Profile</h2>
-            <button class="close-btn" onclick="closeViewModal()">❌</button>
-          </div>
+    </div>
+</div>
 
-          <div class="modal-body">
-            {% set colors = ['decorative-shapes-us', 'decorative-shapes-ac', 'decorative-shapes'] %}
-
-            <div class="{{ colors | random }}" style="position:absolute; inset:0; z-index:0; pointer-events:none;">
-              <div class="shape shape-1"></div>
-              <div class="shape shape-2"></div>
-              <div class="shape shape-3"></div>
-            </div>
-
-            <div style="position:relative; z-index:1;">
-
-              <div class="profile-header">
-                <div class="avatar-wrapper">
-                  <div id="detailAvatar" class="avatar"></div>
-                  <span id="detailBadge" class="status-badge" style="display:none;"></span>
-                </div>
-                <div class="user-meta">
-                  <h3 id="detailFullName" class="user-name"></h3>
-                  <p id="detailUsername" class="user-handle"></p>
-                </div>
-              </div>
-
-              <div class="detail-grid">
-                <div class="detail-item">
-                  <label>Email</label>
-                  <p id="detailEmail"></p>
-                </div>
-                <div class="detail-item">
-                  <label>Phone</label>
-                  <p id="detailPhone"></p>
-                </div>
-                <div class="detail-item">
-                  <label>Gender / DOB</label>
-                  <p id="detailGenderDOB"></p>
-                </div>
-                <div class="detail-item full-width">
-                  <label>Location / Address</label>
-                  <p id="detailAddress"></p>
-                </div>
-              </div>
-
-              <div class="interests-section full-width">
-                <label style="color: white;">Selected Interests</label>
-                <div id="detailInterests" class="interests-tags"></div>
-              </div>
-
-            </div>
-          </div>
-          <div class="modal-footer"> <button class="btn-view" onclick="closeViewModal()">Close</button> </div>
+<div id="viewUserModal" class="modal">
+    <div class="modal-content" style="max-width: 550px; padding: 30px; border-radius: 24px;">
+        <div id="detailAvatar"
+            style="width:120px; height:120px; margin: 0 auto 15px; border-radius: 50%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size: 3rem; overflow:hidden; border: 4px solid #fed7aa; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            👤
         </div>
-      </div>
 
-      <script>
-        function viewUser(buttonElement) {
-          const user = JSON.parse(buttonElement.getAttribute('data-user'));
-          const modal = document.getElementById('viewUserModal');
-          if (!modal) return;
+        <h2 id="detailFullName"
+            style="margin: 0; font-weight: 800; color: #1e293b; font-size: 1.5rem; text-align: center;"></h2>
+        <p id="detailUsername" style="margin: 0 0 25px; color: #64748b; font-size: 1rem; text-align: center;"></p>
 
-          document.getElementById('detailFullName').innerText = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username;
-          document.getElementById('detailUsername').innerText = `@${user.username}`;
-          document.getElementById('detailEmail').innerText = user.email;
-          document.getElementById('detailPhone').innerText = user.phone_number || 'N/A';
-          document.getElementById('detailGenderDOB').innerText = `${user.gender || 'N/A'} | ${user.date_of_birth || 'N/A'}`;
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+            <div class="detail-box">
+                <label class="detail-label">Gender</label>
+                <p id="detailGender" class="detail-value">-</p>
+            </div>
+            <div class="detail-box">
+                <label class="detail-label">Birthdate</label>
+                <p id="detailBirth" class="detail-value">-</p>
+            </div>
+            <div class="detail-box">
+                <label class="detail-label">Phone Number</label>
+                <p id="detailPhone" class="detail-value">-</p>
+            </div>
+            <div class="detail-box">
+                <label class="detail-label">User ID</label>
+                <p id="detailId" class="detail-value">-</p>
+            </div>
+        </div>
 
-          const badge = document.getElementById('detailBadge');
-          badge.innerText = user.status_tag;
-          badge.className = `admin-badge ${user.status_tag.toLowerCase()}`;
+        <div
+            style="background: #f8fafc; border-radius: 20px; padding: 20px; margin-bottom: 25px; text-align: left; border: 1px solid #e2e8f0;">
+            <div style="margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+                <label class="detail-label">Email Address</label>
+                <p id="detailEmail" style="margin:0; font-weight: 700; color: #0f172a; word-break: break-all;"></p>
+            </div>
 
-          const addressParts = [user.street_address, user.city, user.state, user.postal_code, user.country].filter(Boolean);
-          document.getElementById('detailAddress').innerText = addressParts.length > 0 ? addressParts.join(', ') : 'No address provided';
+            <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                <div>
+                    <label class="detail-label">Street Address</label>
+                    <p id="detailStreet" style="margin:0; font-weight: 600; color: #334155;"></p>
+                </div>
 
-          const interestsDiv = document.getElementById('detailInterests');
-          interestsDiv.innerHTML = '';
-          if (user.user_interests) {
-            user.user_interests.split(', ').forEach(interest => {
-              const span = document.createElement('span');
-              span.className = 'interest-pill';
-              span.innerText = interest;
-              interestsDiv.appendChild(span);
-            });
-          } else {
-            interestsDiv.innerHTML = '<em>No interests selected</em>';
-          }
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label class="detail-label">City</label>
+                        <p id="detailCity" class="detail-value"></p>
+                    </div>
+                    <div>
+                        <label class="detail-label">State</label>
+                        <p id="detailState" class="detail-value"></p>
+                    </div>
+                    <div>
+                        <label class="detail-label">Zip Code</label>
+                        <p id="detailPostal" class="detail-value"></p>
+                    </div>
+                </div>
 
-          const avatarDiv = document.getElementById('detailAvatar');
-          if (user.profile_picture) {
-            avatarDiv.innerHTML = `<img src="/static/uploads/${user.profile_picture}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">`;
-          } else {
-            const initials = (user.first_name?.[0] || '') + (user.last_name?.[0] || user.username[0]);
-            avatarDiv.innerHTML = `<div class="default-avatar-placeholder">${initials.toUpperCase()}</div>`;
-          }
+                <div>
+                    <label class="detail-label">Country</label>
+                    <p id="detailCountry" style="margin:0; font-weight: 700; color: #334155;"></p>
+                </div>
+            </div>
+        </div>
 
-          modal.style.display = 'flex';
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <p style="font-size: 0.75rem; color: #94a3b8; margin: 0;">Member Since: <span id="detailJoined"
+                    style="font-weight: 600;">-</span></p>
+            <button class="btn-main" onclick="closeViewModal()" style="padding: 10px 25px; min-width: 140px;">Close
+                Profile</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .detail-box {
+        background: #f8fafc;
+        padding: 12px;
+        border-radius: 16px;
+        text-align: left;
+        border: 1px solid #f1f5f9;
+    }
+
+    .detail-label {
+        display: block;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: #94a3b8;
+        margin-bottom: 2px;
+        letter-spacing: 0.025em;
+    }
+
+    .detail-value {
+        margin: 0;
+        font-weight: 700;
+        color: #334155;
+        font-size: 0.9rem;
+    }
+</style>
+
+    <script>
+        function viewUser(card) {
+        // Parse the full user object from the data attribute
+        const user = JSON.parse(card.dataset.user);
+
+        // 1. Name & Username
+        const fullName = ((user.first_name || '') + ' ' + (user.last_name || '')).trim();
+        document.getElementById('detailFullName').innerText = fullName || user.username;
+        document.getElementById('detailUsername').innerText = '@' + user.username;
+        document.getElementById('detailId').innerText = '#' + (user.id || '0');
+
+        // 2. Personal Details
+        document.getElementById('detailGender').innerText = user.gender || 'Not Specified';
+        document.getElementById('detailBirth').innerText = user.date_of_birth || 'N/A';
+        document.getElementById('detailPhone').innerText = user.phone_number || 'N/A';
+        document.getElementById('detailEmail').innerText = user.email || 'N/A';
+
+        // 3. Address & Location Details
+        document.getElementById('detailStreet').innerText = user.street_address || 'No address provided';
+        document.getElementById('detailCity').innerText = user.city || '-';
+        document.getElementById('detailState').innerText = user.state || '-';
+        document.getElementById('detailPostal').innerText = user.postal_code || '-';
+        document.getElementById('detailCountry').innerText = user.country || 'N/A';
+
+        // 4. Registration Date Formatting
+        if (document.getElementById('detailJoined')) {
+            const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'long', year: 'numeric'
+            }) : 'N/A';
+        document.getElementById('detailJoined').innerText = joinDate;
         }
+
+        // 5. Avatar Logic
+        const avatarDiv = document.getElementById('detailAvatar');
+        if (user.profile_picture && user.profile_picture !== 'default.png') {
+            avatarDiv.innerHTML = `<img src="/static/uploads/${user.profile_picture}" 
+                                    style="width:100%; height:100%; object-fit:cover;">`;
+        } else {
+            avatarDiv.innerHTML = `👤`;
+        }
+
+        // Show Modal
+        document.getElementById('viewUserModal').classList.add('active');
+    }
 
         function closeViewModal() {
-          document.getElementById('viewUserModal').style.display = 'none';
-        }
+            document.getElementById('viewUserModal').classList.remove('active');
+    }
 
-        function initializePageScripts() {
-          console.log("[v0] Manage Users page initialized");
-        }
+    // Close on Escape or Outside Click
+    document.addEventListener('keydown', (e) => { 
+        if (e.key === "Escape") closeViewModal(); 
+    });
 
-        /* ===== SEARCH (CARD BASED) ===== */
-        const searchInput = document.getElementById("activitySearch");
-        if (searchInput) {
-          searchInput.addEventListener("input", e => {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll(".user-card").forEach(card => {
-              card.style.display = card.textContent.toLowerCase().includes(term)
-                ? ""
-                : "none";
-            });
-          });
-        }
-      </script>
+    window.addEventListener('click', (e) => {
+        if (e.target.id === 'viewUserModal') closeViewModal();
+    });
+</script>
 
-      {% endblock %}
+{% endblock %}
