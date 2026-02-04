@@ -163,7 +163,7 @@ def manage_users():
             LEFT JOIN user_interests ui ON u.id = ui.user_id
             LEFT JOIN interests i ON ui.interest_id = i.id
             GROUP BY u.id
-            ORDER BY u.created_at
+            ORDER BY u.id
         """
         )
         users = [dict(row) for row in cursor.fetchall()]

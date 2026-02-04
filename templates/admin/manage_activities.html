@@ -3,6 +3,8 @@
 {% block sidebar_class %}static-expanded{% endblock %}
 
 {% block admin_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_css/admin.css') }}">
+
 <style>
     /* Layout & Background */
     .admin-dashboard-wrapper.with-static-sidebar {
@@ -266,7 +268,6 @@
         margin-bottom: 20px;
         flex-grow: 1;
         display: -webkit-box;
-        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
@@ -701,7 +702,6 @@
                 </select>
             </div>
         </div>
-
         <!-- Activities Grid -->
         <div class="activities-grid" id="activitiesGrid">
             {% for act in activities %}
@@ -1218,6 +1218,60 @@
             });
             document.body.style.overflow = 'auto';
         }
+    });
+
+    const emojiMap = [
+        { keys: ['puzzle', 'puzzles'], emoji: '🧩' },
+        { keys: ['board game', 'board-game', 'chess', 'ludo', 'carrom'], emoji: '♟' },
+        { keys: ['jog', 'jogging', 'run', 'running'], emoji: '🏃' },
+        { keys: ['swim', 'swimming'], emoji: '🏊' },
+        { keys: ['cycle', 'cycling', 'bike', 'biking'], emoji: '🚴' },
+        { keys: ['walk', 'walking'], emoji: '🚶' },
+        { keys: ['paint', 'painting'], emoji: '🎨' },
+        { keys: ['sing', 'song', 'music'], emoji: '🎵' },
+        { keys: ['garden', 'gardening'], emoji: '🌱' },
+        { keys: ['write', 'writing', 'journal'], emoji: '✍️' },
+        { keys: ['draw', 'art', 'painting'], emoji: '🎨' },
+        { keys: ['music', 'song', 'sing'], emoji: '🎵' },
+        { keys: ['cook', 'cooking'], emoji: '🍳' },
+        { keys: ['read', 'reading', 'book'], emoji: '📚' },
+        { keys: ['game', 'gaming'], emoji: '🎮' },
+        { keys: ['meditate', 'meditation'], emoji: '🧘‍♂️' },
+        { keys: ['yoga'], emoji: '🧘‍♀️' },
+        { keys: ['hike', 'hiking'], emoji: '🥾' },
+        { keys: ['cycle', 'cycling'], emoji: '🚴' },
+        { keys: ['gym', 'workout'], emoji: '🏋️' },
+        { keys: ['dance'], emoji: '💃' },
+        { keys: ['travel', 'trip'], emoji: '✈️' },
+        { keys: ['garden', 'gardening'], emoji: '🌱' },
+        { keys: ['care', 'self'], emoji: '🧘' },
+        { keys: ['organize', 'organizing'], emoji: '🗂️' },
+        { keys: ['meet', 'friends'], emoji: '🫂' },
+        { keys: ['volunteer'], emoji: '🤝' },
+        { keys: ['sport'], emoji: '🏏' }
+    ];
+
+    function getEmojiFromName(name) {
+        const lower = name.toLowerCase();
+        for (const entry of emojiMap) {
+            if (entry.keys.some(k => lower.includes(k))) {
+                return entry.emoji;
+            }
+        }
+        return null; // fallback
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.premium-card').forEach(card => {
+            const name = card.dataset.name || '';
+            const categoryIcon = card.dataset.categoryIcon || '🎯';
+
+            const emojiFromName = getEmojiFromName(name);
+            const finalEmoji = emojiFromName || categoryIcon;
+
+            const iconEl = card.querySelector('[data-emoji-target]');
+            if (iconEl) iconEl.textContent = finalEmoji;
+        });
     });
 </script>
 {% endblock %}

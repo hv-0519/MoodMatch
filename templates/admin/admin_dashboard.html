@@ -3,6 +3,10 @@
 {% block sidebar_class %}static-expanded{% endblock %}
 
 {% block admin_styles %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_css/admin.css') }}">
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_css/activity.css') }}"> -->
+
 <style>
     /* 1. LAYOUT & PREMIUM BACKGROUND (Matching Category Page) */
     .admin-dashboard-wrapper.with-static-sidebar {

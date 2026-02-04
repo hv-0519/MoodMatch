@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<!-- User Module CSS -->
+<style>
+    /* ===========================
+       USER SIDEBAR STYLES
+    =========================== */
+    .user-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 280px;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(255, 255, 255, 0.6);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .user-sidebar.collapsed {
+        width: 70px;
+    }
+
+    /* Profile Section */
+    .user-profile-section {
+        padding: 30px 20px;
+        border-bottom: 1px solid rgba(190, 18, 60, 0.1);
+        transition: all 0.3s;
+    }
+
+    .user-profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #be123c, #fb7185);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        box-shadow: 0 8px 16px rgba(190, 18, 60, 0.2);
+        transition: all 0.3s;
+        overflow: hidden;
+    }
+
+    .user-profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .user-profile-avatar-text {
+        color: white;
+        font-size: 28px;
+        font-weight: 900;
+    }
+
+    .user-profile-info {
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .user-profile-name {
+        font-weight: 800;
+        color: #1e293b;
+        font-size: 1.1rem;
+        margin: 0 0 4px 0;
+    }
+
+    .user-profile-username {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .user-sidebar.collapsed .user-profile-info {
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+    }
+
+    .user-sidebar.collapsed .user-profile-avatar {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 0;
+    }
+
+    /* Navigation Menu */
+    .user-nav-menu {
+        flex: 1;
+        padding: 20px 0;
+    }
+
+    .user-nav-item {
+        display: flex;
+        align-items: center;
+        padding: 14px 20px;
+        color: #64748b;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-weight: 600;
+        gap: 15px;
+        margin: 4px 15px;
+        border-radius: 12px;
+    }
+
+    .user-nav-item:hover {
+        background: rgba(190, 18, 60, 0.1);
+        color: #be123c;
+        transform: translateX(4px);
+    }
+
+    .user-nav-item.active {
+        background: rgba(190, 18, 60, 0.15);
+        color: #be123c;
+        font-weight: 700;
+    }
+
+    .user-nav-icon {
+        font-size: 22px;
+        width: 28px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .user-nav-text {
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+
+    .user-sidebar.collapsed .user-nav-text {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    .user-sidebar.collapsed .user-nav-item {
+        justify-content: center;
+        padding: 14px;
+    }
+
+    /* Logout Button */
+    .user-logout-section {
+        padding: 20px;
+        border-top: 1px solid rgba(190, 18, 60, 0.1);
+    }
+
+    .user-logout-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 14px;
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .user-logout-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .user-sidebar.collapsed .user-logout-btn {
+        padding: 14px;
+    }
+
+    .user-sidebar.collapsed .user-logout-btn span:last-child {
+        display: none;
+    }
+
+    /* Hamburger Menu */
+    .hamburger-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 12px;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+    }
+
+    .hamburger-btn:hover {
+        background: white;
+        transform: scale(1.05);
+    }
+
+    .hamburger-icon {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .hamburger-icon span {
+        width: 20px;
+        height: 2px;
+        background: #be123c;
+        border-radius: 2px;
+        transition: all 0.3s;
+    }
+
+    /* Sidebar Overlay */
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+
+    .sidebar-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    /* Static Sidebar Mode */
+    .user-sidebar.static-expanded {
+        width: 280px;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .hamburger-btn {
+            display: flex;
+        }
+
+        .user-sidebar {
+            transform: translateX(-100%);
+        }
+
+        .user-sidebar.mobile-open {
+            transform: translateX(0);
+        }
+
+        .user-sidebar.static-expanded {
+            width: 70px;
+            transform: translateX(0);
+        }
+
+        .user-sidebar.static-expanded .user-nav-text,
+        .user-sidebar.static-expanded .user-profile-info {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .user-sidebar.static-expanded .user-profile-avatar {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 0;
+        }
+
+        .user-sidebar.static-expanded .user-nav-item {
+            justify-content: center;
+            padding: 14px;
+        }
+
+        .user-sidebar.static-expanded .user-logout-btn span:last-child {
+            display: none;
+        }
+    }
+
+    /* Scrollbar Styling */
+    .user-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .user-sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .user-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(190, 18, 60, 0.3);
+        border-radius: 10px;
+    }
+
+    .user-sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(190, 18, 60, 0.5);
+    }
+</style>
+
+{% block user_styles %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<!-- Hamburger Menu Button -->
+<button class="hamburger-btn" id="hamburgerBtn">
+    <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- User Sidebar -->
+<aside class="user-sidebar {% block sidebar_class %}{% endblock %}" id="userSidebar">
+    <!-- Profile Section -->
+    <div class="user-profile-section">
+        <div class="user-profile-avatar">
+            {% if current_user.profile_picture %}
+                <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) }}" alt="Profile">
+            {% else %}
+                <span class="user-profile-avatar-text">
+                    {{ (current_user.first_name[0] if current_user.first_name else current_user.username[0])|upper }}
+                </span>
+            {% endif %}
+        </div>
+        <div class="user-profile-info">
+            <h3 class="user-profile-name">
+                {{ current_user.first_name or current_user.username }}
+            </h3>
+            <p class="user-profile-username">@{{ current_user.username }}</p>
+        </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="user-nav-menu">
+        <a href="{{ url_for('user.user_dashboard') }}" 
+           class="user-nav-item {{ 'active' if request.endpoint == 'user.user_dashboard' }}">
+            <span class="user-nav-icon">🏠</span>
+            <span class="user-nav-text">Dashboard</span>
+        </a>
+
+        <a href="{{ url_for('user.try_activity') }}" 
+           class="user-nav-item {{ 'active' if request.endpoint == 'user.try_activity' }}">
+            <span class="user-nav-icon">🎯</span>
+            <span class="user-nav-text">Try Activity</span>
+        </a>
+
+        <a href="{{ url_for('user.favorites') }}" 
+           class="user-nav-item {{ 'active' if request.endpoint == 'user.favorites' }}">
+            <span class="user-nav-icon">⭐</span>
+            <span class="user-nav-text">Favorites</span>
+        </a>
+
+        <a href="{{ url_for('user.history') }}" 
+           class="user-nav-item {{ 'active' if request.endpoint == 'user.history' }}">
+            <span class="user-nav-icon">📊</span>
+            <span class="user-nav-text">History</span>
+        </a>
+
+        <a href="{{ url_for('user.profile') }}" 
+           class="user-nav-item {{ 'active' if request.endpoint == 'user.profile' }}">
+            <span class="user-nav-icon">👤</span>
+            <span class="user-nav-text">Profile</span>
+        </a>
+    </nav>
+
+    <!-- Logout Section -->
+    <div class="user-logout-section">
+        <a href="{{ url_for('auth.logout') }}" class="user-logout-btn">
+            <span>🚪</span>
+            <span>Logout</span>
+        </a>
+    </div>
+</aside>
+
+<!-- Main Content Area -->
+{% block user_content %}{% endblock %}
+
+<!-- Sidebar Toggle Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('userSidebar');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        // Toggle sidebar on mobile
+        hamburgerBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking overlay
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+        });
+
+        // Close sidebar when clicking nav items on mobile
+        const navItems = document.querySelectorAll('.user-nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

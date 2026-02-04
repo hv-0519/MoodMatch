@@ -1,144 +1,130 @@
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing Activity Management...');
-    
-    // Get all modal elements
-    const addModal = document.getElementById('addModal');
-    const editModal = document.getElementById('editModal');
-    const deleteModal = document.getElementById('deleteModal');
-    const viewModal = document.getElementById('viewModal');
-    
-    // Get all buttons
-    const addActivityBtn = document.getElementById('addActivityBtn');
-    const addFirstActivityBtn = document.getElementById('addFirstActivityBtn');
-    const closeAddBtn = document.getElementById('closeAddBtn');
-    const closeEditBtn = document.getElementById('closeEditBtn');
-    const closeDeleteBtn = document.getElementById('closeDeleteBtn');
-    const closeViewBtn = document.getElementById('closeViewBtn');
-    
-    // Modal functions
-    function openAddModal() {
-        console.log('Opening Add Modal');
-        addModal.classList.add('active');
+function openModal(id) {
+        document.getElementById(id).classList.add('active');
+        document.body.style.overflow = 'hidden';
     }
-    
-    function closeAddModal() {
-        console.log('Closing Add Modal');
-        addModal.classList.remove('active');
-        document.getElementById('add_name').value = '';
-        document.getElementById('add_type').value = '';
-        document.getElementById('add_priority').value = '1';
-        const descField = document.getElementById('add_description');
-        if (descField) descField.value = '';
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+        document.body.style.overflow = 'auto';
     }
-    
-    function openEditModal(id, name, type, priority) {
-        console.log('Opening Edit Modal for ID:', id);
-        document.getElementById('edit_id').value = id;
-        document.getElementById('edit_name').value = name;
-        document.getElementById('edit_type').value = type;
-        document.getElementById('edit_priority').value = priority;
-        editModal.classList.add('active');
-    }
-    
-    function closeEditModal() {
-        console.log('Closing Edit Modal');
-        editModal.classList.remove('active');
-    }
-    
-    function openDeleteModal(id) {
-        console.log('Opening Delete Modal for ID:', id);
-        document.getElementById('delete_id').value = id;
-        deleteModal.classList.add('active');
-    }
-    
-    function closeDeleteModal() {
-        console.log('Closing Delete Modal');
-        deleteModal.classList.remove('active');
-    }
-    
-    function openViewModal(id, name, type, priority) {
-        console.log('Opening View Modal for ID:', id);
-        document.getElementById('view_id').textContent = '#' + id;
-        document.getElementById('view_name').textContent = name;
-        document.getElementById('view_type').textContent = type.charAt(0).toUpperCase() + type.slice(1);
-        document.getElementById('view_priority').textContent = priority;
-        viewModal.classList.add('active');
-    }
-    
-    function closeViewModal() {
-        console.log('Closing View Modal');
-        viewModal.classList.remove('active');
-    }
-    
-    // Attach button listeners
-    if (addActivityBtn) {
-        addActivityBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            openAddModal();
+
+    // ==================== FILTERING ====================
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const energyFilter = document.getElementById('energyFilter');
+    const locationFilter = document.getElementById('locationFilter');
+    const grid = document.getElementById('activitiesGrid');
+
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedCategory = categoryFilter.value;
+        const selectedEnergy = energyFilter.value;
+        const selectedLocation = locationFilter.value;
+
+        const cards = grid.querySelectorAll('.premium-card');
+
+        cards.forEach(card => {
+            const name = card.dataset.name.toLowerCase();
+            const categoryId = card.dataset.categoryId;
+            const energy = card.dataset.energy.toLowerCase();
+            const location = card.dataset.location.toLowerCase();
+
+            const matchesSearch = name.includes(searchTerm);
+            const matchesCategory = !selectedCategory || categoryId === selectedCategory;
+            const matchesEnergy = !selectedEnergy || energy === selectedEnergy;
+            const matchesLocation = !selectedLocation || location === selectedLocation;
+
+            card.style.display = (matchesSearch && matchesCategory && matchesEnergy && matchesLocation) ? '' : 'none';
         });
     }
-    
-    if (addFirstActivityBtn) {
-        addFirstActivityBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            openAddModal();
+
+    searchInput.addEventListener('input', applyFilters);
+    categoryFilter.addEventListener('change', applyFilters);
+    energyFilter.addEventListener('change', applyFilters);
+    locationFilter.addEventListener('change', applyFilters);
+
+    // ==================== VIEW ACTIVITY ====================
+    function viewActivity(card) {
+        document.getElementById('view-title').innerText = card.dataset.name;
+        document.getElementById('view-emoji').innerText = card.dataset.categoryIcon;
+        document.getElementById('view-category').innerText = card.dataset.categoryName;
+        document.getElementById('view-type').innerText = card.dataset.type;
+        document.getElementById('view-energy').innerText = card.dataset.energy || 'Not specified';
+        document.getElementById('view-location').innerText = card.dataset.location || 'Not specified';
+        document.getElementById('view-social').innerText = card.dataset.social || 'Not specified';
+
+        const minTime = card.dataset.minTime || 0;
+        const maxTime = card.dataset.maxTime || 0;
+        document.getElementById('view-time').innerText = minTime && maxTime ? `${minTime} - ${maxTime} mins` : 'Not specified';
+
+        const minBudget = card.dataset.minBudget || 0;
+        const maxBudget = card.dataset.maxBudget || 0;
+        document.getElementById('view-budget').innerText = minBudget || maxBudget ? `₹${minBudget} - ₹${maxBudget}` : 'Free';
+
+        document.getElementById('view-priority').innerText = card.dataset.priority || '0';
+        document.getElementById('view-description').innerText = card.dataset.desc || 'No description provided';
+
+        // Mood tags
+        const moodTagsContainer = document.getElementById('view-mood-tags');
+        moodTagsContainer.innerHTML = '';
+        const moodTags = card.dataset.moodTags.split(',').map(tag => tag.trim());
+        moodTags.forEach(tag => {
+            const span = document.createElement('span');
+            span.className = 'mood-tag';
+            span.textContent = tag;
+            moodTagsContainer.appendChild(span);
         });
+
+        const isActive = card.dataset.isActive === '1';
+        document.getElementById('view-status').innerHTML = isActive
+            ? '<span style="color:#10b981; font-weight:700;">✅ Active</span>'
+            : '<span style="color:#ef4444; font-weight:700;">❌ Inactive</span>';
+
+        openModal('viewModal');
     }
-    
-    if (closeAddBtn) closeAddBtn.addEventListener('click', closeAddModal);
-    if (closeEditBtn) closeEditBtn.addEventListener('click', closeEditModal);
-    if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', closeDeleteModal);
-    if (closeViewBtn) closeViewBtn.addEventListener('click', closeViewModal);
-    
-    // Table action buttons
-    const tableBody = document.getElementById('activitiesTableBody');
-    if (tableBody) {
-        tableBody.addEventListener('click', function(e) {
-            const button = e.target.closest('.admin-icon-btn');
-            if (!button) return;
-            
-            e.preventDefault();
-            
-            const row = button.closest('tr');
-            const id = row.getAttribute('data-id');
-            const name = row.getAttribute('data-name');
-            const type = row.getAttribute('data-type');
-            const priority = row.getAttribute('data-priority');
-            
-            if (button.classList.contains('view-btn')) {
-                openViewModal(id, name, type, priority);
-            } else if (button.classList.contains('edit-btn')) {
-                openEditModal(id, name, type, priority);
-            } else if (button.classList.contains('delete-btn')) {
-                openDeleteModal(id);
-            }
-        });
+
+    // ==================== EDIT ACTIVITY ====================
+    function editActivity(card) {
+        document.getElementById('edit_id').value = card.dataset.id;
+        document.getElementById('edit_name').value = card.dataset.name;
+        document.getElementById('edit_execution_type').value = card.dataset.type;
+        document.getElementById('edit_category_id').value = card.dataset.categoryId;
+        document.getElementById('edit_priority').value = card.dataset.priority;
+        document.getElementById('edit_mood_tags').value = card.dataset.moodTags;
+        document.getElementById('edit_description').value = card.dataset.desc;
+        document.getElementById('edit_energy_level').value = card.dataset.energy;
+        document.getElementById('edit_location_type').value = card.dataset.location;
+        document.getElementById('edit_social_type').value = card.dataset.social;
+        document.getElementById('edit_min_time').value = card.dataset.minTime;
+        document.getElementById('edit_max_time').value = card.dataset.maxTime;
+        document.getElementById('edit_min_budget').value = card.dataset.minBudget;
+        document.getElementById('edit_max_budget').value = card.dataset.maxBudget;
+        document.getElementById('edit_is_active').checked = card.dataset.isActive === '1';
+
+        openModal('editModal');
     }
-    
-    // Close modals on backdrop click
-    [addModal, editModal, deleteModal, viewModal].forEach(modal => {
-        if (modal) {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('active');
-                }
+
+    // ==================== DELETE ACTIVITY ====================
+    function deleteActivity(card) {
+        document.getElementById('delete_id').value = card.dataset.id;
+        document.getElementById('delete-name-preview').textContent = card.dataset.name;
+        openModal('deleteModal');
+    }
+
+    // ==================== CLOSE ON OUTSIDE CLICK ====================
+    window.onclick = function (e) {
+        if (e.target.classList.contains('modal')) {
+            e.target.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    };
+
+    // ==================== ESCAPE KEY CLOSES MODAL ====================
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
             });
+            document.body.style.overflow = 'auto';
         }
     });
-    
-    // Search functionality
-    const searchInput = document.getElementById('activitySearch');
-    if (searchInput && tableBody) {
-        searchInput.addEventListener('keyup', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = tableBody.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        });
-    }
-    
-    console.log('✓ Initialization complete!');
-});

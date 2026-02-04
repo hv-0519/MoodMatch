@@ -3,9 +3,8 @@
 {% block sidebar_class %}static-expanded{% endblock %}
 
 {% block admin_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_css/admin.css') }}">
 <style>
-    
-
     /* 1. LAYOUT & PREMIUM BACKGROUND */
     .admin-dashboard-wrapper.with-static-sidebar {
         position: relative;
@@ -335,7 +334,7 @@
         color: #0f172a;
     }
 
-     @media (max-width: 768px) {
+    @media (max-width: 768px) {
         .admin-dashboard-wrapper.with-static-sidebar {
             margin-left: 0;
             width: 100%;
@@ -411,7 +410,7 @@
         </div>
         {% else %}
         <div style="text-align: center; padding: 100px 20px; position: relative; z-index: 2;">
-            <span style="font-size: 80px;">Empty</span>
+            <span style="font-size: 80px;">👥</span>
             <h2 style="color: #475569;">No users found</h2>
         </div>
         {% endif %}
@@ -519,8 +518,8 @@
     }
 </style>
 
-    <script>
-        function viewUser(card) {
+<script>
+    function viewUser(card) {
         // Parse the full user object from the data attribute
         const user = JSON.parse(card.dataset.user);
 
@@ -546,9 +545,9 @@
         // 4. Registration Date Formatting
         if (document.getElementById('detailJoined')) {
             const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB', {
-            day: 'numeric', month: 'long', year: 'numeric'
+                day: 'numeric', month: 'long', year: 'numeric'
             }) : 'N/A';
-        document.getElementById('detailJoined').innerText = joinDate;
+            document.getElementById('detailJoined').innerText = joinDate;
         }
 
         // 5. Avatar Logic
@@ -564,13 +563,13 @@
         document.getElementById('viewUserModal').classList.add('active');
     }
 
-        function closeViewModal() {
-            document.getElementById('viewUserModal').classList.remove('active');
+    function closeViewModal() {
+        document.getElementById('viewUserModal').classList.remove('active');
     }
 
     // Close on Escape or Outside Click
-    document.addEventListener('keydown', (e) => { 
-        if (e.key === "Escape") closeViewModal(); 
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") closeViewModal();
     });
 
     window.addEventListener('click', (e) => {
