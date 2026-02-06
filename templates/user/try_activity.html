@@ -1,0 +1,164 @@
+{% extends 'user/user_base.html' %}
+{% block sidebar_class %}static-expanded{% endblock %}
+
+{% block user_styles %}
+<style>
+    .user-page-wrapper {
+        margin-left: 280px;
+        min-height: 100vh;
+        padding: 40px;
+        background: linear-gradient(120deg, #fed7aa 0%, #fecdd3 50%, #fbcfe8 100%);
+    }
+
+    .premium-card {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 24px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+
+    .mood-input-area {
+        margin-bottom: 30px;
+    }
+
+    .mood-input {
+        width: 100%;
+        padding: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 16px;
+        font-size: 1.1rem;
+        background: rgba(255, 255, 255, 0.6);
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .submit-btn {
+        background: #be123c;
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(190, 18, 60, 0.3);
+        transition: 0.3s;
+    }
+
+    .submit-btn:hover {
+        background: #a71136;
+        transform: translateY(-2px);
+    }
+
+    .mood-result {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .activities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .activity-card {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 20px;
+        padding: 20px;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .activity-card:hover {
+        background: rgba(255, 255, 255, 0.7);
+        transform: translateY(-4px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .activity-icon {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+
+    @media (max-width: 768px) {
+        .user-page-wrapper { margin-left: 70px; padding: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block user_content %}
+<div class="user-page-wrapper">
+    <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin-bottom: 10px;">
+        How are you feeling? 😊
+    </h1>
+    <p style="color: #64748b; margin-bottom: 30px;">
+        Tell us your mood and we'll recommend perfect activities
+    </p>
+
+    <div class="premium-card">
+        <form method="POST">
+            <div class="mood-input-area">
+                <label style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 10px;">
+                    Express your mood:
+                </label>
+                <textarea 
+                    name="mood_input" 
+                    class="mood-input" 
+                    placeholder="e.g., I'm feeling stressed and anxious today..."
+                    required>{{ mood_input if mood_input }}</textarea>
+            </div>
+            <button type="submit" class="submit-btn">🎯 Find Activities</button>
+        </form>
+    </div>
+
+    {% if show_results %}
+    <div class="mood-result">
+        <h2 style="font-size: 1.5rem; margin-bottom: 10px;">
+            {{ mood_emoji }} Your Mood: {{ mood_type|capitalize }}
+        </h2>
+        <p style="color: #64748b;">Sentiment Score: {{ "%.2f"|format(sentiment_score) }}</p>
+    </div>
+
+    <div class="premium-card">
+        <h2 style="font-size: 1.8rem; font-weight: 700; color: #1e293b; margin-bottom: 20px;">
+            Recommended Activities for You
+        </h2>
+
+        {% if recommendations %}
+        <div class="activities-grid">
+            {% for activity in recommendations %}
+            <div class="activity-card" onclick="window.location.href='{{ url_for('user.activity_detail', activity_id=activity.id, mood_input=mood_input, sentiment_score=sentiment_score) }}'">
+                <div class="activity-icon">{{ activity.icon or '🎯' }}</div>
+                <h3 style="font-weight: 700; color: #1e293b; margin-bottom: 8px;">{{ activity.name }}</h3>
+                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 12px;">
+                    {{ activity.description[:60] if activity.description else 'Try this activity' }}...
+                </p>
+                <span style="display: inline-block; padding: 4px 12px; background: rgba(190, 18, 60, 0.1); color: #be123c; border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
+                    {{ activity.category_name }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="text-align: center; color: #64748b; padding: 60px 20px;">
+            No activities found matching your mood. Try different keywords!
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

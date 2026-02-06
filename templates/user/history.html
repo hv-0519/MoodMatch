@@ -1,0 +1,132 @@
+{% extends 'user/user_base.html' %}
+{% block sidebar_class %}static-expanded{% endblock %}
+
+{% block user_styles %}
+<style>
+    .user-page-wrapper {
+        margin-left: 280px;
+        min-height: 100vh;
+        padding: 40px;
+        background: linear-gradient(120deg, #fed7aa 0%, #fecdd3 50%, #fbcfe8 100%);
+    }
+
+    .premium-card {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 24px;
+        padding: 30px;
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .history-table thead tr {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .history-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+
+    .history-table td {
+        padding: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .history-table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .mood-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .mood-positive { background: #d1fae5; color: #065f46; }
+    .mood-negative { background: #fee2e2; color: #991b1b; }
+    .mood-neutral { background: #e0e7ff; color: #3730a3; }
+
+    @media (max-width: 768px) {
+        .user-page-wrapper { margin-left: 70px; padding: 20px; }
+        .history-table { font-size: 0.9rem; }
+    }
+</style>
+{% endblock %}
+
+{% block user_content %}
+<div class="user-page-wrapper">
+    <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin-bottom: 10px;">
+        📊 Activity History
+    </h1>
+    <p style="color: #64748b; margin-bottom: 30px;">
+        {{ history|length }} activities completed
+    </p>
+
+    <div class="premium-card">
+        {% if history %}
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Activity</th>
+                    <th>Mood Input</th>
+                    <th>Sentiment</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in history %}
+                <tr>
+                    <td style="color: #64748b; font-size: 0.9rem;">
+                        {{ item.created_at[:10] }}
+                    </td>
+                    <td style="font-weight: 600; color: #1e293b;">
+                        {{ item.activity_name }}
+                    </td>
+                    <td style="color: #475569; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{ item.mood_input or 'N/A' }}
+                    </td>
+                    <td>
+                        <span class="mood-badge mood-{{ item.mood_type }}">
+                            {% if item.mood_type == 'positive' %}😊 Positive
+                            {% elif item.mood_type == 'negative' %}😔 Negative
+                            {% else %}😐 Neutral{% endif %}
+                        </span>
+                    </td>
+                    <td style="font-size: 1.2rem;">
+                        {% if item.feedback_rating %}
+                        {% for i in range(item.feedback_rating) %}⭐{% endfor %}
+                        {% else %}
+                        <span style="color: #94a3b8;">Not rated</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 60px; margin-bottom: 15px;">📊</div>
+            <h3 style="color: #475569; margin-bottom: 8px;">No history yet</h3>
+            <p style="color: #64748b; margin-bottom: 20px;">
+                Start trying activities to build your history!
+            </p>
+            <a href="{{ url_for('user.try_activity') }}" style="display: inline-block; background: #be123c; color: white; padding: 12px 30px; border-radius: 12px; text-decoration: none; font-weight: 600;">
+                Try Activities
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

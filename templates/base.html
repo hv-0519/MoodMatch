@@ -24,133 +24,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
 
   <!-- ✅ ADDED: Inline styles for profile picture and button fixes -->
-  <style>
-    /* Profile Picture Navbar Styles */
-    .nav-profile-section {
-      display: flex;
-      align-items: center;
-      gap: var(--space-1, 4px);
-    }
-
-    .navbar-profile-pic {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--border, #e5e7eb);
-      transition: all var(--transition-fast, 0.15s ease);
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .navbar-profile-pic:hover {
-      border-color: var(--primary, #e63946);
-      transform: scale(1.05);
-    }
-
-    .navbar-profile-default {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-      border: 2px solid var(--border, #e5e7eb);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all var(--transition-fast, 0.15s ease);
-      flex-shrink: 0;
-    }
-
-    .navbar-profile-default:hover {
-      border-color: var(--primary, #e63946);
-      transform: scale(1.05);
-    }
-
-    .navbar-profile-default svg {
-      width: 20px;
-      height: 20px;
-      color: var(--text-secondary, #555);
-    }
-
-    /* Username Link - Same style as other nav links */
-    .navbar-username-link {
-      display: block;
-      padding: var(--space-2, 8px) var(--space-3, 12px);
-      font-weight: var(--font-weight-medium, 500);
-      color: var(--text-secondary, #555555);
-      border-radius: var(--radius-md, 8px);
-      transition: all var(--transition-fast, 0.15s ease);
-      font-size: 25px;
-      text-decoration: none;
-    }
-
-    .navbar-username-link:hover {
-      color: var(--primary, #e63946);
-      background: rgba(230, 57, 70, 0.08);
-    }
-
-    /* Logout Link - Same style as other nav links */
-    .navbar-logout-link {
-      display: block;
-      padding: var(--space-2, 8px) var(--space-3, 12px);
-      font-weight: var(--font-weight-medium, 500);
-      color: var(--text-secondary, #555555);
-      border-radius: var(--radius-md, 8px);
-      transition: all var(--transition-fast, 0.15s ease);
-      font-size: 25px;
-      text-decoration: none;
-    }
-
-    .navbar-logout-link:hover {
-      color: var(--primary, #e63946);
-      background: rgba(230, 57, 70, 0.08);
-    }
-
-    /* ✅ CRITICAL FIX: Remove blue border from all buttons */
-    .btn,
-    .btn-primary,
-    .btn-secondary,
-    button,
-    a.btn {
-      outline: none !important;
-      border: none !important;
-    }
-
-    .btn:focus,
-    .btn-primary:focus,
-    .btn-secondary:focus,
-    button:focus,
-    a.btn:focus {
-      outline: none !important;
-      box-shadow: none !important;
-      border: none !important;
-    }
-
-    .btn:active,
-    .btn-primary:active,
-    .btn-secondary:active {
-      outline: none !important;
-      border: none !important;
-    }
-
-    /* Override Bootstrap button focus */
-    .btn-primary:focus,
-    .btn-primary.focus {
-      box-shadow: none !important;
-      outline: none !important;
-    }
-
-    /* Remove browser default outline */
-    *:focus {
-      outline: none !important;
-    }
-
-    /* Keep accessibility but use custom style */
-    .btn-primary:focus-visible {
-      outline: 2px solid var(--primary, #e63946) !important;
-      outline-offset: 2px;
-    }
-  </style>
+  
 
   {% block head %}{% endblock %}
 </head>
@@ -169,7 +43,7 @@
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span class="brand-text" style="font-size: 25px">MoodMatch</span>
+        <span class="brand-text" style="font-size: 25px;">MoodMatch</span>
       </a>
 
       <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">

@@ -1,0 +1,206 @@
+{% extends 'user/user_base.html' %}
+{% block sidebar_class %}static-expanded{% endblock %}
+
+{% block user_styles %}
+<style>
+    .user-page-wrapper {
+        margin-left: 280px;
+        min-height: 100vh;
+        padding: 40px;
+        background: linear-gradient(120deg, #fed7aa 0%, #fecdd3 50%, #fbcfe8 100%);
+    }
+
+    .premium-card {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 24px;
+        padding: 30px;
+        margin-bottom: 25px;
+    }
+
+    .profile-avatar-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin: 0 auto 15px;
+        overflow: hidden;
+        border: 4px solid white;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .file-upload-btn {
+        background: #be123c;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-item {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        color: #1e293b;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .interests-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .interest-checkbox {
+        display: none;
+    }
+
+    .interest-label {
+        display: block;
+        background: rgba(255, 255, 255, 0.5);
+        padding: 12px 20px;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .interest-checkbox:checked + .interest-label {
+        background: #be123c;
+        color: white;
+        border-color: #be123c;
+    }
+
+    .interest-label:hover {
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .user-page-wrapper { margin-left: 70px; padding: 20px; }
+        .info-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block user_content %}
+<div class="user-page-wrapper">
+    <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin-bottom: 10px;">
+        👤 My Profile
+    </h1>
+    <p style="color: #64748b; margin-bottom: 30px;">
+        Manage your account settings
+    </p>
+
+    <div class="premium-card">
+        <div class="profile-avatar-section">
+            <div class="profile-avatar">
+                {% if user.profile_picture %}
+                <img src="{{ url_for('static', filename='uploads/' ~ user.profile_picture) }}" alt="Profile">
+                {% else %}
+                👤
+                {% endif %}
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data" id="avatarForm">
+                <input type="file" name="profile_picture" id="profilePictureInput" accept="image/*" style="display: none;" onchange="this.form.submit()">
+                <button type="button" class="file-upload-btn" onclick="document.getElementById('profilePictureInput').click()">
+                    📷 Change Picture
+                </button>
+            </form>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Full Name</div>
+                <div class="info-value">{{ user.first_name }} {{ user.last_name }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Username</div>
+                <div class="info-value">@{{ user.username }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ user.email }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Member Since</div>
+                <div class="info-value">{{ user.created_at[:10] }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="premium-card">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 20px;">
+            💡 My Interests
+        </h2>
+        <p style="color: #64748b; margin-bottom: 20px;">
+            Select your interests to get better recommendations
+        </p>
+
+        <form method="POST">
+            <div class="interests-grid">
+                {% for interest in interests %}
+                <div>
+                    <input 
+                        type="checkbox" 
+                        name="interests" 
+                        value="{{ interest.id }}" 
+                        id="interest_{{ interest.id }}"
+                        class="interest-checkbox"
+                        {% if interest.selected %}checked{% endif %}>
+                    <label for="interest_{{ interest.id }}" class="interest-label">
+                        {{ interest.name|capitalize }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" style="background: #be123c; color: white; padding: 15px 40px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 20px; width: 100%;">
+                Save Interests
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

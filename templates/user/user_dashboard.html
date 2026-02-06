@@ -1,449 +1,429 @@
-{% extends 'user/user_base.html' %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block sidebar_class %}static-expanded{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodMatch - Dashboard</title>
 
-{% block user_styles %}
-<style>
-    .user-dashboard-wrapper.with-static-sidebar {
-        position: relative;
-        margin-left: 280px;
-        min-height: 100vh;
-        width: calc(100% - 280px);
-        background: transparent;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_dashboard.css') }}">
+</head>
 
-    .decorative-bg {
-        position: fixed;
-        inset: 0;
-        left: 280px;
-        z-index: 0;
-        background: linear-gradient(120deg, #fed7aa 0%, #fecdd3 50%, #fbcfe8 100%);
-        pointer-events: none;
-    }
+<body>
+    <!-- Navbar - Fixed at top -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="{{ url_for('user.user_dashboard') }}" class="navbar-brand">
+                <div class="brand-icon" id="emoji">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                        <line x1="9" y1="9" x2="9.01" y2="9" />
+                        <line x1="15" y1="9" x2="15.01" y2="9" />
+                    </svg>
+                </div>
+                <span class="brand-text">MoodMatch</span>
+            </a>
 
-    .shape {
-        position: absolute;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        user-select: none;
-        pointer-events: none;
-        z-index: 1;
-        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
-    }
+            <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
 
-    .shape-1::before { content: "😊"; font-size: 180px; }
-    .shape-2::before { content: "🎯"; font-size: 140px; }
-    .shape-3::before { content: "⭐"; font-size: 100px; }
-    .shape-4::before { content: "🎨"; font-size: 120px; }
-
-    .shape-1 { top: -50px; right: -20px; opacity: 0.2; animation: floatEmoji 8s ease-in-out infinite; }
-    .shape-2 { bottom: 50px; left: 20px; opacity: 0.15; animation: floatEmoji 12s ease-in-out infinite reverse; }
-    .shape-3 { top: 40%; left: 15%; opacity: 0.1; animation: floatEmoji 10s ease-in-out infinite; }
-    .shape-4 { bottom: 10%; right: 10%; opacity: 0.15; animation: floatEmoji 15s ease-in-out infinite; }
-
-    @keyframes floatEmoji {
-        0%, 100% { transform: translateY(0) rotate(-5deg) scale(1); }
-        50% { transform: translateY(-40px) rotate(10deg) scale(1.1); }
-    }
-
-    .user-main-content {
-        position: relative;
-        z-index: 2;
-        padding: 40px;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 25px;
-        margin-bottom: 30px;
-    }
-
-    .stat-card {
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 24px;
-        padding: 25px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-    }
-
-    .stat-card:hover {
-        transform: translateY(-8px);
-        background: rgba(255, 255, 255, 0.6);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-    }
-
-    .stat-icon-circle {
-        width: 60px;
-        height: 60px;
-        background: white;
-        border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 30px;
-        margin-bottom: 15px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
-    }
-
-    .stat-label {
-        color: #64748b;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 900;
-        color: #1e293b;
-        margin-bottom: 8px;
-    }
-
-    .stat-trend {
-        color: #10b981;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .premium-card {
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 24px;
-        padding: 25px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-        margin-bottom: 25px;
-    }
-
-    .premium-card:hover {
-        background: rgba(255, 255, 255, 0.6);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-    }
-
-    .card-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0 0 20px 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .quick-action-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        background: #be123c;
-        color: white;
-        padding: 20px 30px;
-        border-radius: 16px;
-        border: none;
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-        box-shadow: 0 4px 15px rgba(190, 18, 60, 0.3);
-    }
-
-    .quick-action-btn:hover {
-        background: #a71136;
-        transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(190, 18, 60, 0.4);
-    }
-
-    .activities-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-    }
-
-    .activity-card {
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        border-radius: 20px;
-        padding: 20px;
-        transition: all 0.3s;
-        cursor: pointer;
-    }
-
-    .activity-card:hover {
-        background: rgba(255, 255, 255, 0.7);
-        transform: translateY(-4px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .activity-icon {
-        width: 50px;
-        height: 50px;
-        background: white;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        margin-bottom: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .activity-name {
-        font-weight: 700;
-        color: #1e293b;
-        font-size: 1.1rem;
-        margin-bottom: 6px;
-    }
-
-    .activity-desc {
-        color: #64748b;
-        font-size: 0.9rem;
-        margin-bottom: 12px;
-    }
-
-    .activity-category {
-        display: inline-block;
-        padding: 4px 12px;
-        background: rgba(190, 18, 60, 0.1);
-        color: #be123c;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .history-list {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-
-    .history-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 12px;
-        margin-bottom: 12px;
-        transition: 0.2s;
-    }
-
-    .history-item:hover {
-        background: rgba(255, 255, 255, 0.5);
-    }
-
-    .history-icon {
-        width: 40px;
-        height: 40px;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        flex-shrink: 0;
-    }
-
-    .history-content {
-        flex: 1;
-    }
-
-    .history-text {
-        color: #1e293b;
-        font-weight: 600;
-        margin: 0 0 4px 0;
-    }
-
-    .history-time {
-        color: #64748b;
-        font-size: 0.85rem;
-    }
-
-    .history-rating {
-        flex-shrink: 0;
-        color: #fbbf24;
-        font-size: 1.2rem;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-    }
-
-    .empty-state-icon {
-        font-size: 60px;
-        margin-bottom: 15px;
-    }
-
-    .empty-state-text {
-        color: #64748b;
-        margin: 0;
-    }
-
-    @media (max-width: 768px) {
-        .user-dashboard-wrapper.with-static-sidebar {
-            margin-left: 70px;
-            width: calc(100% - 70px);
-        }
-        .decorative-bg { left: 70px; }
-        .user-main-content { padding: 20px; }
-        .stats-grid { grid-template-columns: 1fr; }
-    }
-</style>
-{% endblock %}
-
-{% block user_content %}
-<div class="user-dashboard-wrapper with-static-sidebar">
-    <div class="decorative-bg">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
-        <div class="shape shape-4"></div>
-    </div>
-
-    <div class="user-main-content">
-        <div style="margin-bottom: 40px;">
-            <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin: 0;">
-                Welcome back, {{ user.first_name or user.username }}! 👋
-            </h1>
-            <p style="color: #64748b; margin: 5px 0 0 0;">
-                Ready to discover activities that match your mood?
-            </p>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon-circle">🎯</div>
-                <div class="stat-label">Activities Tried</div>
-                <div class="stat-value">{{ activities_tried }}</div>
-                <div class="stat-trend">Keep exploring!</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon-circle">⭐</div>
-                <div class="stat-label">Favorites</div>
-                <div class="stat-value">{{ total_favorites }}</div>
-                <div class="stat-trend">Your top picks</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon-circle">😊</div>
-                <div class="stat-label">Mood Entries</div>
-                <div class="stat-value">{{ mood_entries }}</div>
-                <div class="stat-trend">Tracking progress</div>
+            <div class="navbar-menu" id="navbarMenu">
+                <div style="display: flex; gap: 12px; align-items: center;" class="admin-nav-link">
+                    {% if user.profile_picture %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ user.profile_picture) }}" alt="Profile"
+                        class="profile-pic">
+                    {% else %}
+                    <div class="profile-pic"
+                        style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8ec5fc, #e0c3fc); color: white; font-weight: 700;">
+                        {{ user.first_name[0].upper() if user.first_name else '👤' }}
+                    </div>
+                    {% endif %}
+                    <span style="margin-top: 2px;" id="dp">Hello, <b style="color: #8ec5fc;">{{ user.first_name
+                            }}</b></span>
+                </div>
             </div>
         </div>
+    </nav>
 
-        <div class="premium-card" style="text-align: center;">
-            <h2 style="font-size: 1.8rem; font-weight: 700; color: #1e293b; margin: 0 0 15px 0;">
-                How are you feeling today?
-            </h2>
-            <p style="color: #64748b; margin-bottom: 25px;">
-                Tell us your mood and we'll recommend activities just for you
-            </p>
-            <a href="{{ url_for('user.try_activity') }}" class="quick-action-btn">
-                <span style="font-size: 1.5rem;">🎯</span>
-                <span>Try an Activity</span>
+    <!-- Sidebar - Between navbar and footer -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <nav class="admin-sidebar-nav">
+            <!-- Main Menu -->
+            <div class="admin-nav-section">
+                <div class="admin-nav-label">Main Menu</div>
+                <ul class="admin-nav-list">
+                    <li class="admin-nav-item">
+                        <a href="{{ url_for('user.user_dashboard') }}" class="admin-nav-link active">
+                            <span class="admin-nav-icon">🏠</span>
+                            <span class="admin-nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav-item">
+                        <a href="{{ url_for('main.index') }}" class="admin-nav-link">
+                            <span class="admin-nav-icon">🎯</span>
+                            <span class="admin-nav-text">Discover Activities</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav-item">
+                        <a href="{{ url_for('user.try_activity') }}" class="admin-nav-link">
+                            <span class="admin-nav-icon">✨</span>
+                            <span class="admin-nav-text">Try Activity</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav-item">
+                        <a href="{{ url_for('user.favorites') }}" class="admin-nav-link">
+                            <span class="admin-nav-icon">⭐</span>
+                            <span class="admin-nav-text">My Favorites</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav-item">
+                        <a href="{{ url_for('user.history') }}" class="admin-nav-link">
+                            <span class="admin-nav-icon">📊</span>
+                            <span class="admin-nav-text">Activity History</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Account Menu -->
+            <div class="admin-nav-section">
+                <div class="admin-nav-label">Account</div>
+                <ul class="admin-nav-list">
+                    <li class="admin-nav-item">
+                        <a href="{{ url_for('main.about') }}" class="admin-nav-link">
+                            <span class="admin-nav-icon">ℹ️</span>
+                            <span class="admin-nav-text">About</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav-item">
+                        <a href="{{ url_for('user.profile') }}" class="admin-nav-link">
+                            <span class="admin-nav-icon">👤</span>
+                            <span class="admin-nav-text">My Profile</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="admin-sidebar-footer">
+            <a href="{{ url_for('auth.logout') }}" class="admin-nav-link" id="logout">
+                <span class="admin-nav-icon" style="margin-left: 70px;">🚪</span>
+                <span class="admin-nav-text">Logout</span>
             </a>
         </div>
+    </aside>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 25px; margin-bottom: 25px;">
-            <div class="premium-card">
-                <h3 class="card-title">
-                    <span>💡</span>
-                    <span>Recommended For You</span>
-                </h3>
-                <p style="color: #64748b; margin-bottom: 20px;">
-                    Based on your interests and past activities
-                </p>
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-main">
 
-                {% if recommended %}
-                <div class="activities-grid">
-                    {% for activity in recommended[:6] %}
-                    <div class="activity-card" onclick="window.location.href='{{ url_for('user.activity_detail', activity_id=activity.id) }}'">
-                        <div class="activity-icon">{{ activity.icon or '🎯' }}</div>
-                        <div class="activity-name">{{ activity.name }}</div>
-                        <p class="activity-desc">{{ activity.description[:60] if activity.description else 'No description' }}...</p>
-                        <span class="activity-category">{{ activity.category_name }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">🎯</div>
-                    <p class="empty-state-text">No recommendations yet. Try your first activity!</p>
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="premium-card">
-                <h3 class="card-title">
-                    <span>📊</span>
-                    <span>Recent Activity</span>
-                </h3>
-
-                {% if recent_history %}
-                <div class="history-list">
-                    {% for item in recent_history %}
-                    <div class="history-item">
-                        <div class="history-icon">
-                            {% if item.execution_type == 'writing' %}✍️
-                            {% elif item.execution_type == 'reading' %}📚
-                            {% elif item.execution_type == 'cooking' %}🍳
-                            {% elif item.execution_type == 'physical' %}💪
-                            {% elif item.execution_type == 'gaming' %}🎮
-                            {% else %}🎯{% endif %}
-                        </div>
-                        <div class="history-content">
-                            <p class="history-text">{{ item.activity_name }}</p>
-                            <small class="history-time">{{ item.created_at[:10] }}</small>
-                        </div>
-                        {% if item.feedback_rating %}
-                        <div class="history-rating">
-                            {% for i in range(item.feedback_rating) %}⭐{% endfor %}
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <a href="{{ url_for('user.history') }}" style="display: block; text-align: center; margin-top: 15px; color: #be123c; font-weight: 600; text-decoration: none;">
-                    View All History →
+        <!-- Welcome Hero Section -->
+        <section class="welcome-hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Welcome back, {{ user.first_name }}! 🎉</h1>
+                <p class="hero-subtitle">Ready to discover activities that match your mood today?</p>
+                <a href="{{ url_for('user.try_activity') }}" class="cta-button">
+                    <span class="cta-icon">✨</span>
+                    <span>Find Your Perfect Activity</span>
+                    <span class="cta-arrow">→</span>
                 </a>
-                {% else %}
-                <div class="empty-state" style="padding: 40px 20px;">
-                    <div class="empty-state-icon">📊</div>
-                    <p class="empty-state-text">No activity history yet</p>
+            </div>
+        </section>
+
+        <!-- Stats Overview -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Activities Tried</div>
+                        <div class="stat-value">{{ activities_tried }}</div>
+                        <div class="stat-change positive">↗ Keep exploring!</div>
+                    </div>
                 </div>
-                {% endif %}
+
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-content">
+                        <div class="stat-label">My Favorites</div>
+                        <div class="stat-value">{{ total_favorites }}</div>
+                        <div class="stat-change">Your top picks</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">😊</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Mood Entries</div>
+                        <div class="stat-value">{{ mood_entries }}</div>
+                        <div class="stat-change">Tracking progress</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Day Streak</div>
+                        <div class="stat-value">{{ streak_days|default(0) }}</div>
+                        <div class="stat-change positive">Days active</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <section class="content-grid">
+
+            <!-- Recommended Activities -->
+            <div class="content-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">💡</span>
+                        <span>Recommended For You</span>
+                    </div>
+                    <a href="{{ url_for('main.index') }}" class="view-all-link">View All →</a>
+                </div>
+
+                <div class="card-body">
+                    {% if recommended %}
+                    <div class="activities-grid">
+                        {% for activity in recommended[:4] %}
+                        <div class="activity-card"
+                            onclick="window.location.href='{{ url_for('user.activity_detail', activity_id=activity.id) }}'">
+                            <div class="activity-icon-wrapper">
+                                <span class="activity-emoji">{{ activity.icon or '🎯' }}</span>
+                            </div>
+                            <h3 class="activity-name">{{ activity.name }}</h3>
+                            <p class="activity-desc">
+                                {{ activity.description[:60] if activity.description else 'Discover this amazing
+                                activity' }}...
+                            </p>
+                            <div class="activity-footer">
+                                <span class="activity-category">{{ activity.category_name }}</span>
+                                <span class="activity-arrow">→</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">🎯</div>
+                        <p class="empty-text">No recommendations yet. Start exploring!</p>
+                        <a href="{{ url_for('main.index') }}" class="empty-cta">Discover Activities</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="content-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="card-icon">📊</span>
+                        <span>Recent Activity</span>
+                    </div>
+                    <a href="{{ url_for('user.history') }}" class="view-all-link">See All →</a>
+                </div>
+
+                <div class="card-body">
+                    {% if recent_history %}
+                    <div class="activity-timeline">
+                        {% for item in recent_history %}
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                {% if item.execution_type == 'writing' %}✍️
+                                {% elif item.execution_type == 'reading' %}📚
+                                {% elif item.execution_type == 'cooking' %}🍳
+                                {% elif item.execution_type == 'physical' %}💪
+                                {% elif item.execution_type == 'gaming' %}🎮
+                                {% else %}🎯{% endif %}
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-name">{{ item.activity_name }}</div>
+                                <div class="timeline-time">{{ item.created_at[:10] }}</div>
+                            </div>
+                            {% if item.feedback_rating %}
+                            <div class="timeline-rating">
+                                {% for i in range(item.feedback_rating) %}⭐{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <p class="empty-text">No activity history yet</p>
+                        <a href="{{ url_for('user.try_activity') }}" class="empty-cta">Try Your First Activity</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="quick-actions-grid">
+
+                <a href="{{ url_for('user.favorites') }}" class="quick-action-card">
+                    <div class="quick-action-icon">⭐</div>
+                    <div class="quick-action-content">
+                        <div class="quick-action-title">My Favorites</div>
+                        <div class="quick-action-subtitle">{{ total_favorites }} saved activities</div>
+                    </div>
+                    <div class="quick-action-arrow">→</div>
+                </a>
+
+                <a href="{{ url_for('user.history') }}" class="quick-action-card">
+                    <div class="quick-action-icon">📊</div>
+                    <div class="quick-action-content">
+                        <div class="quick-action-title">Activity History</div>
+                        <div class="quick-action-subtitle">{{ activities_tried }} activities tried</div>
+                    </div>
+                    <div class="quick-action-arrow">→</div>
+                </a>
+
+                <a href="{{ url_for('user.profile') }}" class="quick-action-card">
+                    <div class="quick-action-icon">👤</div>
+                    <div class="quick-action-content">
+                        <div class="quick-action-title">My Profile</div>
+                        <div class="quick-action-subtitle">Update your settings</div>
+                    </div>
+                    <div class="quick-action-arrow">→</div>
+                </a>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid" id="emoji2">
+                <div class="footer-brand">
+                    <a href="{{ url_for('user.user_dashboard') }}" class="brand-link">
+                        <div class="brand-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                                <line x1="9" y1="9" x2="9.01" y2="9" />
+                                <line x1="15" y1="9" x2="15.01" y2="9" />
+                            </svg>
+                        </div>
+                        <span>MoodMatch</span>
+                    </a>
+                    <p class="footer-tagline">
+                        Find activities that match your mood and inspire your day.
+                    </p>
+                </div>
+
+                <div class="footer-links">
+                    <h4 class="footer-heading">Navigation</h4>
+                    <ul>
+                        <li><a href="{{ url_for('user.user_dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ url_for('main.about') }}">About</a></li>
+                        <li><a href="{{ url_for('user.favorites') }}">Favorites</a></li>
+                        <li><a href="{{ url_for('user.history') }}">History</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4 class="footer-heading">Activities</h4>
+                    <ul>
+                        <li><a href="{{ url_for('main.index') }}">Discover</a></li>
+                        <li><a href="{{ url_for('user.try_activity') }}">Try Activity</a></li>
+                        <li><a href="{{ url_for('user.favorites') }}">Favorites</a></li>
+                        <li><a href="{{ url_for('user.history') }}">History</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4 class="footer-heading">Connect</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link twitter" aria-label="Twitter">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 12 7.48v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link github" aria-label="GitHub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77A5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link linkedin" aria-label="LinkedIn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                                <rect x="2" y="9" width="4" height="12" />
+                                <circle cx="4" cy="4" r="2" />
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link instagram" aria-label="Instagram">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.5" y2="6.51"></line>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link facebook" aria-label="Facebook">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 2h-3a4 4 0 0 0-4 4v3H8v4h3v9h4v-9h3l1-4h-4V6a1 1 0 0 1 1-1h3z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 MoodMatch. All rights reserved.</p>
+                <p class="footer-credits">Crafted with care for curious minds.</p>
             </div>
         </div>
+    </footer>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-            <a href="{{ url_for('user.favorites') }}" class="premium-card" style="text-decoration: none; text-align: center; padding: 30px;">
-                <div style="font-size: 3rem; margin-bottom: 10px;">⭐</div>
-                <h4 style="color: #1e293b; font-weight: 700; margin: 0 0 5px 0;">Favorites</h4>
-                <p style="color: #64748b; margin: 0; font-size: 0.9rem;">{{ total_favorites }} saved</p>
-            </a>
+    <script>
+        // Mobile sidebar toggle
+        const navbarToggle = document.getElementById('navbarToggle');
+        const adminSidebar = document.getElementById('adminSidebar');
 
-            <a href="{{ url_for('user.history') }}" class="premium-card" style="text-decoration: none; text-align: center; padding: 30px;">
-                <div style="font-size: 3rem; margin-bottom: 10px;">📊</div>
-                <h4 style="color: #1e293b; font-weight: 700; margin: 0 0 5px 0;">History</h4>
-                <p style="color: #64748b; margin: 0; font-size: 0.9rem;">{{ activities_tried }} activities</p>
-            </a>
+        if (navbarToggle) {
+            navbarToggle.addEventListener('click', function () {
+                this.classList.toggle('active');
+                adminSidebar.classList.toggle('expanded');
+            });
+        }
 
-            <a href="{{ url_for('user.profile') }}" class="premium-card" style="text-decoration: none; text-align: center; padding: 30px;">
-                <div style="font-size: 3rem; margin-bottom: 10px;">👤</div>
-                <h4 style="color: #1e293b; font-weight: 700; margin: 0 0 5px 0;">Profile</h4>
-                <p style="color: #64748b; margin: 0; font-size: 0.9rem;">Manage settings</p>
-            </a>
-        </div>
-    </div>
-</div>
-{% endblock %}
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function (event) {
+            const isClickInsideSidebar = adminSidebar.contains(event.target);
+            const isClickOnToggle = navbarToggle.contains(event.target);
+
+            if (!isClickInsideSidebar && !isClickOnToggle && adminSidebar.classList.contains('expanded')) {
+                adminSidebar.classList.remove('expanded');
+                navbarToggle.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+
+</html>

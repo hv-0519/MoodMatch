@@ -1,11 +1,3 @@
-/* =====================================================
-   PREMIUM ADMIN DASHBOARD - INDUSTRY STANDARD
-   Enhanced Colors, Typography, Shadows & Spacing
-   ===================================================== */
-
-/* =====================================================
-   PREMIUM COLOR SYSTEM
-   ===================================================== */
 :root {
   /* Primary Brand Colors - Sophisticated gradient system */
   --admin-primary: #8ec5fc;
@@ -85,14 +77,10 @@
   --font-size-4xl: 2.25rem;
 }
 
-/* =====================================================
-   PREMIUM TYPOGRAPHY
-   ===================================================== */
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none;
-  /* Chrome, Safari, Brave */
 }
 
 body {
@@ -107,9 +95,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* =====================================================
-   HAMBURGER BUTTON - PREMIUM STYLE
-   ===================================================== */
 .hamburger-btn {
   position: fixed;
   top: 24px;
@@ -171,9 +156,6 @@ body {
   transform: rotate(-45deg) translate(7px, -7px);
 }
 
-/* =====================================================
-   PREMIUM SIDEBAR
-   ===================================================== */
 .admin-sidebar {
   position: fixed;
   left: 0;
@@ -213,7 +195,6 @@ body {
   background: linear-gradient(120deg, #e0f2f1 0%, #8ec5fc 50%, #e0c3fc 100%);
 }
 
-/* Sidebar Profile - Premium Card Style */
 .admin-sidebar-profile {
   padding: 80px 12px 20px;
   margin: 16px 12px;
@@ -280,7 +261,7 @@ body {
   padding: 10px 20px;
 }
 
-/* Sidebar Navigation - Enhanced */
+
 .admin-sidebar-nav {
   flex: 1;
   padding: 24px 0;
@@ -391,7 +372,7 @@ body {
   opacity: 1;
 }
 
-/* Sidebar Footer - Enhanced */
+
 .admin-sidebar-footer {
   padding: 20px 12px;
   border-top: 1px solid var(--admin-border);
@@ -427,7 +408,6 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-/* Overlay */
 .sidebar-overlay {
   position: fixed;
   top: 0;
@@ -447,29 +427,6 @@ body {
   visibility: visible;
 }
 
-/* =====================================================
-   PREMIUM MAIN CONTENT AREA
-   ===================================================== */
-
-/* =====================================================
-   PREMIUM STAT CARDS
-   ===================================================== */
-
-/* =====================================================
-   PREMIUM TABLE STYLES
-   ===================================================== */
-
-/* =====================================================
-   PREMIUM USER CARDS (Manage Users Page)
-   ===================================================== */
-
-/* =====================================================
-   PREMIUM ACTIVITY THUMBNAIL
-   ===================================================== */
-
-/* =====================================================
-   STATIC EXPANDED SIDEBAR (Dashboard)
-   ===================================================== */
 .admin-sidebar.static-expanded {
   width: var(--sidebar-width-expanded) !important;
   background: var(--admin-surface);
@@ -509,9 +466,6 @@ body {
   font-size: var(--font-size-sm);
 }
 
-/* =====================================================
-   RESPONSIVE DESIGN
-   ===================================================== */
 @media (max-width: 1200px) {
   .admin-content-grid {
     grid-template-columns: 1fr;
@@ -626,13 +580,7 @@ body {
   }
 }
 
-/* Hide default footer and navbar on admin pages */
 .footer,
 .navbar {
   display: none !important;
 }
-
-/* =====================================================
-   PREMIUM MODAL SYSTEM CSS
-   Add this to your admin.css file at the end
-   ===================================================== */
