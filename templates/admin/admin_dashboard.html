@@ -443,7 +443,7 @@
     }
 
     /* Responsive adjustments for mobile */
-     @media (max-width: 768px) {
+    @media (max-width: 768px) {
         .admin-dashboard-wrapper.with-static-sidebar {
             margin-left: 0;
             width: 100%;
@@ -545,8 +545,10 @@
                 </div>
             </div>
 
-            <div class="chart-wrapper">
-                <canvas id="registrationChart"></canvas>
+            <div class="chart-wrapper"
+                style="display:block !important; visibility:visible !important; height:400px !important;">
+                <canvas id="registrationChart"
+                    style="display:block !important; visibility:visible !important;"></canvas>
             </div>
         </div>
 

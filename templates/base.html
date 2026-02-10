@@ -76,21 +76,7 @@
                 {{ url_for('admin.admin_dashboard') }}
               {% else %}
                 {{ url_for('user.user_dashboard') }}
-              {% endif %}">
-            {% if current_user.profile_picture %}
-            <!-- <img
-                src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) }}"
-                alt="Profile"
-                class="navbar-profile-pic"
-              /> -->
-            {% else %}
-            <!-- <div class="navbar-profile-default">👤</div> -->
-            {% endif %}
-          </a>
-
-          <!-- <span class="navbar-username-link">
-              {{ current_user.first_name or current_user.username }}
-            </span> -->
+              {% endif %}" class="nav-link {% block nav_dashboard %}{% endblock %}">Dashboard</a>
 
           <a href="{{ url_for('auth.logout') }}" class="navbar-logout-link">
             Logout

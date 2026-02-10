@@ -43,6 +43,7 @@ class User(UserMixin):
         self.is_admin = is_admin
 
 
+
 # ---------------------------
 # REGISTER (FIXED - CORRECT FIELD NAMES + FILE UPLOAD)
 # ---------------------------
@@ -175,49 +176,50 @@ def login():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Check Admin Table
-        cursor.execute(
-            "SELECT id, username, password_hash FROM admins WHERE username = ?",
-            (username,),
-        )
-        admin = cursor.fetchone()
+        try:
+            # 1. Check the Admins Table first
+            cursor.execute(
+                "SELECT id, username, password_hash FROM admins WHERE username = ?",
+                (username,),
+            )
+            admin_row = cursor.fetchone()
 
-        if admin and check_password_hash(admin["password_hash"], password):
-            login_user(
-                User(
-                    id=admin["id"],
-                    username=admin["username"],
+            if admin_row and check_password_hash(admin_row["password_hash"], password):
+                admin_obj = User(
+                    id=admin_row["id"],
+                    username=admin_row["username"],
                     first_name="Admin",
-                    is_admin=True,
-                ),
-                remember=remember,
+                    is_admin=True  # Explicitly set to True
+                )
+                login_user(admin_obj, remember=remember)
+                return redirect(url_for("admin.admin_dashboard"))
+
+            # 2. Check the Users Table if not found in Admins
+            cursor.execute(
+                "SELECT id, username, first_name, profile_picture, password_hash FROM users WHERE username = ?",
+                (username,),
             )
+            user_row = cursor.fetchone()
+
+            if user_row and check_password_hash(user_row["password_hash"], password):
+                user_obj = User(
+                    id=user_row["id"],
+                    username=user_row["username"],
+                    first_name=user_row["first_name"],
+                    profile_picture=user_row["profile_picture"],
+                    is_admin=False  # Explicitly set to False
+                )
+                login_user(user_obj, remember=remember)
+                return redirect(url_for("user.user_dashboard"))
+
+            # If neither match
+            flash("Invalid username or password", "danger")
+
+        except Exception as e:
+            print(f"Login error: {e}")
+            flash("An error occurred during login.", "danger")
+        finally:
             conn.close()
-            return redirect(url_for("admin.admin_dashboard"))
-
-        # Check Users Table
-        cursor.execute(
-            "SELECT id, username, first_name, profile_picture, password_hash FROM users WHERE username = ?",
-            (username,),
-        )
-        user = cursor.fetchone()
-        conn.close()
-
-        if user and check_password_hash(user["password_hash"], password):
-            login_user(
-                User(
-                    id=user["id"],
-                    username=user["username"],
-                    first_name=user["first_name"],
-                    profile_picture=user["profile_picture"],
-                    is_admin=False,
-                ),
-                remember=remember,
-            )
-            return redirect(url_for("user.user_dashboard"))
-
-        flash("Invalid username or password", "danger")
-        return render_template("auth/login.html")
 
     return render_template("auth/login.html")
 

@@ -355,7 +355,7 @@ def favorites():
     favorites_list = [dict(row) for row in cursor.fetchall()]
     conn.close()
     
-    return render_template('user/favorites.html', favorites=favorites_list)
+    return render_template('main/favorites.html', favorites=favorites_list)
 
 
 @user_bp.route("/favorites/add/<int:activity_id>", methods=["POST"])

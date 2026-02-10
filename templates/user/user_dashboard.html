@@ -1,429 +1,185 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'user/user_base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoodMatch - Dashboard</title>
+{% block title %}Dashboard - MoodMatch{% endblock %}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_dashboard.css') }}">
-</head>
+{% block user_content %}
+{% endblock %}
+{% block content %}
+<main class="dashboard-main">
 
-<body>
-    <!-- Navbar - Fixed at top -->
-    <nav class="navbar">
-        <div class="container navbar-container">
-            <a href="{{ url_for('user.user_dashboard') }}" class="navbar-brand">
-                <div class="brand-icon" id="emoji">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                        <line x1="9" y1="9" x2="9.01" y2="9" />
-                        <line x1="15" y1="9" x2="15.01" y2="9" />
-                    </svg>
-                </div>
-                <span class="brand-text">MoodMatch</span>
-            </a>
-
-            <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-            </button>
-
-            <div class="navbar-menu" id="navbarMenu">
-                <div style="display: flex; gap: 12px; align-items: center;" class="admin-nav-link">
-                    {% if user.profile_picture %}
-                    <img src="{{ url_for('static', filename='uploads/' ~ user.profile_picture) }}" alt="Profile"
-                        class="profile-pic">
-                    {% else %}
-                    <div class="profile-pic"
-                        style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8ec5fc, #e0c3fc); color: white; font-weight: 700;">
-                        {{ user.first_name[0].upper() if user.first_name else '👤' }}
-                    </div>
-                    {% endif %}
-                    <span style="margin-top: 2px;" id="dp">Hello, <b style="color: #8ec5fc;">{{ user.first_name
-                            }}</b></span>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Sidebar - Between navbar and footer -->
-    <aside class="admin-sidebar" id="adminSidebar">
-        <nav class="admin-sidebar-nav">
-            <!-- Main Menu -->
-            <div class="admin-nav-section">
-                <div class="admin-nav-label">Main Menu</div>
-                <ul class="admin-nav-list">
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.user_dashboard') }}" class="admin-nav-link active">
-                            <span class="admin-nav-icon">🏠</span>
-                            <span class="admin-nav-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('main.index') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">🎯</span>
-                            <span class="admin-nav-text">Discover Activities</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.try_activity') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">✨</span>
-                            <span class="admin-nav-text">Try Activity</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.favorites') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">⭐</span>
-                            <span class="admin-nav-text">My Favorites</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.history') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">📊</span>
-                            <span class="admin-nav-text">Activity History</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Account Menu -->
-            <div class="admin-nav-section">
-                <div class="admin-nav-label">Account</div>
-                <ul class="admin-nav-list">
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('main.about') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">ℹ️</span>
-                            <span class="admin-nav-text">About</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.profile') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">👤</span>
-                            <span class="admin-nav-text">My Profile</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Sidebar Footer -->
-        <div class="admin-sidebar-footer">
-            <a href="{{ url_for('auth.logout') }}" class="admin-nav-link" id="logout">
-                <span class="admin-nav-icon" style="margin-left: 70px;">🚪</span>
-                <span class="admin-nav-text">Logout</span>
+    <section class="welcome-hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Welcome back, {{ user.first_name }}! 🎉</h1>
+            <p class="hero-subtitle">Ready to discover activities that match your mood today?</p>
+            <a href="{{ url_for('user.try_activity') }}" class="cta-button">
+                <span class="cta-icon">✨</span>
+                <span>Find Your Perfect Activity</span>
+                <span class="cta-arrow">→</span>
             </a>
         </div>
-    </aside>
+    </section>
 
-    <!-- Main Dashboard Content -->
-    <main class="dashboard-main">
-
-        <!-- Welcome Hero Section -->
-        <section class="welcome-hero">
-            <div class="hero-content">
-                <h1 class="hero-title">Welcome back, {{ user.first_name }}! 🎉</h1>
-                <p class="hero-subtitle">Ready to discover activities that match your mood today?</p>
-                <a href="{{ url_for('user.try_activity') }}" class="cta-button">
-                    <span class="cta-icon">✨</span>
-                    <span>Find Your Perfect Activity</span>
-                    <span class="cta-arrow">→</span>
-                </a>
-            </div>
-        </section>
-
-        <!-- Stats Overview -->
-        <section class="stats-section">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">🎯</div>
-                    <div class="stat-content">
-                        <div class="stat-label">Activities Tried</div>
-                        <div class="stat-value">{{ activities_tried }}</div>
-                        <div class="stat-change positive">↗ Keep exploring!</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">⭐</div>
-                    <div class="stat-content">
-                        <div class="stat-label">My Favorites</div>
-                        <div class="stat-value">{{ total_favorites }}</div>
-                        <div class="stat-change">Your top picks</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">😊</div>
-                    <div class="stat-content">
-                        <div class="stat-label">Mood Entries</div>
-                        <div class="stat-value">{{ mood_entries }}</div>
-                        <div class="stat-change">Tracking progress</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">🔥</div>
-                    <div class="stat-content">
-                        <div class="stat-label">Day Streak</div>
-                        <div class="stat-value">{{ streak_days|default(0) }}</div>
-                        <div class="stat-change positive">Days active</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Main Content Grid -->
-        <section class="content-grid">
-
-            <!-- Recommended Activities -->
-            <div class="content-card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">💡</span>
-                        <span>Recommended For You</span>
-                    </div>
-                    <a href="{{ url_for('main.index') }}" class="view-all-link">View All →</a>
-                </div>
-
-                <div class="card-body">
-                    {% if recommended %}
-                    <div class="activities-grid">
-                        {% for activity in recommended[:4] %}
-                        <div class="activity-card"
-                            onclick="window.location.href='{{ url_for('user.activity_detail', activity_id=activity.id) }}'">
-                            <div class="activity-icon-wrapper">
-                                <span class="activity-emoji">{{ activity.icon or '🎯' }}</span>
-                            </div>
-                            <h3 class="activity-name">{{ activity.name }}</h3>
-                            <p class="activity-desc">
-                                {{ activity.description[:60] if activity.description else 'Discover this amazing
-                                activity' }}...
-                            </p>
-                            <div class="activity-footer">
-                                <span class="activity-category">{{ activity.category_name }}</span>
-                                <span class="activity-arrow">→</span>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="empty-state">
-                        <div class="empty-icon">🎯</div>
-                        <p class="empty-text">No recommendations yet. Start exploring!</p>
-                        <a href="{{ url_for('main.index') }}" class="empty-cta">Discover Activities</a>
-                    </div>
-                    {% endif %}
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                    <div class="stat-label">Activities Tried</div>
+                    <div class="stat-value">{{ activities_tried }}</div>
+                    <div class="stat-change positive">↗ Keep exploring!</div>
                 </div>
             </div>
 
-            <!-- Recent Activity -->
-            <div class="content-card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">📊</span>
-                        <span>Recent Activity</span>
-                    </div>
-                    <a href="{{ url_for('user.history') }}" class="view-all-link">See All →</a>
-                </div>
-
-                <div class="card-body">
-                    {% if recent_history %}
-                    <div class="activity-timeline">
-                        {% for item in recent_history %}
-                        <div class="timeline-item">
-                            <div class="timeline-icon">
-                                {% if item.execution_type == 'writing' %}✍️
-                                {% elif item.execution_type == 'reading' %}📚
-                                {% elif item.execution_type == 'cooking' %}🍳
-                                {% elif item.execution_type == 'physical' %}💪
-                                {% elif item.execution_type == 'gaming' %}🎮
-                                {% else %}🎯{% endif %}
-                            </div>
-                            <div class="timeline-content">
-                                <div class="timeline-name">{{ item.activity_name }}</div>
-                                <div class="timeline-time">{{ item.created_at[:10] }}</div>
-                            </div>
-                            {% if item.feedback_rating %}
-                            <div class="timeline-rating">
-                                {% for i in range(item.feedback_rating) %}⭐{% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="empty-state">
-                        <div class="empty-icon">📊</div>
-                        <p class="empty-text">No activity history yet</p>
-                        <a href="{{ url_for('user.try_activity') }}" class="empty-cta">Try Your First Activity</a>
-                    </div>
-                    {% endif %}
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-content">
+                    <div class="stat-label">My Favorites</div>
+                    <div class="stat-value">{{ total_favorites }}</div>
+                    <div class="stat-change">Your top picks</div>
                 </div>
             </div>
 
-        </section>
-
-        <!-- Quick Actions -->
-        <section class="quick-actions">
-            <h2 class="section-title">Quick Actions</h2>
-            <div class="quick-actions-grid">
-
-                <a href="{{ url_for('user.favorites') }}" class="quick-action-card">
-                    <div class="quick-action-icon">⭐</div>
-                    <div class="quick-action-content">
-                        <div class="quick-action-title">My Favorites</div>
-                        <div class="quick-action-subtitle">{{ total_favorites }} saved activities</div>
-                    </div>
-                    <div class="quick-action-arrow">→</div>
-                </a>
-
-                <a href="{{ url_for('user.history') }}" class="quick-action-card">
-                    <div class="quick-action-icon">📊</div>
-                    <div class="quick-action-content">
-                        <div class="quick-action-title">Activity History</div>
-                        <div class="quick-action-subtitle">{{ activities_tried }} activities tried</div>
-                    </div>
-                    <div class="quick-action-arrow">→</div>
-                </a>
-
-                <a href="{{ url_for('user.profile') }}" class="quick-action-card">
-                    <div class="quick-action-icon">👤</div>
-                    <div class="quick-action-content">
-                        <div class="quick-action-title">My Profile</div>
-                        <div class="quick-action-subtitle">Update your settings</div>
-                    </div>
-                    <div class="quick-action-arrow">→</div>
-                </a>
-
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid" id="emoji2">
-                <div class="footer-brand">
-                    <a href="{{ url_for('user.user_dashboard') }}" class="brand-link">
-                        <div class="brand-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                                <line x1="9" y1="9" x2="9.01" y2="9" />
-                                <line x1="15" y1="9" x2="15.01" y2="9" />
-                            </svg>
-                        </div>
-                        <span>MoodMatch</span>
-                    </a>
-                    <p class="footer-tagline">
-                        Find activities that match your mood and inspire your day.
-                    </p>
-                </div>
-
-                <div class="footer-links">
-                    <h4 class="footer-heading">Navigation</h4>
-                    <ul>
-                        <li><a href="{{ url_for('user.user_dashboard') }}">Dashboard</a></li>
-                        <li><a href="{{ url_for('main.about') }}">About</a></li>
-                        <li><a href="{{ url_for('user.favorites') }}">Favorites</a></li>
-                        <li><a href="{{ url_for('user.history') }}">History</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-links">
-                    <h4 class="footer-heading">Activities</h4>
-                    <ul>
-                        <li><a href="{{ url_for('main.index') }}">Discover</a></li>
-                        <li><a href="{{ url_for('user.try_activity') }}">Try Activity</a></li>
-                        <li><a href="{{ url_for('user.favorites') }}">Favorites</a></li>
-                        <li><a href="{{ url_for('user.history') }}">History</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-links">
-                    <h4 class="footer-heading">Connect</h4>
-                    <div class="social-links">
-                        <a href="#" class="social-link twitter" aria-label="Twitter">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 12 7.48v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
-                            </svg>
-                        </a>
-                        <a href="#" class="social-link github" aria-label="GitHub">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77A5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-                            </svg>
-                        </a>
-                        <a href="#" class="social-link linkedin" aria-label="LinkedIn">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                                <rect x="2" y="9" width="4" height="12" />
-                                <circle cx="4" cy="4" r="2" />
-                            </svg>
-                        </a>
-                        <a href="#" class="social-link instagram" aria-label="Instagram">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                <line x1="17.5" y1="6.5" x2="17.5" y2="6.51"></line>
-                            </svg>
-                        </a>
-                        <a href="#" class="social-link facebook" aria-label="Facebook">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 2h-3a4 4 0 0 0-4 4v3H8v4h3v9h4v-9h3l1-4h-4V6a1 1 0 0 1 1-1h3z" />
-                            </svg>
-                        </a>
-                    </div>
+            <div class="stat-card">
+                <div class="stat-icon">😊</div>
+                <div class="stat-content">
+                    <div class="stat-label">Mood Entries</div>
+                    <div class="stat-value">{{ mood_entries }}</div>
+                    <div class="stat-change">Tracking progress</div>
                 </div>
             </div>
 
-            <div class="footer-bottom">
-                <p>&copy; 2026 MoodMatch. All rights reserved.</p>
-                <p class="footer-credits">Crafted with care for curious minds.</p>
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-content">
+                    <div class="stat-label">Day Streak</div>
+                    <div class="stat-value">{{ streak_days|default(0) }}</div>
+                    <div class="stat-change positive">Days active</div>
+                </div>
             </div>
         </div>
-    </footer>
+    </section>
 
-    <script>
-        // Mobile sidebar toggle
-        const navbarToggle = document.getElementById('navbarToggle');
-        const adminSidebar = document.getElementById('adminSidebar');
+    <section class="content-grid">
 
-        if (navbarToggle) {
-            navbarToggle.addEventListener('click', function () {
-                this.classList.toggle('active');
-                adminSidebar.classList.toggle('expanded');
-            });
-        }
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">💡</span>
+                    <span>Recommended For You</span>
+                </div>
+                <a href="{{ url_for('main.index') }}" class="view-all-link">View All →</a>
+            </div>
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function (event) {
-            const isClickInsideSidebar = adminSidebar.contains(event.target);
-            const isClickOnToggle = navbarToggle.contains(event.target);
+            <div class="card-body">
+                {% if recommended %}
+                <div class="activities-grid">
+                    {% for activity in recommended[:4] %}
+                    <div class="activity-card"
+                        onclick="window.location.href='{{ url_for('user.activity_detail', activity_id=activity.id) }}'">
+                        <div class="activity-icon-wrapper">
+                            <span class="activity-emoji">{{ activity.icon or '🎯' }}</span>
+                        </div>
+                        <h3 class="activity-name">{{ activity.name }}</h3>
+                        <p class="activity-desc">
+                            {{ activity.description[:60] if activity.description else 'Discover this amazing
+                            activity' }}...
+                        </p>
+                        <div class="activity-footer">
+                            <span class="activity-category">{{ activity.category_name }}</span>
+                            <span class="activity-arrow">→</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">🎯</div>
+                    <p class="empty-text">No recommendations yet. Start exploring!</p>
+                    <a href="{{ url_for('main.index') }}" class="empty-cta">Discover Activities</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
-            if (!isClickInsideSidebar && !isClickOnToggle && adminSidebar.classList.contains('expanded')) {
-                adminSidebar.classList.remove('expanded');
-                navbarToggle.classList.remove('active');
-            }
-        });
-    </script>
-</body>
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">📊</span>
+                    <span>Recent Activity</span>
+                </div>
+                <a href="{{ url_for('user.history') }}" class="view-all-link">See All →</a>
+            </div>
 
-</html>
+            <div class="card-body">
+                {% if recent_history %}
+                <div class="activity-timeline">
+                    {% for item in recent_history %}
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            {% if item.execution_type == 'writing' %}✍️
+                            {% elif item.execution_type == 'reading' %}📚
+                            {% elif item.execution_type == 'cooking' %}🍳
+                            {% elif item.execution_type == 'physical' %}💪
+                            {% elif item.execution_type == 'gaming' %}🎮
+                            {% else %}🎯{% endif %}
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-name">{{ item.activity_name }}</div>
+                            <div class="timeline-time">{{ item.created_at[:10] }}</div>
+                        </div>
+                        {% if item.feedback_rating %}
+                        <div class="timeline-rating">
+                            {% for i in range(item.feedback_rating) %}⭐{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <p class="empty-text">No activity history yet</p>
+                    <a href="{{ url_for('user.try_activity') }}" class="empty-cta">Try Your First Activity</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </section>
+
+    <section class="quick-actions">
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="quick-actions-grid">
+
+            <a href="{{ url_for('user.favorites') }}" class="quick-action-card">
+                <div class="quick-action-icon">⭐</div>
+                <div class="quick-action-content">
+                    <div class="quick-action-title">My Favorites</div>
+                    <div class="quick-action-subtitle">{{ total_favorites }} saved activities</div>
+                </div>
+                <div class="quick-action-arrow">→</div>
+            </a>
+
+            <a href="{{ url_for('user.history') }}" class="quick-action-card">
+                <div class="quick-action-icon">📊</div>
+                <div class="quick-action-content">
+                    <div class="quick-action-title">Activity History</div>
+                    <div class="quick-action-subtitle">{{ activities_tried }} activities tried</div>
+                </div>
+                <div class="quick-action-arrow">→</div>
+            </a>
+
+            <a href="{{ url_for('user.profile') }}" class="quick-action-card">
+                <div class="quick-action-icon">👤</div>
+                <div class="quick-action-content">
+                    <div class="quick-action-title">My Profile</div>
+                    <div class="quick-action-subtitle">Update your settings</div>
+                </div>
+                <div class="quick-action-arrow">→</div>
+            </a>
+
+        </div>
+    </section>
+
+</main>    
+{% endblock %}
