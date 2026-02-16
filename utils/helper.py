@@ -1,11 +1,7 @@
-import sqlite3
 import random
-import string
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from werkzeug.security import generate_password_hash
-from flask import url_for, redirect
 
 def send_email(
     to_email,
@@ -19,7 +15,7 @@ def send_email(
     msg["From"] = from_email
     msg["To"] = to_email
     msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
+    msg.attach(MIMEText(body, "html"))
 
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)

@@ -269,6 +269,11 @@ p {
   font-size: 1rem;
 }
 
+#q:hover{
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
 /* =====================================================
    Navbar
    ===================================================== */
