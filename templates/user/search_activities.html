@@ -1,0 +1,275 @@
+{% extends 'user/user_base.html' %}
+
+{% block content %}
+<div class="main-wrapper">
+    <div class="page-header">
+        <h1>🔍 Discover Activities</h1>
+        <p>Search and explore activities that match your interests</p>
+    </div>
+    <!-- Search Form -->
+    <div class="glass-card search-section">
+        <form method="GET" action="{{ url_for('user.search_activities') }}" class="search-form">
+            <div class="search-input-group">
+                <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Search activities..."
+                    class="search-input">
+                <button type="submit" class="search-btn">Search</button>
+            </div>
+
+            <div class="filter-group">
+                <select name="category" class="filter-select" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if request.args.get('category')==cat.id|string %}selected{% endif
+                        %}>
+                        {{ cat.icon }} {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results -->
+    <div class="results-section">
+        {% if activities %}
+        <p class="results-count">Found {{ activities|length }} activities</p>
+
+        <div class="activities-grid">
+            {% for activity in activities %}
+            <div class="activity-card">
+                <div class="activity-icon">{{ activity.category_icon or '🎯' }}</div>
+                <h3>{{ activity.name }}</h3>
+                <p class="activity-desc">{{ activity.description[:100] }}...</p>
+                <div class="card-footer">
+                    <span class="badge">{{ activity.category_name }}</span>
+                    <a href="{{ url_for('user.activity_detail', activity_id=activity.id) }}" class="view-btn">
+                        View →
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-results">
+            <div class="empty-icon">🔍</div>
+            <h3>No activities found</h3>
+            <p>Try adjusting your search or browse all categories</p>
+            <a href="{{ url_for('user.browse_categories') }}" class="btn-primary">Browse Categories</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .main-wrapper {
+        margin-left: 80px;
+        margin-top: 70px;
+        padding: 40px;
+        background: linear-gradient(120deg, #fed7aa 0%, #fecdd3 50%, #fbcfe8 100%);
+        min-height: calc(100vh - 70px);
+    }
+
+    .page-header {
+        z-index: 1;
+        margin-bottom: 30px;
+    }
+
+    .page-header h1 {
+        color: #1f2937;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    .page-header p {
+        color: #6b7280;
+        font-size: 1.1rem;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+    }
+
+    .search-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .search-input-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.7);
+        font-size: 1rem;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #8ec5fc;
+    }
+
+    .search-btn {
+        padding: 15px 30px;
+        background: #e63946;
+        font-family: 'Outfit', sans-serif;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+        font-size: x-large;
+    }
+
+    .search-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .filter-select {
+        padding: 12px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.7);
+        font-size: 1rem;
+        font-family: 'Outfit', sans-serif;
+        cursor: pointer;
+    }
+
+    .results-count {
+        color: #6b7280;
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .activities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .activity-card {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 20px;
+        padding: 25px;
+        transition: all 0.3s;
+    }
+
+    .activity-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .activity-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .activity-card h3 {
+        color: #1f2937;
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+    }
+
+    .activity-desc {
+        color: #6b7280;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 15px;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+    }
+
+    .badge {
+        background: #e63946;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .view-btn {
+        color: #e63946;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.2s;
+    }
+
+    .view-btn:hover {
+        transform: translateX(5px);
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .no-results h3 {
+        color: #1f2937;
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+
+    .no-results p {
+        color: #6b7280;
+        margin-bottom: 20px;
+    }
+
+    .btn-primary {
+        display: inline-block;
+        padding: 12px 25px;
+        background: #e63946;
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: transform 0.2s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 968px) {
+        .main-wrapper {
+            margin-left: 0;
+            padding: 20px;
+            margin-top: 60px;
+        }
+
+        .activities-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .search-input-group {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}

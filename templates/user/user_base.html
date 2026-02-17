@@ -2,124 +2,125 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoodMatch - User Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoodMatch - User Dashboard</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}">
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="container navbar-container">
-            <a href="{{ url_for('user.user_dashboard') }}" class="navbar-brand">
-                <div class="brand-icon" id="emoji">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                        <line x1="9" y1="9" x2="9.01" y2="9" />
-                        <line x1="15" y1="9" x2="15.01" y2="9" />
-                    </svg>
-                </div>
-                <span class="brand-text">MoodMatch</span>
-            </a>
-
-            <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-            </button>
-
-            <div class="navbar-menu" id="navbarMenu">
-                <div style="display: flex; gap: 12px; align-items: center;" class="admin-nav-link">
-                    {% if user.profile_picture %}
-                    <img src="{{ url_for('static', filename='uploads/' ~ user.profile_picture) }}" alt="Profile"
-                        class="profile-pic">
-                    {% else %}
-                    <div class="profile-pic"
-                        style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8ec5fc, #e0c3fc); color: white; font-weight: 700;">
-                        {{ user.first_name[0].upper() if user.first_name else '👤' }}
-                    </div>
-                    {% endif %}
-                    <span style="margin-top: 2px;" id="dp">Hello, <b style="color: var(--admin-primary);">{{ user.first_name
-                            }}</b></span>
-                </div>
-            </div>
+  <nav class="navbar">
+    <div class="container navbar-container">
+      <a href="{{ url_for('user.user_dashboard') }}" class="navbar-brand">
+        <div class="brand-icon" id="emoji">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+            <line x1="9" y1="9" x2="9.01" y2="9" />
+            <line x1="15" y1="9" x2="15.01" y2="9" />
+          </svg>
         </div>
+        <span class="brand-text">MoodMatch</span>
+      </a>
+
+      <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+      <div class="navbar-menu" id="navbarMenu">
+        <div style="display: flex; gap: 12px; align-items: center;" class="admin-nav-link">
+          {% if user.profile_picture %}
+          <img src="{{ url_for('static', filename='uploads/' ~ user.profile_picture) }}" alt="Profile"
+            class="profile-pic">
+          {% else %}
+          <div class="profile-pic"
+            style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8ec5fc, #e0c3fc); color: white; font-weight: 700;">
+            {{ user.first_name[0].upper() if user.first_name else '👤' }}
+          </div>
+          {% endif %}
+          <span style="margin-top: 2px;" id="dp">Hello, <b style="color: var(--admin-primary);">{{ user.first_name
+              }}</b></span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <aside class="admin-sidebar" id="adminSidebar"
+    style="backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.2); -webkit-backdrop-filter: blur(12px);">
+    <nav class="admin-sidebar-nav">
+      <div class="admin-nav-section">
+        <div class="admin-nav-label">Main Menu</div>
+        <ul class="admin-nav-list">
+          <li class="admin-nav-item">
+            <a href="{{ url_for('user.user_dashboard') }}" class="admin-nav-link active">
+              <span class="admin-nav-icon">🏠</span>
+              <span class="admin-nav-text">Dashboard</span>
+            </a>
+          </li>
+          <li class="admin-nav-item">
+            <a href="{{ url_for('user.search_activities') }}" class="admin-nav-link">
+              <span class="admin-nav-icon">🎯</span>
+              <span class="admin-nav-text">Discover Activities</span>
+            </a>
+          </li>
+          <li class="admin-nav-item">
+            <a href="{{ url_for('user.try_activity') }}" class="admin-nav-link">
+              <span class="admin-nav-icon">✨</span>
+              <span class="admin-nav-text">Try Activity</span>
+            </a>
+          </li>
+          <li class="admin-nav-item">
+            <a href="{{ url_for('user.favorites') }}" class="admin-nav-link">
+              <span class="admin-nav-icon">⭐</span>
+              <span class="admin-nav-text">My Favorites</span>
+            </a>
+          </li>
+          <li class="admin-nav-item">
+            <a href="{{ url_for('user.history') }}" class="admin-nav-link">
+              <span class="admin-nav-icon">🕰️</span>
+              <span class="admin-nav-text">Activity History</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="admin-nav-section">
+        <div class="admin-nav-label">Account</div>
+        <ul class="admin-nav-list">
+          <li class="admin-nav-item">
+            <a href="{{ url_for('main.about') }}" class="admin-nav-link">
+              <span class="admin-nav-icon">ℹ️</span>
+              <span class="admin-nav-text">About</span>
+            </a>
+          </li>
+          <li class="admin-nav-item">
+            <a href="{{ url_for('user.profile') }}" class="admin-nav-link">
+              <span class="admin-nav-icon">👤</span>
+              <span class="admin-nav-text">My Profile</span>
+            </a>
+          </li>
+        </ul>
+      </div>
     </nav>
 
-    <aside class="admin-sidebar" id="adminSidebar" style="backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.2); -webkit-backdrop-filter: blur(12px);">
-        <nav class="admin-sidebar-nav">
-            <div class="admin-nav-section">
-                <div class="admin-nav-label">Main Menu</div>
-                <ul class="admin-nav-list">
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.user_dashboard') }}" class="admin-nav-link active">
-                            <span class="admin-nav-icon">🏠</span>
-                            <span class="admin-nav-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('main.index') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">🎯</span>
-                            <span class="admin-nav-text">Discover Activities</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.try_activity') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">✨</span>
-                            <span class="admin-nav-text">Try Activity</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.favorites') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">⭐</span>
-                            <span class="admin-nav-text">My Favorites</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.history') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">🕰️</span>
-                            <span class="admin-nav-text">Activity History</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+    <div class="admin-sidebar-footer">
+      <a href="{{ url_for('auth.logout') }}" class="admin-nav-link" id="logout">
+        <span class="admin-nav-icon" style="margin-left: 70px;">🚪</span>
+        <span class="admin-nav-text">Logout</span>
+      </a>
+    </div>
+  </aside>
 
-            <div class="admin-nav-section">
-                <div class="admin-nav-label">Account</div>
-                <ul class="admin-nav-list">
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('main.about') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">ℹ️</span>
-                            <span class="admin-nav-text">About</span>
-                        </a>
-                    </li>
-                    <li class="admin-nav-item">
-                        <a href="{{ url_for('user.profile') }}" class="admin-nav-link">
-                            <span class="admin-nav-icon">👤</span>
-                            <span class="admin-nav-text">My Profile</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+  {% block content %}{% endblock %}
 
-        <div class="admin-sidebar-footer">
-            <a href="{{ url_for('auth.logout') }}" class="admin-nav-link" id="logout">
-                <span class="admin-nav-icon" style="margin-left: 70px;">🚪</span>
-                <span class="admin-nav-text">Logout</span>
-            </a>
-        </div>
-    </aside>
-
-    {% block content %}{% endblock %}
-
-    <footer class="footer">
+  <footer class="footer">
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
@@ -227,29 +228,29 @@
     </div>
   </footer>
 
-    <script>
-        const navbarToggle = document.getElementById('navbarToggle');
-        const adminSidebar = document.getElementById('adminSidebar');
+  <script>
+    const navbarToggle = document.getElementById('navbarToggle');
+    const adminSidebar = document.getElementById('adminSidebar');
 
-        if (navbarToggle) {
-            navbarToggle.addEventListener('click', function () {
-                this.classList.toggle('active');
-                adminSidebar.classList.toggle('expanded');
-            });
-        }
+    if (navbarToggle) {
+      navbarToggle.addEventListener('click', function () {
+        this.classList.toggle('active');
+        adminSidebar.classList.toggle('expanded');
+      });
+    }
 
-        document.addEventListener('click', function (event) {
-            const isClickInsideSidebar = adminSidebar.contains(event.target);
-            const isClickOnToggle = navbarToggle.contains(event.target);
+    document.addEventListener('click', function (event) {
+      const isClickInsideSidebar = adminSidebar.contains(event.target);
+      const isClickOnToggle = navbarToggle.contains(event.target);
 
-            if (!isClickInsideSidebar && !isClickOnToggle && adminSidebar.classList.contains('expanded')) {
-                adminSidebar.classList.remove('expanded');
-                navbarToggle.classList.remove('active');
-            }
-        });
+      if (!isClickInsideSidebar && !isClickOnToggle && adminSidebar.classList.contains('expanded')) {
+        adminSidebar.classList.remove('expanded');
+        navbarToggle.classList.remove('active');
+      }
+    });
 
-        
-    </script>
+
+  </script>
 </body>
 
 </html>

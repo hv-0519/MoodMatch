@@ -1,164 +1,1044 @@
 {% extends 'user/user_base.html' %}
-{% block sidebar_class %}static-expanded{% endblock %}
 
-{% block user_styles %}
-<style>
-    .user-page-wrapper {
-        margin-left: 280px;
-        min-height: 100vh;
-        padding: 40px;
-        background: linear-gradient(120deg, #fed7aa 0%, #fecdd3 50%, #fbcfe8 100%);
-    }
+{% block content %}
+<div class="main-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>🎯 Discover Activities</h1>
+        <p class="subtitle">Tell us how you're feeling, and we'll find the perfect activity for you</p>
+    </div>
 
-    .premium-card {
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 24px;
-        padding: 30px;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-    }
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">
+        <span>{{ message }}</span>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
-    .mood-input-area {
-        margin-bottom: 30px;
-    }
-
-    .mood-input {
-        width: 100%;
-        padding: 20px;
-        border: 2px solid rgba(255, 255, 255, 0.5);
-        border-radius: 16px;
-        font-size: 1.1rem;
-        background: rgba(255, 255, 255, 0.6);
-        resize: vertical;
-        min-height: 120px;
-    }
-
-    .submit-btn {
-        background: #be123c;
-        color: white;
-        padding: 15px 40px;
-        border: none;
-        border-radius: 12px;
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(190, 18, 60, 0.3);
-        transition: 0.3s;
-    }
-
-    .submit-btn:hover {
-        background: #a71136;
-        transform: translateY(-2px);
-    }
-
-    .mood-result {
-        background: white;
-        padding: 20px;
-        border-radius: 16px;
-        text-align: center;
-        margin-bottom: 25px;
-    }
-
-    .activities-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-    }
-
-    .activity-card {
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        border-radius: 20px;
-        padding: 20px;
-        transition: 0.3s;
-        cursor: pointer;
-    }
-
-    .activity-card:hover {
-        background: rgba(255, 255, 255, 0.7);
-        transform: translateY(-4px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .activity-icon {
-        width: 50px;
-        height: 50px;
-        background: white;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        margin-bottom: 12px;
-    }
-
-    @media (max-width: 768px) {
-        .user-page-wrapper { margin-left: 70px; padding: 20px; }
-    }
-</style>
-{% endblock %}
-
-{% block user_content %}
-<div class="user-page-wrapper">
-    <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin-bottom: 10px;">
-        How are you feeling? 😊
-    </h1>
-    <p style="color: #64748b; margin-bottom: 30px;">
-        Tell us your mood and we'll recommend perfect activities
-    </p>
-
-    <div class="premium-card">
-        <form method="POST">
-            <div class="mood-input-area">
-                <label style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 10px;">
-                    Express your mood:
-                </label>
-                <textarea 
-                    name="mood_input" 
-                    class="mood-input" 
-                    placeholder="e.g., I'm feeling stressed and anxious today..."
-                    required>{{ mood_input if mood_input }}</textarea>
+    <!-- Mood Input Form -->
+    <div class="mood-input-section glass-card">
+        <form method="POST" action="{{ url_for('user.try_activity') }}" id="moodForm">
+            <!-- Main Mood Input -->
+            <div class="mood-input-group">
+                <label for="mood_input">How are you feeling today?</label>
+                <textarea name="mood_input" id="mood_input" rows="4"
+                    placeholder="I'm feeling stressed and overwhelmed with work. Need something relaxing..." required
+                    maxlength="500">{% if mood_input %}{{ mood_input }}{% endif %}</textarea>
+                <div class="char-count">
+                    <span id="charCount">0</span>/500 characters
+                </div>
             </div>
-            <button type="submit" class="submit-btn">🎯 Find Activities</button>
+
+            <!-- Optional Filters -->
+            <div class="filters-section">
+                <h3>🔍 Optional Filters <span class="toggle-filters" onclick="toggleFilters()">(Show/Hide)</span></h3>
+
+                <div class="filters-grid" id="filtersGrid" style="display: none;">
+                    <!-- Energy Level -->
+                    <div class="filter-group">
+                        <label for="energy_level">⚡ Energy Level</label>
+                        <select name="energy_level" id="energy_level">
+                            <option value="">Any</option>
+                            <option value="Low">Low - Relaxed activities</option>
+                            <option value="Medium">Medium - Moderate effort</option>
+                            <option value="High">High - Active & energetic</option>
+                        </select>
+                    </div>
+
+                    <!-- Time Available -->
+                    <div class="filter-group">
+                        <label for="time_available">⏰ Time Available</label>
+                        <select name="time_available" id="time_available">
+                            <option value="">Any</option>
+                            <option value="15">15 minutes - Quick break</option>
+                            <option value="30">30 minutes - Short activity</option>
+                            <option value="60">1 hour - Medium activity</option>
+                            <option value="120">2 hours - Extended activity</option>
+                            <option value="180">3+ hours - Long activity</option>
+                        </select>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="filter-group">
+                        <label for="location_type">📍 Location</label>
+                        <select name="location_type" id="location_type">
+                            <option value="">Any</option>
+                            <option value="Indoor">Indoor - Stay at home</option>
+                            <option value="Outdoor">Outdoor - Go outside</option>
+                            <option value="Both">Both - Flexible</option>
+                        </select>
+                    </div>
+
+                    <!-- Social Preference -->
+                    <div class="filter-group">
+                        <label for="social_type">👥 Social Setting</label>
+                        <select name="social_type" id="social_type">
+                            <option value="">Any</option>
+                            <option value="Solo">Solo - By myself</option>
+                            <option value="Small Group">Small Group - 2-5 people</option>
+                            <option value="Large Group">Large Group - 6+ people</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-primary">
+                <span class="btn-icon">🔍</span>
+                Find Activities
+            </button>
         </form>
     </div>
 
-    {% if show_results %}
-    <div class="mood-result">
-        <h2 style="font-size: 1.5rem; margin-bottom: 10px;">
-            {{ mood_emoji }} Your Mood: {{ mood_type|capitalize }}
-        </h2>
-        <p style="color: #64748b;">Sentiment Score: {{ "%.2f"|format(sentiment_score) }}</p>
-    </div>
+    <!-- Results Section -->
+    {% if searched %}
+    <div class="results-section">
+        <!-- Sentiment Badge -->
+        <div class="sentiment-display glass-card">
+            <div class="sentiment-header">
+                <h3>Your Mood Analysis</h3>
+            </div>
+            <div class="sentiment-content">
+                <div class="mood-emoji">{{ mood_emoji }}</div>
+                <div class="mood-details">
+                    <p class="mood-type mood-{{ mood_type }}">{{ mood_type|title }} Mood</p>
+                    <p class="sentiment-score">
+                        Sentiment Score:
+                        <span class="score-value">{{ "%.2f"|format(sentiment_score) }}</span>
+                    </p>
+                    <div class="sentiment-bar">
+                        <div class="sentiment-fill mood-{{ mood_type }}"
+                            style="width: {{ ((sentiment_score + 1) / 2 * 100)|int }}%">
+                        </div>
+                    </div>
+                    <div class="sentiment-labels">
+                        <span>😔 Negative</span>
+                        <span>😐 Neutral</span>
+                        <span>😊 Positive</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="premium-card">
-        <h2 style="font-size: 1.8rem; font-weight: 700; color: #1e293b; margin-bottom: 20px;">
-            Recommended Activities for You
-        </h2>
-
+        <!-- Recommendations Grid -->
         {% if recommendations %}
+        <div class="recommendations-header">
+            <h2>✨ Recommended Activities ({{ recommendations|length }})</h2>
+            <p>Based on your mood and preferences</p>
+        </div>
+
         <div class="activities-grid">
             {% for activity in recommendations %}
-            <div class="activity-card" onclick="window.location.href='{{ url_for('user.activity_detail', activity_id=activity.id, mood_input=mood_input, sentiment_score=sentiment_score) }}'">
-                <div class="activity-icon">{{ activity.icon or '🎯' }}</div>
-                <h3 style="font-weight: 700; color: #1e293b; margin-bottom: 8px;">{{ activity.name }}</h3>
-                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 12px;">
-                    {{ activity.description[:60] if activity.description else 'Try this activity' }}...
-                </p>
-                <span style="display: inline-block; padding: 4px 12px; background: rgba(190, 18, 60, 0.1); color: #be123c; border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
-                    {{ activity.category_name }}
-                </span>
+            <div class="activity-card glass-card" data-activity-id="{{ activity.id }}">
+                <!-- Category Badge -->
+                <div class="category-badge">
+                    <span class="badge-icon">{{ activity.category_icon or '🎯' }}</span>
+                    <span class="badge-text">{{ activity.category_name }}</span>
+                </div>
+
+                <!-- Activity Content -->
+                <div class="activity-content">
+                    <h3 class="activity-name">{{ activity.name }}</h3>
+                    <p class="activity-description">
+                        {{ activity.description[:100] }}{% if activity.description|length > 100 %}...{% endif %}
+                    </p>
+
+                    <!-- Activity Meta -->
+                    <div class="activity-meta">
+                        <span class="meta-tag">
+                            {% if activity.execution_type == 'editor' %}
+                            ✍️ Writing
+                            {% elif activity.execution_type == 'resource' %}
+                            📚 Reading
+                            {% elif activity.execution_type == 'steps' %}
+                            📋 Step-by-Step
+                            {% elif activity.execution_type == 'gaming' %}
+                            🎮 Gaming
+                            {% elif activity.execution_type == 'travel' %}
+                            ✈️ Travel
+                            {% else %}
+                            🎯 Activity
+                            {% endif %}
+                        </span>
+                        {% if activity.priority %}
+                        <span class="priority-badge">⭐ Priority {{ activity.priority }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <a href="{{ url_for('user.activity_detail', activity_id=activity.id) }}" class="btn-try">
+                    Try This Activity →
+                </a>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <p style="text-align: center; color: #64748b; padding: 60px 20px;">
-            No activities found matching your mood. Try different keywords!
-        </p>
+        <!-- Empty State -->
+        <div class="empty-state glass-card">
+            <div class="empty-icon">😔</div>
+            <h3>No Activities Found</h3>
+            <p>We couldn't find activities matching your criteria.</p>
+            <p>Try adjusting your filters or describing your mood differently.</p>
+            <button onclick="document.getElementById('mood_input').focus()" class="btn-secondary">
+                Try Again
+            </button>
+        </div>
         {% endif %}
     </div>
     {% endif %}
 </div>
+
+<div id="loadingModal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content loading-content">
+        <div class="loading-animation">
+            <div class="brain-icon">🧠</div>
+            <div class="pulse-rings">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+            </div>
+        </div>
+        <h3 class="loading-title">Analyzing Your Mood...</h3>
+        <p class="loading-message" id="loadingMessage">Processing your feelings</p>
+        <div class="loading-steps">
+            <div class="step active" id="step1">
+                <span class="step-icon">✓</span>
+                <span class="step-text">Reading your input</span>
+            </div>
+            <div class="step" id="step2">
+                <span class="step-icon">○</span>
+                <span class="step-text">Analyzing sentiment</span>
+            </div>
+            <div class="step" id="step3">
+                <span class="step-icon">○</span>
+                <span class="step-text">Finding perfect matches</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.show {
+        display: flex;
+    }
+
+    .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        animation: fadeIn 0.3s;
+    }
+
+    .loading-content {
+        position: relative;
+        background: white;
+        padding: 60px 50px;
+        border-radius: 30px;
+        text-align: center;
+        max-width: 500px;
+        animation: slideUp 0.5s;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+    }
+
+    .loading-animation {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 30px;
+    }
+
+    .brain-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 5rem;
+        z-index: 2;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .pulse-rings {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .pulse-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        height: 100%;
+        border: 3px solid #8ec5fc;
+        border-radius: 50%;
+        opacity: 0;
+    }
+
+    .pulse-ring:nth-child(1) {
+        animation: pulseRing 2s ease-out infinite;
+    }
+
+    .pulse-ring:nth-child(2) {
+        animation: pulseRing 2s ease-out 0.6s infinite;
+    }
+
+    .pulse-ring:nth-child(3) {
+        animation: pulseRing 2s ease-out 1.2s infinite;
+    }
+
+    .loading-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 15px;
+    }
+
+    .loading-message {
+        font-size: 1.1rem;
+        color: #64748b;
+        margin-bottom: 40px;
+    }
+
+    .loading-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        text-align: left;
+    }
+
+    .step {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 20px;
+        background: rgba(142, 197, 252, 0.05);
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+
+    .step.active {
+        background: rgba(142, 197, 252, 0.15);
+    }
+
+    .step.completed {
+        background: rgba(16, 185, 129, 0.15);
+    }
+
+    .step-icon {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #94a3b8;
+    }
+
+    .step.active .step-icon {
+        color: #8ec5fc;
+        animation: spin 1s linear infinite;
+    }
+
+    .step.completed .step-icon {
+        color: #10b981;
+    }
+
+    .step-text {
+        font-size: 1rem;
+        color: #475569;
+        font-weight: 500;
+    }
+
+    .step.active .step-text {
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(100px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        50% {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+    }
+
+    @keyframes pulseRing {
+        0% {
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+        }
+
+        100% {
+            width: 200%;
+            height: 200%;
+            opacity: 0;
+        }
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Main Wrapper */
+    .main-wrapper {
+        margin-left: 80px;
+        margin-top: 70px;
+        padding: 40px;
+        background: linear-gradient(120deg, #fed7aa 0%, #fecdd3 50%, #fbcfe8 100%);
+        min-height: calc(100vh - 70px);
+    }
+
+
+
+    /* Page Header */
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #0f172a;
+        margin-bottom: 10px;
+    }
+
+    .page-header .subtitle {
+        font-size: 1.1rem;
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* Glassmorphic Card */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+    }
+
+    /* Alert Messages */
+    .alert {
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #059669;
+    }
+
+    .alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        color: #d97706;
+    }
+
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #dc2626;
+    }
+
+    .alert-info {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #2563eb;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: inherit;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+    /* Mood Input Section */
+    .mood-input-section {
+        max-width: 900px;
+        margin: 0 auto 40px;
+    }
+
+    .mood-input-group {
+        margin-bottom: 30px;
+    }
+
+    .mood-input-group label {
+        display: block;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 12px;
+    }
+
+    #mood_input {
+        width: 100%;
+        padding: 18px;
+        font-size: 1.05rem;
+        font-family: 'Outfit', sans-serif;
+        border: 2px solid #e63946;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.7);
+        resize: vertical;
+        transition: all 0.3s;
+    }
+
+    #mood_input:focus {
+        outline: none;
+        border-color: #e63946;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(142, 197, 252, 0.1);
+    }
+
+    .char-count {
+        text-align: right;
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-top: 8px;
+    }
+
+    /* Filters Section */
+    .filters-section h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 20px;
+    }
+
+    .toggle-filters {
+        font-size: 0.9rem;
+        color: #e63946;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .toggle-filters:hover {
+        text-decoration: underline;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 8px;
+    }
+
+    .filter-group select {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 1rem;
+        font-family: 'Outfit', sans-serif;
+        border: 2px solid rgba(142, 197, 252, 0.3);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .filter-group select:focus {
+        outline: none;
+        border-color: #8ec5fc;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Primary Button */
+    .btn-primary {
+        width: 100%;
+        padding: 18px 32px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: white;
+        background: #e63946;
+        border: none;
+        border-radius: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-top: 30px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-4px);
+    }
+
+    .btn-primary:active {
+        transform: translateY(-2px);
+    }
+
+    .btn-icon {
+        font-size: 1.3rem;
+    }
+
+    /* Sentiment Display */
+    .sentiment-display {
+        max-width: 700px;
+        margin: 0 auto 40px;
+    }
+
+    .sentiment-header h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .sentiment-content {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .mood-emoji {
+        font-size: 5rem;
+        flex-shrink: 0;
+    }
+
+    .mood-details {
+        flex: 1;
+    }
+
+    .mood-type {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+    }
+
+    .mood-positive {
+        color: #10b981;
+    }
+
+    .mood-neutral {
+        color: #3b82f6;
+    }
+
+    .mood-negative {
+        color: #ef4444;
+    }
+
+    .sentiment-score {
+        font-size: 1rem;
+        color: #64748b;
+        margin: 0 0 15px 0;
+    }
+
+    .score-value {
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .sentiment-bar {
+        width: 100%;
+        height: 12px;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .sentiment-fill {
+        height: 100%;
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+    }
+
+    .sentiment-fill.mood-positive {
+        background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+    }
+
+    .sentiment-fill.mood-neutral {
+        background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+    }
+
+    .sentiment-fill.mood-negative {
+        background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+    }
+
+    .sentiment-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    /* Recommendations Header */
+    .recommendations-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .recommendations-header h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 8px;
+    }
+
+    .recommendations-header p {
+        font-size: 1rem;
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* Activities Grid */
+    .activities-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .activity-card {
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .activity-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #e63946;
+        transform: scaleX(0);
+        transition: transform 0.3s;
+    }
+
+    .activity-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    .activity-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: rgba(142, 197, 252, 0.15);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 16px;
+    }
+
+    .badge-icon {
+        font-size: 1rem;
+    }
+
+    .activity-content {
+        flex: 1;
+        margin-bottom: 20px;
+    }
+
+    .activity-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 12px 0;
+    }
+
+    .activity-description {
+        font-size: 0.95rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin: 0 0 16px 0;
+    }
+
+    .activity-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .meta-tag,
+    .priority-badge {
+        padding: 4px 10px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #475569;
+    }
+
+    .priority-badge {
+        background: rgba(251, 191, 36, 0.15);
+        color: #d97706;
+    }
+
+    .btn-try {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        text-align: center;
+        text-decoration: none;
+        font-weight: 600;
+        color: white;
+        background: #e63946;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+
+    .btn-try:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(142, 197, 252, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 40px;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 12px;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 12px;
+    }
+
+    .btn-secondary {
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #e63946;
+        background: rgba(230, 57, 70, 0.1);
+        border: 2px solid #e63946;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 20px;
+    }
+
+    .btn-secondary:hover {
+        background: rgba(230, 57, 70, 0.2);
+        transform: translateY(-2px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .activities-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-wrapper {
+            margin-left: 0;
+            padding: 20px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .activities-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sentiment-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .mood-emoji {
+            font-size: 4rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .glass-card {
+            padding: 20px;
+        }
+    }
+</style>
+
+</style>
+
+<script>
+    const form = document.getElementById("moodForm");
+    const modal = document.getElementById("loadingModal");
+    const messageEl = document.getElementById("loadingMessage");
+
+    const steps = [
+        { id: "step1", msg: "Reading your input..." },
+        { id: "step2", msg: "Analyzing your emotions..." },
+        { id: "step3", msg: "Finding perfect activities for you..." }
+    ];
+
+    const thinkingMessages = [
+        "Understanding your feelings...",
+        "Running AI mood analysis...",
+        "Scanning activity database...",
+        "Matching based on your personality...",
+        "Almost ready..."
+    ];
+
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const moodValue = document.getElementById("mood_input").value.trim();
+            if (moodValue.length < 5) {
+                alert("Please describe your mood in at least 5 characters.");
+                return;
+            }
+
+            modal.classList.add("show");
+
+            let stepIndex = 0;
+            let msgIndex = 0;
+
+            // Step progress animation
+            const stepInterval = setInterval(() => {
+                if (stepIndex > 0) {
+                    document.getElementById(steps[stepIndex - 1].id)
+                        .classList.add("completed");
+                    document.getElementById(steps[stepIndex - 1].id)
+                        .classList.remove("active");
+                }
+
+                if (stepIndex < steps.length) {
+                    const stepEl = document.getElementById(steps[stepIndex].id);
+                    stepEl.classList.add("active");
+                    messageEl.textContent = steps[stepIndex].msg;
+                    stepIndex++;
+                } else {
+                    clearInterval(stepInterval);
+                }
+            }, 1500);
+
+            // AI thinking messages animation
+            const thinkingInterval = setInterval(() => {
+                messageEl.textContent = thinkingMessages[msgIndex];
+                msgIndex = (msgIndex + 1) % thinkingMessages.length;
+            }, 1200);
+
+            // Final submit
+            setTimeout(() => {
+                clearInterval(thinkingInterval);
+                form.submit();
+            }, 6000);
+        });
+    }
+</script>
+
+
 {% endblock %}
