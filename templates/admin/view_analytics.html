@@ -19,12 +19,30 @@
         inset: 0;
         left: 280px;
         z-index: 0;
-        background: radial-gradient(at 0% 0%, #fed7aa 0%, transparent 50%),
-            radial-gradient(at 100% 0%, #fecdd3 0%, transparent 50%),
-            radial-gradient(at 100% 100%, #fbcfe8 0%, transparent 50%),
-            radial-gradient(at 0% 100%, #e0e7ff 0%, transparent 50%),
-            #f8fafc;
         pointer-events: none;
+
+        background:
+            radial-gradient(circle at 30% 30%, #fef3c7 0%, transparent 50%),
+            radial-gradient(circle at 70% 70%, #fde68a 0%, transparent 50%),
+            linear-gradient(120deg, #fffbeb, #fef3c7);
+
+        background-size: 200% 200%;
+        animation: gradientFlow 18s ease infinite;
+    }
+
+    /* ANIMATION */
+    @keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
     }
 
     /* 2. FLOATING EMOJIS - Analytics themed */
@@ -141,6 +159,15 @@
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
         margin-bottom: 25px;
+        scrollbar-width: none;
+        /* For Firefox */
+        -ms-overflow-style: none;
+        /* For Internet Explorer and older Edge */
+        overflow: auto;
+    }
+
+    .premium-card::-webkit-scrollbar {
+        display: none;
     }
 
     .premium-card:hover {
@@ -263,6 +290,12 @@
     .activity-feed {
         max-height: 500px;
         overflow-y: auto;
+        scrollbar-width: none;
+    }
+
+    .activity-feed::-webkit-scrollbar {
+        display: none;
+        /* Chrome */
     }
 
     .activity-item {
@@ -639,10 +672,12 @@
         <!-- ===================== -->
         <!-- 3. ENGAGEMENT METRICS -->
         <!-- ===================== -->
-        <center><div class="section-header">
-            <h2 class="section-title">💪 Engagement Metrics</h2>
-            <p class="section-subtitle">User interaction and platform usage statistics</p>
-        </div></center>
+        <center>
+            <div class="section-header">
+                <h2 class="section-title">💪 Engagement Metrics</h2>
+                <p class="section-subtitle">User interaction and platform usage statistics</p>
+            </div>
+        </center>
 
         <div class="metrics-grid">
             <div class="metric-card">
@@ -670,10 +705,12 @@
         <!-- ===================== -->
         <!-- 4. INTEREST ANALYTICS -->
         <!-- ===================== -->
-        <center><div class="section-header">
-            <h2 class="section-title">💡 Interest Analytics</h2>
-            <p class="section-subtitle">User interests and their correlation with activities</p>
-        </div></center>
+        <center>
+            <div class="section-header">
+                <h2 class="section-title">💡 Interest Analytics</h2>
+                <p class="section-subtitle">User interests and their correlation with activities</p>
+            </div>
+        </center>
 
         <div class="two-col-grid">
             <!-- Top 10 Interests -->
@@ -743,10 +780,12 @@
         <!-- ===================== -->
         <!-- 5. RECENT ACTIVITY FEED -->
         <!-- ===================== -->
-        <center><div class="section-header">
-            <h2 class="section-title">🔔 Recent Activity</h2>
-            <p class="section-subtitle">Live feed of user actions and system events</p>
-        </div></center>
+        <center>
+            <div class="section-header">
+                <h2 class="section-title">🔔 Recent Activity</h2>
+                <p class="section-subtitle">Live feed of user actions and system events</p>
+            </div>
+        </center>
 
         <div class="premium-card">
             <div class="activity-feed">
@@ -786,185 +825,27 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // =====================================
-        // 1. CATEGORY USAGE CHART (Bar)
-        // =====================================
-        const categoryCtx = document.getElementById('categoryUsageChart').getContext('2d');
-        new Chart(categoryCtx, {
-            type: 'bar',
-            data: {
-                labels: {{ category_labels | tojson | safe }},
-        datasets: [{
-            label: 'Usage Count',
-            data: {{ category_counts | tojson | safe }},
-        backgroundColor: 'rgba(190, 18, 60, 0.7)',
-        borderColor: '#be123c',
-        borderWidth: 2,
-        borderRadius: 8
-            }]
-        },
-        options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: { beginAtZero: true }
-        }
-    }
-    });
-
-    // =====================================
-    // 2. MOOD DISTRIBUTION CHART (Doughnut)
-    // =====================================
-    const moodDistCtx = document.getElementById('moodDistChart').getContext('2d');
-    new Chart(moodDistCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Positive', 'Neutral', 'Negative'],
-            datasets: [{
-                data: [
-                    {{ mood_distribution.positive }},
-            {{ mood_distribution.neutral }},
-                    {{ mood_distribution.negative }}
-                ],
-        backgroundColor: ['#10b981', '#6366f1', '#ef4444'],
-        borderColor: '#ffffff',
-        borderWidth: 3
-            }]
-        },
-        options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: false }
-        },
-        cutout: '65%'
-    }
-    });
-
-    // =====================================
-    // 3. MOOD TRENDS CHART (Line)
-    // =====================================
-    const moodTrendsCtx = document.getElementById('moodTrendsChart').getContext('2d');
-    new Chart(moodTrendsCtx, {
-        type: 'line',
-        data: {
-            labels: {{ mood_trend_labels | tojson | safe }},
-        datasets: [
-        {
-            label: 'Positive',
-            data: {{ mood_trend_positive | tojson | safe }},
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        fill: true,
-        tension: 0.4
-                },
-        {
-            label: 'Neutral',
-            data: {{ mood_trend_neutral | tojson | safe }},
-        borderColor: '#6366f1',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-        fill: true,
-        tension: 0.4
-                },
-        {
-            label: 'Negative',
-            data: {{ mood_trend_negative | tojson | safe }},
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        fill: true,
-        tension: 0.4
-                }
-    ]
-        },
-        options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: true }
-        },
-        scales: {
-            y: { beginAtZero: true }
-        }
-    }
-    });
-
-    // =====================================
-    // 4. FEEDBACK DISTRIBUTION CHART (Bar)
-    // =====================================
-    const feedbackCtx = document.getElementById('feedbackChart').getContext('2d');
-    new Chart(feedbackCtx, {
-        type: 'bar',
-        data: {
-            labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
-            datasets: [{
-                label: 'Feedback Count',
-                data: [
-                    {{ feedback_distribution[1] }},
-            {{ feedback_distribution[2] }},
-                    {{ feedback_distribution[3] }},
-        {{ feedback_distribution[4] }},
-        {{ feedback_distribution[5] }}
-                ],
-        backgroundColor: [
-        'rgba(239, 68, 68, 0.7)',
-        'rgba(251, 146, 60, 0.7)',
-        'rgba(250, 204, 21, 0.7)',
-        'rgba(163, 230, 53, 0.7)',
-        'rgba(34, 197, 94, 0.7)'
-    ],
-        borderRadius: 8
-            }]
-        },
-        options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: { beginAtZero: true }
-        }
-    }
-    });
-
-    // =====================================
-    // 5. INTEREST-ACTIVITY CORRELATION (Bar)
-    // =====================================
-    {% if interest_activity_correlation %}
-    const interestActivityCtx = document.getElementById('interestActivityChart').getContext('2d');
-    new Chart(interestActivityCtx, {
-        type: 'bar',
-        data: {
-            labels: {{ interest_activity_correlation | map(attribute = 'interest_name') | list | tojson | safe }},
-        datasets: [{
-            label: 'Activity Tries',
-            data: {{ interest_activity_correlation | map(attribute = 'activity_tries') | list | tojson | safe }},
-        backgroundColor: 'rgba(99, 102, 241, 0.7)',
-        borderColor: '#6366f1',
-        borderWidth: 2,
-        borderRadius: 8
-            }]
-        },
-        options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: { beginAtZero: true }
-        }
-    }
-    });
-    {% endif %}
-});
+<script id="adminAnalyticsData" type="application/json">
+{{ {
+  'category_labels': category_labels,
+  'category_counts': category_counts,
+  'mood_positive': mood_distribution.positive,
+  'mood_neutral': mood_distribution.neutral,
+  'mood_negative': mood_distribution.negative,
+  'mood_trend_labels': mood_trend_labels,
+  'mood_trend_positive': mood_trend_positive,
+  'mood_trend_neutral': mood_trend_neutral,
+  'mood_trend_negative': mood_trend_negative,
+  'feedback_distribution': [
+    feedback_distribution[1],
+    feedback_distribution[2],
+    feedback_distribution[3],
+    feedback_distribution[4],
+    feedback_distribution[5]
+  ],
+  'interest_labels': interest_activity_correlation | map(attribute='interest_name') | list,
+  'interest_activity_tries': interest_activity_correlation | map(attribute='activity_tries') | list
+} | tojson }}
 </script>
 
 {% endblock %}

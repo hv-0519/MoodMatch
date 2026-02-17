@@ -174,16 +174,6 @@
     <div class="admin-main-content">
         <h1 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; margin-bottom: 30px;">⚙️ Settings</h1>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-                {{ '✅' if category == 'success' else '❌' }} {{ message }}
-            </div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
-
         <!-- Profile Settings -->
         <div class="settings-card">
             <h3 class="card-title">👤 Profile Information</h3>

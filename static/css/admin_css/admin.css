@@ -162,7 +162,7 @@ body {
   top: 0;
   width: var(--sidebar-width-collapsed);
   height: 100vh;
-  background: var(--admin-surface);
+  background: linear-gradient(180deg, #1e293b, #0f172a);
   border-right: 1px solid var(--admin-border);
   z-index: 1000;
   display: flex;
@@ -179,7 +179,7 @@ body {
 }
 
 .admin-sidebar::-webkit-scrollbar {
-  width: 6px;
+  display: none;
 }
 
 .admin-sidebar::-webkit-scrollbar-track {

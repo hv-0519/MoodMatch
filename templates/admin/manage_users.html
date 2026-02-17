@@ -518,63 +518,6 @@
     }
 </style>
 
-<script>
-    function viewUser(card) {
-        // Parse the full user object from the data attribute
-        const user = JSON.parse(card.dataset.user);
 
-        // 1. Name & Username
-        const fullName = ((user.first_name || '') + ' ' + (user.last_name || '')).trim();
-        document.getElementById('detailFullName').innerText = fullName || user.username;
-        document.getElementById('detailUsername').innerText = '@' + user.username;
-        document.getElementById('detailId').innerText = '#' + (user.id || '0');
-
-        // 2. Personal Details
-        document.getElementById('detailGender').innerText = user.gender || 'Not Specified';
-        document.getElementById('detailBirth').innerText = user.date_of_birth || 'N/A';
-        document.getElementById('detailPhone').innerText = user.phone_number || 'N/A';
-        document.getElementById('detailEmail').innerText = user.email || 'N/A';
-
-        // 3. Address & Location Details
-        document.getElementById('detailStreet').innerText = user.street_address || 'No address provided';
-        document.getElementById('detailCity').innerText = user.city || '-';
-        document.getElementById('detailState').innerText = user.state || '-';
-        document.getElementById('detailPostal').innerText = user.postal_code || '-';
-        document.getElementById('detailCountry').innerText = user.country || 'N/A';
-
-        // 4. Registration Date Formatting
-        if (document.getElementById('detailJoined')) {
-            const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB', {
-                day: 'numeric', month: 'long', year: 'numeric'
-            }) : 'N/A';
-            document.getElementById('detailJoined').innerText = joinDate;
-        }
-
-        // 5. Avatar Logic
-        const avatarDiv = document.getElementById('detailAvatar');
-        if (user.profile_picture && user.profile_picture !== 'default.png') {
-            avatarDiv.innerHTML = `<img src="/static/uploads/${user.profile_picture}" 
-                                    style="width:100%; height:100%; object-fit:cover;">`;
-        } else {
-            avatarDiv.innerHTML = `👤`;
-        }
-
-        // Show Modal
-        document.getElementById('viewUserModal').classList.add('active');
-    }
-
-    function closeViewModal() {
-        document.getElementById('viewUserModal').classList.remove('active');
-    }
-
-    // Close on Escape or Outside Click
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "Escape") closeViewModal();
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target.id === 'viewUserModal') closeViewModal();
-    });
-</script>
 
 {% endblock %}

@@ -16,7 +16,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import os
 from datetime import datetime, timedelta
@@ -917,6 +917,10 @@ def profile():
             new_password = request.form.get("new_password", "")
             confirm_password = request.form.get("confirm_password", "")
 
+            if not current_password:
+                flash("Current password is required!", "error")
+                return redirect(url_for("user.profile"))
+
             if new_password != confirm_password:
                 flash("Passwords don't match!", "error")
                 return redirect(url_for("user.profile"))
@@ -927,6 +931,17 @@ def profile():
 
             conn = get_db()
             cursor = conn.cursor()
+            cursor.execute(
+                "SELECT password_hash FROM users WHERE id = ?",
+                (current_user.id,),
+            )
+            row = cursor.fetchone()
+
+            if not row or not check_password_hash(row[0], current_password):
+                conn.close()
+                flash("Current password is incorrect!", "error")
+                return redirect(url_for("user.profile"))
+
             cursor.execute(
                 """
                 UPDATE users 
@@ -1209,3 +1224,6 @@ def category_activities(category_id):
         category=category,
         activities=activities,
     )
+
+
+#run codex resume 019c6a36-f6b3-7c20-b99a-192ef4a48f31
