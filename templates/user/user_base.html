@@ -95,7 +95,7 @@
         <div class="admin-nav-label">Account</div>
         <ul class="admin-nav-list">
           <li class="admin-nav-item">
-            <a href="{{ url_for('main.about') }}" class="admin-nav-link">
+            <a href="/about" class="admin-nav-link">
               <span class="admin-nav-icon">ℹ️</span>
               <span class="admin-nav-text">About</span>
             </a>
@@ -124,7 +124,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <a href="{{ url_for('main.index') }}" class="brand-link">
+          <a href="/" class="brand-link">
             <div class="brand-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -144,10 +144,10 @@
         <div class="footer-links">
           <h4 class="footer-heading">Navigation</h4>
           <ul>
-            <li><a href="{{ url_for('main.index') }}">Home</a></li>
-            <li><a href="{{ url_for('main.about') }}">About</a></li>
-            <li><a href="{{ url_for('main.favorites') }}">Favorites</a></li>
-            <li><a href="{{ url_for('main.history') }}">History</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="{{ url_for('user.favorites') }}">Favorites</a></li>
+            <li><a href="{{ url_for('user.history') }}">History</a></li>
           </ul>
         </div>
 
@@ -155,16 +155,16 @@
           <h4 class="footer-heading">Moods</h4>
           <ul>
             <li>
-              <a href="{{ url_for('main.index') }}#mood-selector">Creative</a>
+              <a href="/#mood-selector">Creative</a>
             </li>
             <li>
-              <a href="{{ url_for('main.index') }}#mood-selector">Intellectual</a>
+              <a href="/#mood-selector">Intellectual</a>
             </li>
             <li>
-              <a href="{{ url_for('main.index') }}#mood-selector">Adventure</a>
+              <a href="/#mood-selector">Adventure</a>
             </li>
             <li>
-              <a href="{{ url_for('main.index') }}#mood-selector">Social</a>
+              <a href="/#mood-selector">Social</a>
             </li>
           </ul>
         </div>

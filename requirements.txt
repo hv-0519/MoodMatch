@@ -4,3 +4,4 @@ flask-login
 Werkzeug==3.0.1
 vaderSentiment==3.3.2
 reportlab==4.0.7
+anthropic==0.39.0

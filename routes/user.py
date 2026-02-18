@@ -1,7 +1,7 @@
 """
-MoodMatch - Complete User Module Routes (FIXED)
-All routes for user functionality with VADER sentiment analysis
-Fixed: Added 'user' variable to all render_template calls
+MoodMatch - Complete User Module Routes
+Fixed: removed duplicate try_activity route
+Added: Gemini AI chatbot with auto model discovery + debug endpoint
 """
 
 from flask import (
@@ -19,6 +19,10 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import os
+import json
+import urllib.request
+import urllib.error
+import time
 from datetime import datetime, timedelta
 
 # VADER Sentiment Analysis
@@ -28,31 +32,123 @@ try:
     VADER_AVAILABLE = True
 except ImportError:
     VADER_AVAILABLE = False
-    print("⚠️ WARNING: vaderSentiment not installed. Run: pip install vaderSentiment")
+    print("⚠️ vaderSentiment not installed. Run: pip install vaderSentiment")
 
 user_bp = Blueprint("user", __name__)
 
-# Configuration
 DB_PATH = "models/instance/moodmatch.db"
 UPLOAD_FOLDER = "static/uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_FILE_SIZE = 5 * 1024 * 1024
+
+# ── Gemini config ──────────────────────────────────────────────────────────────
+
+GEMINI_SYSTEM = (
+    "You are MoodMatch Assistant, a friendly and empathetic AI that helps users "
+    "discover activities based on their mood. Acknowledge their feelings with warmth, "
+    "ask clarifying questions when needed (time, energy, indoor/outdoor, alone/social), "
+    "and suggest thoughtful personalized activities. Keep responses under 120 words. "
+    "Use 1-2 emojis max. Be supportive and non-judgmental."
+)
+
+GEMINI_MODELS = [
+    "gemini-2.0-flash-lite",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash-8b",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro",
+    "gemini-pro",
+]
 
 
-# ===============================
-# HELPER FUNCTIONS
-# ===============================
+def _list_gemini_models(api_key):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}&pageSize=50"
+    req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            data = json.loads(r.read())
+            return [
+                m["name"].replace("models/", "")
+                for m in data.get("models", [])
+                if "generateContent" in m.get("supportedGenerationMethods", [])
+            ], None
+    except urllib.error.HTTPError as e:
+        return [], e.read().decode("utf-8", errors="ignore")
+    except Exception as e:
+        return [], str(e)
+
+
+def _gemini_call(api_key, model, prompt, system=None):
+    """Single Gemini REST call. Returns (text, error_str)."""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    full_prompt = f"{system or GEMINI_SYSTEM}\n\n{prompt}"
+    body = json.dumps(
+        {
+            "contents": [{"role": "user", "parts": [{"text": full_prompt}]}],
+            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 600},
+        }
+    ).encode()
+    req = urllib.request.Request(
+        url, data=body, headers={"Content-Type": "application/json"}, method="POST"
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            data = json.loads(r.read())
+            return data["candidates"][0]["content"]["parts"][0]["text"], None
+    except urllib.error.HTTPError as e:
+        raw = e.read().decode("utf-8", errors="ignore")
+        return None, f"HTTP {e.code}: {raw[:300]}"
+    except Exception as e:
+        return None, str(e)
+
+
+def call_gemini(api_key, prompt, system=None):
+    """Auto-discover models then try them in order. Returns (text, log)."""
+    available, _ = _list_gemini_models(api_key)
+    ordered = [m for m in GEMINI_MODELS if m in available]
+    ordered += [m for m in available if m not in ordered]
+    if not ordered:
+        ordered = ["gemini-2.0-flash-lite", "gemini-2.0-flash"]
+
+    log = [
+        {
+            "step": "list_models",
+            "available": available or "discovery failed, using defaults",
+        }
+    ]
+
+    for model in ordered:
+        text, err = _gemini_call(api_key, model, prompt, system)
+        if text:
+            log.append({"step": "success", "model": model})
+            return text, log
+        code = 0
+        try:
+            code = int(err.split(":")[0].replace("HTTP ", "").strip())
+        except:
+            pass
+        log.append({"step": "failed", "model": model, "error": err[:120]})
+        if code == 429:
+            time.sleep(0.5)
+            continue
+        if code in (404, 400):
+            continue
+        if code == 403:
+            break
+
+    raise Exception(json.dumps({"message": "All models failed", "log": log}, indent=2))
+
+
+# ── Helper functions ───────────────────────────────────────────────────────────
 
 
 def get_db():
-    """Get database connection with Row factory"""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 
 def get_current_user_dict():
-    """Helper function to get current user data as dictionary"""
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE id = ?", (current_user.id,))
@@ -62,12 +158,10 @@ def get_current_user_dict():
 
 
 def allowed_file(filename):
-    """Check if file extension is allowed"""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def get_sentiment_classification(score):
-    """Classify sentiment score into positive/neutral/negative"""
     if score >= 0.2:
         return "positive", "😊"
     elif score <= -0.2:
@@ -77,51 +171,263 @@ def get_sentiment_classification(score):
 
 
 def extract_keywords(text, min_length=3):
-    """Extract meaningful keywords from text"""
-    stop_words = {
+    stopwords = {
         "the",
+        "is",
+        "at",
+        "which",
+        "on",
+        "a",
+        "an",
         "and",
-        "for",
-        "are",
+        "or",
         "but",
-        "not",
-        "you",
-        "all",
-        "can",
-        "her",
-        "was",
-        "one",
-        "our",
-        "out",
-        "day",
-        "get",
-        "has",
-        "him",
-        "his",
-        "how",
-        "man",
-        "new",
-        "now",
-        "old",
-        "see",
-        "two",
-        "way",
-        "who",
-        "boy",
-        "did",
-        "its",
-        "let",
-        "put",
-        "say",
-        "she",
-        "too",
-        "use",
+        "in",
+        "with",
+        "to",
+        "for",
+        "of",
+        "as",
+        "by",
+        "i",
+        "me",
+        "my",
+        "we",
+        "am",
+        "are",
     }
     words = text.lower().split()
     keywords = [
-        word for word in words if len(word) >= min_length and word not in stop_words
+        w.strip(".,!?;:") for w in words if len(w) >= min_length and w not in stopwords
     ]
-    return keywords
+    return keywords[:10]
+
+
+# ===============================
+# CHATBOT ROUTES
+# ===============================
+
+
+@user_bp.route("/try_activity_chat")
+@login_required
+def try_activity_chat():
+    """AI Chatbot interface — serves try_activity.html in chatbot mode"""
+    user = get_current_user_dict()
+    return render_template(
+        "user/try_activity.html", user=user, searched=False, chatbot_mode=True
+    )
+
+
+@user_bp.route("/chat_mood", methods=["POST"])
+@login_required
+def chat_mood():
+    """
+    Chatbot endpoint: VADER sentiment + Gemini AI + activity DB lookup.
+    Expects JSON: { message, history, api_key }
+    """
+    try:
+        data = request.get_json()
+        user_message = data.get("message", "").strip()
+        history = data.get("history", [])
+        api_key = data.get("api_key", "").strip()
+
+        if not user_message:
+            return jsonify({"error": "No message provided"}), 400
+
+        # 1. VADER sentiment
+        sentiment_data = None
+        mood_type = "neutral"
+        mood_emoji = "😐"
+
+        if VADER_AVAILABLE:
+            analyzer = SentimentIntensityAnalyzer()
+            scores = analyzer.polarity_scores(user_message)
+            compound = scores["compound"]
+            mood_type, mood_emoji = get_sentiment_classification(compound)
+            sentiment_data = {
+                "type": mood_type,
+                "score": f"{compound:.2f}",
+                "emoji": mood_emoji,
+                "label": mood_type.capitalize(),
+            }
+
+        # 2. Build conversation prompt
+        prompt = ""
+        for msg in history[-6:]:
+            role = "User" if msg["role"] == "user" else "Assistant"
+            prompt += f"{role}: {msg['content']}\n"
+        prompt += f"User: {user_message}\nAssistant:"
+
+        # Enrich system with mood context
+        system = (
+            f"{GEMINI_SYSTEM}\n\n"
+            f"Current mood analysis — Type: {mood_type} {mood_emoji}, "
+            f"Score: {sentiment_data['score'] if sentiment_data else 'N/A'}. "
+            "If stressed/sad → suggest calming activities. "
+            "If energetic/happy → suggest engaging activities."
+        )
+
+        # 3. Gemini AI call
+        ai_response = f"I sense you're feeling {mood_type} {mood_emoji}. Let me find some activities for you!"
+        model_used = "fallback"
+
+        if api_key:
+            try:
+                ai_response, log = call_gemini(api_key, prompt, system)
+                model_used = next(
+                    (e["model"] for e in log if e.get("step") == "success"), "unknown"
+                )
+            except Exception as e:
+                err = str(e)
+                if "429" in err:
+                    ai_response = (
+                        f"⚠️ Gemini quota exceeded (429). "
+                        f"I can still analyze your {mood_type} mood {mood_emoji} — "
+                        "here are activity matches from our database:"
+                    )
+                elif "403" in err:
+                    ai_response = (
+                        "🔑 Gemini API key rejected. Check your key and try again."
+                    )
+                else:
+                    ai_response = f"I sense you're feeling {mood_type} {mood_emoji}. Here are some activity matches!"
+        else:
+            ai_response = (
+                f"No API key provided. Based on your {mood_type} mood {mood_emoji}, "
+                "here are some activity suggestions from our database:"
+            )
+
+        # 4. Fetch matching activities from DB
+        activities = []
+        keywords = extract_keywords(user_message)
+
+        try:
+            conn = get_db()
+            cursor = conn.cursor()
+
+            query = """
+                SELECT a.id, a.name, a.description, a.execution_type, a.priority,
+                       c.name as category_name, c.icon as category_icon
+                FROM activities a
+                JOIN categories c ON a.category_id = c.id
+                WHERE a.is_active = 1
+            """
+            params = []
+
+            if keywords:
+                mood_conds = " OR ".join(
+                    [f"LOWER(a.mood_tags) LIKE ?" for _ in keywords]
+                )
+                query += f" AND ({mood_conds})"
+                params.extend([f"%{kw}%" for kw in keywords])
+
+            if mood_type == "negative":
+                query += " AND (LOWER(a.mood_tags) LIKE '%calm%' OR LOWER(a.mood_tags) LIKE '%relax%' OR LOWER(a.mood_tags) LIKE '%peace%')"
+            elif mood_type == "positive":
+                query += " AND (LOWER(a.mood_tags) LIKE '%energetic%' OR LOWER(a.mood_tags) LIKE '%happy%' OR LOWER(a.mood_tags) LIKE '%fun%')"
+
+            query += " ORDER BY a.priority DESC, RANDOM() LIMIT 5"
+            cursor.execute(query, params)
+            activities = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+        except Exception as db_err:
+            print(f"DB error in chat_mood: {db_err}")
+
+        # 5. Save to mood history (best-effort)
+        try:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO user_mood_history (user_id, mood_input, sentiment_score, sentiment_type, created_at) VALUES (?,?,?,?,?)",
+                (
+                    current_user.id,
+                    user_message,
+                    sentiment_data["score"] if sentiment_data else "0.0",
+                    mood_type,
+                    datetime.now(),
+                ),
+            )
+            conn.commit()
+            conn.close()
+        except:
+            pass
+
+        return jsonify(
+            {
+                "response": ai_response,
+                "sentiment": sentiment_data,
+                "activities": activities,
+                "model_used": model_used,
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        return (
+            jsonify(
+                {"error": "Something went wrong. Please try again!", "details": str(e)}
+            ),
+            500,
+        )
+
+
+# ── DEBUG: test Gemini key + list models ───────────────────────────────────────
+# REMOVE THIS SECTION ONCE CHATBOT IS WORKING
+
+
+@user_bp.route("/chat_debug", methods=["POST"])
+@login_required
+def chat_debug():
+    """Debug endpoint — tests all Gemini models. Remove when done."""
+    api_key = request.get_json().get("api_key", "").strip()
+    if not api_key:
+        return jsonify({"error": "No key"}), 400
+
+    available, list_err = _list_gemini_models(api_key)
+    results = []
+
+    for model in available or ["gemini-2.0-flash-lite", "gemini-2.0-flash"]:
+        text, err = _gemini_call(api_key, model, "Reply with exactly: OK")
+        if text:
+            results.append(
+                {"model": model, "status": "✅ WORKS", "response": text.strip()}
+            )
+            break
+        else:
+            code = 0
+            try:
+                code = int(err.split(":")[0].replace("HTTP ", "").strip())
+            except:
+                pass
+            reason = {
+                429: "Quota exceeded",
+                403: "Key rejected",
+                404: "Model not found",
+                400: "Bad request",
+            }.get(code, err[:80])
+            results.append(
+                {"model": model, "status": f"❌ HTTP {code}", "reason": reason}
+            )
+
+    working = [r for r in results if "WORKS" in r["status"]]
+    return jsonify(
+        {
+            "key_prefix": api_key[:12] + "...",
+            "available_models": available or f"ListModels failed: {list_err}",
+            "test_results": results,
+            "verdict": (
+                f"✅ Working: {[r['model'] for r in working]}"
+                if working
+                else "❌ All models failed — quota exhausted or key invalid"
+            ),
+        }
+    )
+
+
+# END DEBUG SECTION ─────────────────────────────────────────────────────────────
 
 
 # ===============================
@@ -137,11 +443,9 @@ def user_dashboard():
     conn = get_db()
     cursor = conn.cursor()
 
-    # Get user info
     cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
     user = dict(cursor.fetchone())
 
-    # Get statistics
     cursor.execute("SELECT COUNT(*) FROM user_history WHERE user_id = ?", (user_id,))
     activities_tried = cursor.fetchone()[0]
 
@@ -149,26 +453,15 @@ def user_dashboard():
     total_favorites = cursor.fetchone()[0]
 
     cursor.execute(
-        """
-        SELECT COUNT(*) FROM user_history 
-        WHERE user_id = ? AND sentiment_score IS NOT NULL
-    """,
+        "SELECT COUNT(*) FROM user_history WHERE user_id = ? AND sentiment_score IS NOT NULL",
         (user_id,),
     )
     mood_entries = cursor.fetchone()[0]
 
-    # Calculate streak (consecutive days with activities)
     cursor.execute(
-        """
-        SELECT DATE(created_at) as activity_date 
-        FROM user_history 
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-        LIMIT 30
-    """,
+        "SELECT DATE(created_at) as activity_date FROM user_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 30",
         (user_id,),
     )
-
     dates = [row[0] for row in cursor.fetchall()]
     streak_days = 0
     if dates:
@@ -180,24 +473,21 @@ def user_dashboard():
             else:
                 break
 
-    # Get recent history (last 5 activities)
     cursor.execute(
         """
         SELECT uh.*, a.name as activity_name, a.execution_type
         FROM user_history uh
         JOIN activities a ON uh.activity_id = a.id
         WHERE uh.user_id = ?
-        ORDER BY uh.created_at DESC
-        LIMIT 5
-    """,
+        ORDER BY uh.created_at DESC LIMIT 5
+        """,
         (user_id,),
     )
     recent_history = [dict(row) for row in cursor.fetchall()]
 
-    # Get recommended activities (based on user interests and popularity)
     cursor.execute(
         """
-        SELECT DISTINCT a.id, a.name, a.description, a.execution_type, 
+        SELECT DISTINCT a.id, a.name, a.description, a.execution_type,
                c.name as category_name, c.icon
         FROM activities a
         JOIN categories c ON a.category_id = c.id
@@ -206,11 +496,10 @@ def user_dashboard():
         WHERE a.is_active = 1
         ORDER BY CASE WHEN i.id IS NOT NULL THEN 0 ELSE 1 END, a.priority DESC
         LIMIT 6
-    """,
+        """,
         (user_id,),
     )
     recommended = [dict(row) for row in cursor.fetchall()]
-
     conn.close()
 
     return render_template(
@@ -226,16 +515,14 @@ def user_dashboard():
 
 
 # ===============================
-# 2. TRY ACTIVITY (MOOD INPUT & RECOMMENDATIONS)
+# 2. TRY ACTIVITY (MOOD INPUT — original form-based flow)
 # ===============================
 
 
 @user_bp.route("/try_activity", methods=["GET", "POST"])
 @login_required
 def try_activity():
-    """Activity recommendation based on VADER sentiment analysis"""
-
-    # Get user data for the template
+    """Activity recommendation based on VADER sentiment analysis (form-based)"""
     user = get_current_user_dict()
 
     if request.method == "POST":
@@ -245,13 +532,11 @@ def try_activity():
             flash("Please tell us how you're feeling!", "warning")
             return redirect(url_for("user.try_activity"))
 
-        # VADER Sentiment Analysis
         if VADER_AVAILABLE:
             analyzer = SentimentIntensityAnalyzer()
             sentiment = analyzer.polarity_scores(mood_input)
             sentiment_score = sentiment["compound"]
         else:
-            # Fallback: Simple keyword matching
             sentiment_score = 0.0
             negative_keywords = [
                 "sad",
@@ -275,7 +560,6 @@ def try_activity():
                 "joyful",
                 "confident",
             ]
-
             mood_lower = mood_input.lower()
             for word in negative_keywords:
                 if word in mood_lower:
@@ -283,22 +567,16 @@ def try_activity():
             for word in positive_keywords:
                 if word in mood_lower:
                     sentiment_score += 0.3
-
             sentiment_score = max(-1.0, min(1.0, sentiment_score))
 
-        # Get mood classification
         mood_type, mood_emoji = get_sentiment_classification(sentiment_score)
-
-        # Extract keywords for matching
         keywords = extract_keywords(mood_input)
 
-        # Get optional filters
         energy_level = request.form.get("energy_level")
         time_available = request.form.get("time_available")
         location_type = request.form.get("location_type")
         social_type = request.form.get("social_type")
 
-        # Build query
         conn = get_db()
         cursor = conn.cursor()
 
@@ -311,7 +589,6 @@ def try_activity():
         """
         params = []
 
-        # Mood-based filtering (keyword matching in mood_tags)
         if keywords:
             mood_conditions = " OR ".join(
                 [f"LOWER(a.mood_tags) LIKE ?" for _ in keywords]
@@ -319,27 +596,21 @@ def try_activity():
             query += f" AND ({mood_conditions})"
             params.extend([f"%{kw}%" for kw in keywords])
 
-        # Apply activity_filters if they exist
         if energy_level or time_available or location_type or social_type:
             query += " AND a.id IN (SELECT activity_id FROM activity_filters WHERE 1=1"
-
             if energy_level:
                 query += " AND energy_level = ?"
                 params.append(energy_level)
-
             if time_available:
                 time_mins = int(time_available)
                 query += " AND min_time <= ? AND max_time >= ?"
                 params.extend([time_mins, time_mins])
-
             if location_type:
                 query += " AND location_type = ?"
                 params.append(location_type)
-
             if social_type:
                 query += " AND social_type = ?"
                 params.append(social_type)
-
             query += ")"
 
         query += " ORDER BY a.priority DESC, RANDOM() LIMIT 10"
@@ -348,7 +619,6 @@ def try_activity():
         recommended_activities = [dict(row) for row in cursor.fetchall()]
         conn.close()
 
-        # Store mood in session for activity tracking
         session["mood_input"] = mood_input
         session["sentiment_score"] = sentiment_score
         session["mood_type"] = mood_type
@@ -357,6 +627,7 @@ def try_activity():
             "user/try_activity.html",
             user=user,
             searched=True,
+            chatbot_mode=False,
             mood_input=mood_input,
             mood_type=mood_type,
             mood_emoji=mood_emoji,
@@ -364,8 +635,9 @@ def try_activity():
             recommendations=recommended_activities,
         )
 
-    # GET request - show mood input form
-    return render_template("user/try_activity.html", user=user, searched=False)
+    return render_template(
+        "user/try_activity.html", user=user, searched=False, chatbot_mode=False
+    )
 
 
 # ===============================
@@ -376,24 +648,14 @@ def try_activity():
 @user_bp.route("/activity/<int:activity_id>")
 @login_required
 def activity_detail(activity_id):
-    """View activity details with execution content"""
     conn = get_db()
     cursor = conn.cursor()
-
-    # Get user data for the template - THIS WAS MISSING!
     user = get_current_user_dict()
 
-    # Get activity basic info
     cursor.execute(
-        """
-        SELECT a.*, c.name as category_name, c.icon as category_icon
-        FROM activities a
-        JOIN categories c ON a.category_id = c.id
-        WHERE a.id = ?
-    """,
+        "SELECT a.*, c.name as category_name, c.icon as category_icon FROM activities a JOIN categories c ON a.category_id = c.id WHERE a.id = ?",
         (activity_id,),
     )
-
     row = cursor.fetchone()
     if not row:
         flash("Activity not found!", "error")
@@ -401,96 +663,46 @@ def activity_detail(activity_id):
 
     activity = dict(row)
     execution_type = activity["execution_type"]
-
-    # Initialize execution_data
     activity["execution_data"] = {}
 
-    # Get execution-specific data
     if execution_type == "resource":
-        # Resource-based activity (videos, articles, etc.)
         cursor.execute(
-            """
-            SELECT * FROM resources 
-            WHERE activity_id = ?
-            ORDER BY difficulty
-        """,
+            "SELECT * FROM resources WHERE activity_id = ? ORDER BY difficulty",
             (activity_id,),
         )
-        resources = [dict(row) for row in cursor.fetchall()]
-        activity["execution_data"] = {"resources": resources}
-
+        activity["execution_data"] = {"resources": [dict(r) for r in cursor.fetchall()]}
     elif execution_type == "steps":
-        # Cooking/Steps type
         cursor.execute(
-            """
-            SELECT * FROM activity_steps 
-            WHERE activity_id = ?
-            ORDER BY step_number
-        """,
+            "SELECT * FROM activity_steps WHERE activity_id = ? ORDER BY step_number",
             (activity_id,),
         )
-        steps = [dict(row) for row in cursor.fetchall()]
-        activity["execution_data"] = {"steps": steps}
-
+        activity["execution_data"] = {"steps": [dict(r) for r in cursor.fetchall()]}
     elif execution_type == "gaming":
-        # Physical/Gaming type
-        cursor.execute(
-            """
-            SELECT * FROM game_rules 
-            WHERE game_id = ?
-        """,
-            (activity_id,),
-        )
-        rules = [dict(row) for row in cursor.fetchall()]
-
-        cursor.execute(
-            """
-            SELECT * FROM game_tutorials 
-            WHERE game_id = ?
-        """,
-            (activity_id,),
-        )
-        tutorials = [dict(row) for row in cursor.fetchall()]
-
+        cursor.execute("SELECT * FROM game_rules WHERE game_id = ?", (activity_id,))
+        rules = [dict(r) for r in cursor.fetchall()]
+        cursor.execute("SELECT * FROM game_tutorials WHERE game_id = ?", (activity_id,))
+        tutorials = [dict(r) for r in cursor.fetchall()]
         activity["execution_data"] = {"rules": rules, "tutorials": tutorials}
-
     elif execution_type == "travel":
-        # Travel type
         cursor.execute(
-            """
-            SELECT * FROM travel_places 
-            WHERE activity_id = ?
-            ORDER BY distance_km
-        """,
+            "SELECT * FROM travel_places WHERE activity_id = ? ORDER BY distance_km",
             (activity_id,),
         )
-        places = [dict(row) for row in cursor.fetchall()]
-        activity["execution_data"] = {"places": places}
+        activity["execution_data"] = {"places": [dict(r) for r in cursor.fetchall()]}
 
-    # Check if already in favorites
     cursor.execute(
-        """
-        SELECT COUNT(*) FROM favorites 
-        WHERE user_id = ? AND activity_id = ?
-    """,
+        "SELECT COUNT(*) FROM favorites WHERE user_id = ? AND activity_id = ?",
         (current_user.id, activity_id),
     )
     activity["is_favorite"] = cursor.fetchone()[0] > 0
 
-    # Get activity filters
     cursor.execute(
-        """
-        SELECT * FROM activity_filters 
-        WHERE activity_id = ?
-    """,
-        (activity_id,),
+        "SELECT * FROM activity_filters WHERE activity_id = ?", (activity_id,)
     )
     filter_row = cursor.fetchone()
     activity["filters"] = dict(filter_row) if filter_row else None
-
     conn.close()
 
-    # FIXED: Added user variable here
     return render_template("user/activity_detail.html", user=user, activity=activity)
 
 
@@ -502,7 +714,6 @@ def activity_detail(activity_id):
 @user_bp.route("/activity/<int:activity_id>/rate", methods=["POST"])
 @login_required
 def rate_activity(activity_id):
-    """Record activity rating and feedback"""
     rating = request.form.get("rating", type=int)
     feedback_text = request.form.get("feedback_text", "").strip()
 
@@ -510,21 +721,13 @@ def rate_activity(activity_id):
         flash("Invalid rating!", "error")
         return redirect(url_for("user.activity_detail", activity_id=activity_id))
 
-    # Get mood data from session
     mood_input = session.get("mood_input", "Direct access")
     sentiment_score = session.get("sentiment_score", 0.0)
 
     conn = get_db()
     cursor = conn.cursor()
-
-    # Insert into user_history
     cursor.execute(
-        """
-        INSERT INTO user_history (
-            user_id, activity_id, mood_input, sentiment_score, 
-            feedback_rating, feedback_text, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-    """,
+        "INSERT INTO user_history (user_id, activity_id, mood_input, sentiment_score, feedback_rating, feedback_text, created_at) VALUES (?,?,?,?,?,?,?)",
         (
             current_user.id,
             activity_id,
@@ -535,11 +738,9 @@ def rate_activity(activity_id):
             datetime.utcnow().isoformat(),
         ),
     )
-
     conn.commit()
     conn.close()
 
-    # Clear session data
     session.pop("mood_input", None)
     session.pop("sentiment_score", None)
     session.pop("mood_type", None)
@@ -556,8 +757,6 @@ def rate_activity(activity_id):
 @user_bp.route("/activity/<int:activity_id>/write", methods=["GET", "POST"])
 @login_required
 def write_activity(activity_id):
-    """Writing/Journaling activity with editor"""
-
     user = get_current_user_dict()
 
     if request.method == "POST":
@@ -570,14 +769,8 @@ def write_activity(activity_id):
 
         conn = get_db()
         cursor = conn.cursor()
-
-        # Save writing
         cursor.execute(
-            """
-            INSERT INTO user_writings (
-                user_id, activity_id, title, content, created_at
-            ) VALUES (?, ?, ?, ?, ?)
-        """,
+            "INSERT INTO user_writings (user_id, activity_id, title, content, created_at) VALUES (?,?,?,?,?)",
             (
                 current_user.id,
                 activity_id,
@@ -586,17 +779,10 @@ def write_activity(activity_id):
                 datetime.utcnow().isoformat(),
             ),
         )
-
-        # Also add to history
         mood_input = session.get("mood_input", "Writing activity")
         sentiment_score = session.get("sentiment_score", 0.0)
-
         cursor.execute(
-            """
-            INSERT INTO user_history (
-                user_id, activity_id, mood_input, sentiment_score, created_at
-            ) VALUES (?, ?, ?, ?, ?)
-        """,
+            "INSERT INTO user_history (user_id, activity_id, mood_input, sentiment_score, created_at) VALUES (?,?,?,?,?)",
             (
                 current_user.id,
                 activity_id,
@@ -605,396 +791,133 @@ def write_activity(activity_id):
                 datetime.utcnow().isoformat(),
             ),
         )
-
         conn.commit()
         conn.close()
-
         flash("Your writing has been saved! ✍️", "success")
         return redirect(url_for("user.my_writings"))
 
-    # GET - Show editor
     conn = get_db()
     cursor = conn.cursor()
-
     cursor.execute(
-        """
-        SELECT a.name, a.description, c.name as category_name
-        FROM activities a
-        JOIN categories c ON a.category_id = c.id
-        WHERE a.id = ?
-    """,
+        "SELECT a.name, a.description, c.name as category_name FROM activities a JOIN categories c ON a.category_id = c.id WHERE a.id = ?",
         (activity_id,),
     )
-
     row = cursor.fetchone()
     if not row:
         flash("Activity not found!", "error")
         return redirect(url_for("user.user_dashboard"))
-
     activity = dict(row)
-    activity["id"] = activity_id
     conn.close()
-
-    return render_template("user/write_activity.html", user=user, activity=activity)
-
-
-@user_bp.route("/writings")
-@login_required
-def my_writings():
-    """View user's saved writings"""
-    user = get_current_user_dict()
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT w.*, a.name as activity_name
-        FROM user_writings w
-        JOIN activities a ON w.activity_id = a.id
-        WHERE w.user_id = ?
-        ORDER BY w.created_at DESC
-    """,
-        (current_user.id,),
+    return render_template(
+        "user/write_activity.html",
+        user=user,
+        activity=activity,
+        activity_id=activity_id,
     )
 
+
+# ===============================
+# 6. MY WRITINGS
+# ===============================
+
+
+@user_bp.route("/my_writings")
+@login_required
+def my_writings():
+    user = get_current_user_dict()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT uw.*, a.name as activity_name FROM user_writings uw JOIN activities a ON uw.activity_id = a.id WHERE uw.user_id = ? ORDER BY uw.created_at DESC",
+        (current_user.id,),
+    )
     writings = [dict(row) for row in cursor.fetchall()]
     conn.close()
-
     return render_template("user/my_writings.html", user=user, writings=writings)
 
 
 # ===============================
-# 6. FAVORITES MANAGEMENT
+# 7. FAVORITES
 # ===============================
 
 
 @user_bp.route("/favorites")
 @login_required
 def favorites():
-    """View user's favorite activities"""
     user = get_current_user_dict()
-
     conn = get_db()
     cursor = conn.cursor()
-
     cursor.execute(
-        """
-        SELECT a.*, c.name as category_name, c.icon as category_icon, 
-               f.created_at as favorited_at
-        FROM favorites f
-        JOIN activities a ON f.activity_id = a.id
-        JOIN categories c ON a.category_id = c.id
-        WHERE f.user_id = ?
-        ORDER BY f.created_at DESC
-    """,
+        "SELECT a.*, c.name as category_name, c.icon as category_icon FROM favorites f JOIN activities a ON f.activity_id = a.id JOIN categories c ON a.category_id = c.id WHERE f.user_id = ? ORDER BY f.created_at DESC",
         (current_user.id,),
     )
-
-    favorites_list = [dict(row) for row in cursor.fetchall()]
+    fav_activities = [dict(row) for row in cursor.fetchall()]
     conn.close()
-
-    # FIXED: Added user variable here
-    return render_template("user/favorites.html", user=user, favorites=favorites_list)
+    return render_template("user/favorites.html", user=user, favorites=fav_activities)
 
 
-@user_bp.route("/favorite/<int:activity_id>", methods=["POST"])
+@user_bp.route("/activity/<int:activity_id>/toggle-favorite", methods=["POST"])
 @login_required
 def toggle_favorite(activity_id):
-    """Toggle favorite status (AJAX endpoint)"""
     conn = get_db()
     cursor = conn.cursor()
-
-    # Check if already favorited
     cursor.execute(
-        """
-        SELECT COUNT(*) FROM favorites 
-        WHERE user_id = ? AND activity_id = ?
-    """,
+        "SELECT id FROM favorites WHERE user_id = ? AND activity_id = ?",
         (current_user.id, activity_id),
     )
-
-    is_favorited = cursor.fetchone()[0] > 0
-
-    if is_favorited:
-        # Remove from favorites
+    existing = cursor.fetchone()
+    if existing:
         cursor.execute(
-            """
-            DELETE FROM favorites 
-            WHERE user_id = ? AND activity_id = ?
-        """,
+            "DELETE FROM favorites WHERE user_id = ? AND activity_id = ?",
             (current_user.id, activity_id),
         )
-        message = "Removed from favorites"
-        favorited = False
+        message, status = "Removed from favorites", "removed"
     else:
-        # Add to favorites
-        try:
-            cursor.execute(
-                """
-                INSERT INTO favorites (user_id, activity_id, created_at)
-                VALUES (?, ?, ?)
-            """,
-                (current_user.id, activity_id, datetime.utcnow().isoformat()),
-            )
-            message = "Added to favorites! ⭐"
-            favorited = True
-        except sqlite3.IntegrityError:
-            conn.close()
-            return jsonify({"success": False, "message": "Already in favorites"})
-
+        cursor.execute(
+            "INSERT INTO favorites (user_id, activity_id, created_at) VALUES (?,?,?)",
+            (current_user.id, activity_id, datetime.utcnow().isoformat()),
+        )
+        message, status = "Added to favorites! ❤️", "added"
     conn.commit()
     conn.close()
-
-    return jsonify({"success": True, "message": message, "favorited": favorited})
-
-
-# ===============================
-# 7. ACTIVITY HISTORY
-# ===============================
-
-
-@user_bp.route("/history")
-@login_required
-def history():
-    """Show user's activity history with mood tracking"""
-    user = get_current_user_dict()
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT uh.*, a.name as activity_name, a.execution_type,
-               CASE 
-                   WHEN uh.sentiment_score >= 0.2 THEN 'positive'
-                   WHEN uh.sentiment_score <= -0.2 THEN 'negative'
-                   ELSE 'neutral'
-               END as mood_type
-        FROM user_history uh
-        JOIN activities a ON uh.activity_id = a.id
-        WHERE uh.user_id = ?
-        ORDER BY uh.created_at DESC
-    """,
-        (current_user.id,),
-    )
-
-    history_list = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-
-    # FIXED: Added user variable here
-    return render_template("user/history.html", user=user, history=history_list)
-
-
-@user_bp.route("/history/delete/<int:history_id>", methods=["POST"])
-@login_required
-def delete_history(history_id):
-    """Delete a history entry"""
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        DELETE FROM user_history 
-        WHERE id = ? AND user_id = ?
-    """,
-        (history_id, current_user.id),
-    )
-
-    conn.commit()
-    conn.close()
-
-    return jsonify({"success": True, "message": "History entry deleted"})
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify({"status": status, "message": message})
+    flash(message, "success")
+    return redirect(url_for("user.activity_detail", activity_id=activity_id))
 
 
 # ===============================
-# 8. USER PROFILE & SETTINGS
+# 8. USER PROFILE
 # ===============================
 
 
-@user_bp.route("/profile", methods=["GET", "POST"])
+@user_bp.route("/profile")
 @login_required
 def profile():
-    """User profile and settings management"""
-
-    if request.method == "POST":
-        # Handle profile picture upload
-        if "profile_picture" in request.files:
-            file = request.files["profile_picture"]
-
-            if file and file.filename and allowed_file(file.filename):
-                # Check file size
-                file.seek(0, os.SEEK_END)
-                file_size = file.tell()
-                if file_size > MAX_FILE_SIZE:
-                    flash("File size exceeds 5MB limit!", "error")
-                    return redirect(url_for("user.profile"))
-                file.seek(0)
-
-                filename = secure_filename(file.filename)
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"user_{current_user.id}_{timestamp}_{filename}"
-
-                os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-                filepath = os.path.join(UPLOAD_FOLDER, filename)
-                file.save(filepath)
-
-                # Update database
-                conn = get_db()
-                cursor = conn.cursor()
-                cursor.execute(
-                    """
-                    UPDATE users 
-                    SET profile_picture = ? 
-                    WHERE id = ?
-                """,
-                    (filename, current_user.id),
-                )
-                conn.commit()
-                conn.close()
-
-                flash("Profile picture updated! 📸", "success")
-                return redirect(url_for("user.profile"))
-
-        # Handle profile update (name, bio, etc.)
-        if "first_name" in request.form:
-            first_name = request.form.get("first_name", "").strip()
-            last_name = request.form.get("last_name", "").strip()
-            bio = request.form.get("bio", "").strip()
-
-            if not first_name:
-                flash("First name is required!", "error")
-                return redirect(url_for("user.profile"))
-
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                UPDATE users 
-                SET first_name = ?, last_name = ?, bio = ? 
-                WHERE id = ?
-            """,
-                (first_name, last_name, bio, current_user.id),
-            )
-            conn.commit()
-            conn.close()
-
-            flash("Profile updated successfully! ✨", "success")
-            return redirect(url_for("user.profile"))
-
-        # Handle interests update
-        if "interests" in request.form:
-            interest_ids = request.form.getlist("interests")
-
-            conn = get_db()
-            cursor = conn.cursor()
-
-            # Clear existing interests
-            cursor.execute(
-                "DELETE FROM user_interests WHERE user_id = ?", (current_user.id,)
-            )
-
-            # Add new interests
-            for interest_id in interest_ids:
-                cursor.execute(
-                    """
-                    INSERT INTO user_interests (user_id, interest_id)
-                    VALUES (?, ?)
-                """,
-                    (current_user.id, int(interest_id)),
-                )
-
-            conn.commit()
-            conn.close()
-
-            flash("Interests updated! 🎯", "success")
-            return redirect(url_for("user.profile"))
-
-        # Handle password change
-        if "new_password" in request.form:
-            current_password = request.form.get("current_password", "")
-            new_password = request.form.get("new_password", "")
-            confirm_password = request.form.get("confirm_password", "")
-
-            if not current_password:
-                flash("Current password is required!", "error")
-                return redirect(url_for("user.profile"))
-
-            if new_password != confirm_password:
-                flash("Passwords don't match!", "error")
-                return redirect(url_for("user.profile"))
-
-            if len(new_password) < 6:
-                flash("Password must be at least 6 characters!", "error")
-                return redirect(url_for("user.profile"))
-
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT password_hash FROM users WHERE id = ?",
-                (current_user.id,),
-            )
-            row = cursor.fetchone()
-
-            if not row or not check_password_hash(row[0], current_password):
-                conn.close()
-                flash("Current password is incorrect!", "error")
-                return redirect(url_for("user.profile"))
-
-            cursor.execute(
-                """
-                UPDATE users 
-                SET password_hash = ? 
-                WHERE id = ?
-            """,
-                (generate_password_hash(new_password), current_user.id),
-            )
-            conn.commit()
-            conn.close()
-
-            flash("Password changed successfully! 🔒", "success")
-            return redirect(url_for("user.profile"))
-
-    # GET - Load profile data
+    user = get_current_user_dict()
     conn = get_db()
     cursor = conn.cursor()
 
-    # Get user info
-    cursor.execute("SELECT * FROM users WHERE id = ?", (current_user.id,))
-    user = dict(cursor.fetchone())
-
-    # Get all interests with user's selections
     cursor.execute(
-        """
-        SELECT i.id, i.name, c.name as category_name,
-               CASE WHEN ui.user_id IS NOT NULL THEN 1 ELSE 0 END as selected
-        FROM interests i
-        JOIN categories c ON i.category_id = c.id
-        LEFT JOIN user_interests ui ON i.id = ui.interest_id AND ui.user_id = ?
-        ORDER BY c.name, i.name
-    """,
+        "SELECT i.id, i.name FROM interests i JOIN user_interests ui ON i.id = ui.interest_id WHERE ui.user_id = ?",
         (current_user.id,),
     )
-
     interests = [dict(row) for row in cursor.fetchall()]
 
-    # Get user statistics for profile
     cursor.execute(
         """
-        SELECT 
-            (SELECT COUNT(*) FROM user_history WHERE user_id = ?) as total_activities,
-            (SELECT COUNT(*) FROM favorites WHERE user_id = ?) as total_favorites,
-            (SELECT COUNT(*) FROM user_writings WHERE user_id = ?) as total_writings,
-            (SELECT AVG(feedback_rating) FROM user_history WHERE user_id = ? AND feedback_rating IS NOT NULL) as avg_rating
-    """,
-        (current_user.id, current_user.id, current_user.id, current_user.id),
+        SELECT COUNT(DISTINCT uh.activity_id) as unique_activities,
+               COUNT(uh.id) as total_sessions,
+               COUNT(f.id) as total_favorites,
+               (SELECT AVG(feedback_rating) FROM user_history WHERE user_id = ? AND feedback_rating IS NOT NULL) as avg_rating
+        FROM user_history uh
+        LEFT JOIN favorites f ON f.user_id = uh.user_id
+        WHERE uh.user_id = ?
+        """,
+        (current_user.id, current_user.id),
     )
-
     stats = dict(cursor.fetchone())
-
     conn.close()
-
     return render_template(
         "user/profile.html", user=user, interests=interests, stats=stats
     )
@@ -1008,79 +931,38 @@ def profile():
 @user_bp.route("/mood_insights")
 @login_required
 def mood_insights():
-    """Personal mood analytics and insights"""
     user = get_current_user_dict()
-
     conn = get_db()
     cursor = conn.cursor()
 
-    # Get mood distribution
     cursor.execute(
         """
-        SELECT 
-            CASE 
-                WHEN sentiment_score >= 0.2 THEN 'positive'
-                WHEN sentiment_score <= -0.2 THEN 'negative'
-                ELSE 'neutral'
-            END as mood_type,
-            COUNT(*) as count
-        FROM user_history
-        WHERE user_id = ? AND sentiment_score IS NOT NULL
-        GROUP BY mood_type
-    """,
+        SELECT CASE WHEN sentiment_score >= 0.2 THEN 'positive'
+                    WHEN sentiment_score <= -0.2 THEN 'negative'
+                    ELSE 'neutral' END as mood_type, COUNT(*) as count
+        FROM user_history WHERE user_id = ? AND sentiment_score IS NOT NULL GROUP BY mood_type
+        """,
         (current_user.id,),
     )
-
     mood_distribution = [dict(row) for row in cursor.fetchall()]
 
-    # Get mood trends over time (last 30 days)
     cursor.execute(
-        """
-        SELECT DATE(created_at) as date, 
-               AVG(sentiment_score) as avg_sentiment,
-               COUNT(*) as activity_count
-        FROM user_history
-        WHERE user_id = ? AND sentiment_score IS NOT NULL
-        AND DATE(created_at) >= DATE('now', '-30 days')
-        GROUP BY DATE(created_at)
-        ORDER BY date
-    """,
+        "SELECT DATE(created_at) as date, AVG(sentiment_score) as avg_sentiment, COUNT(*) as activity_count FROM user_history WHERE user_id = ? AND sentiment_score IS NOT NULL AND DATE(created_at) >= DATE('now', '-30 days') GROUP BY DATE(created_at) ORDER BY date",
         (current_user.id,),
     )
-
     mood_trends = [dict(row) for row in cursor.fetchall()]
 
-    # Get most common moods (keywords)
     cursor.execute(
-        """
-        SELECT mood_input, sentiment_score, created_at
-        FROM user_history
-        WHERE user_id = ? AND mood_input IS NOT NULL
-        ORDER BY created_at DESC
-        LIMIT 20
-    """,
+        "SELECT mood_input, sentiment_score, created_at FROM user_history WHERE user_id = ? AND mood_input IS NOT NULL ORDER BY created_at DESC LIMIT 20",
         (current_user.id,),
     )
-
     recent_moods = [dict(row) for row in cursor.fetchall()]
 
-    # Get activity effectiveness (highest rated activities)
     cursor.execute(
-        """
-        SELECT a.name, AVG(uh.feedback_rating) as avg_rating, COUNT(*) as times_tried
-        FROM user_history uh
-        JOIN activities a ON uh.activity_id = a.id
-        WHERE uh.user_id = ? AND uh.feedback_rating IS NOT NULL
-        GROUP BY a.id, a.name
-        HAVING COUNT(*) >= 2
-        ORDER BY avg_rating DESC
-        LIMIT 10
-    """,
+        "SELECT a.name, AVG(uh.feedback_rating) as avg_rating, COUNT(*) as times_tried FROM user_history uh JOIN activities a ON uh.activity_id = a.id WHERE uh.user_id = ? AND uh.feedback_rating IS NOT NULL GROUP BY a.id, a.name HAVING COUNT(*) >= 2 ORDER BY avg_rating DESC LIMIT 10",
         (current_user.id,),
     )
-
     top_activities = [dict(row) for row in cursor.fetchall()]
-
     conn.close()
 
     return render_template(
@@ -1101,54 +983,38 @@ def mood_insights():
 @user_bp.route("/activity/<int:activity_id>/quick-try", methods=["POST"])
 @login_required
 def quick_try_activity(activity_id):
-    """Quick try activity without mood input"""
     session["mood_input"] = "Quick try"
     session["sentiment_score"] = 0.0
     session["mood_type"] = "neutral"
-
     return redirect(url_for("user.activity_detail", activity_id=activity_id))
 
 
 @user_bp.route("/search_activities")
 @login_required
 def search_activities():
-    """Search activities page with filters"""
     user = get_current_user_dict()
-
     query = request.args.get("q", "").strip()
     category = request.args.get("category", "")
-
     conn = get_db()
     cursor = conn.cursor()
 
-    sql = """
-        SELECT a.*, c.name as category_name, c.icon as category_icon
-        FROM activities a
-        JOIN categories c ON a.category_id = c.id
-        WHERE a.is_active = 1
-    """
+    sql = "SELECT a.*, c.name as category_name, c.icon as category_icon FROM activities a JOIN categories c ON a.category_id = c.id WHERE a.is_active = 1"
     params = []
-
     if query:
         sql += " AND (LOWER(a.name) LIKE ? OR LOWER(a.description) LIKE ?)"
         params.extend([f"%{query.lower()}%", f"%{query.lower()}%"])
-
     if category:
         sql += " AND c.id = ?"
         params.append(category)
-
     sql += " ORDER BY a.priority DESC, a.name"
 
     cursor.execute(sql, params)
     activities = [dict(row) for row in cursor.fetchall()]
 
-    # Get all categories for filter
     cursor.execute("SELECT * FROM categories ORDER BY name")
     categories = [dict(row) for row in cursor.fetchall()]
-
     conn.close()
 
-    # FIXED: Added user variable here
     return render_template(
         "user/search_activities.html",
         user=user,
@@ -1161,29 +1027,15 @@ def search_activities():
 @user_bp.route("/categories")
 @login_required
 def browse_categories():
-    """Browse activities by category"""
     user = get_current_user_dict()
-
     conn = get_db()
     cursor = conn.cursor()
-
-    # Get all categories with activity counts
     cursor.execute(
-        """
-        SELECT c.id, c.name, c.icon, c.description,
-               COUNT(a.id) as activity_count
-        FROM categories c
-        LEFT JOIN activities a ON c.id = a.category_id AND a.is_active = 1
-        GROUP BY c.id
-        ORDER BY c.name
-    """,
+        "SELECT c.id, c.name, c.icon, c.description, COUNT(a.id) as activity_count FROM categories c LEFT JOIN activities a ON c.id = a.category_id AND a.is_active = 1 GROUP BY c.id ORDER BY c.name",
         (),
     )
-
     categories = [dict(row) for row in cursor.fetchall()]
     conn.close()
-
-    # FIXED: Added user variable here
     return render_template(
         "user/browse_categories.html", user=user, categories=categories
     )
@@ -1192,32 +1044,17 @@ def browse_categories():
 @user_bp.route("/category/<int:category_id>")
 @login_required
 def category_activities(category_id):
-    """View all activities in a category"""
     user = get_current_user_dict()
-
     conn = get_db()
     cursor = conn.cursor()
-
-    # Get category info
     cursor.execute("SELECT * FROM categories WHERE id = ?", (category_id,))
     category = dict(cursor.fetchone())
-
-    # Get activities in this category
     cursor.execute(
-        """
-        SELECT a.*, c.name as category_name, c.icon as category_icon
-        FROM activities a
-        JOIN categories c ON a.category_id = c.id
-        WHERE c.id = ? AND a.is_active = 1
-        ORDER BY a.priority DESC, a.name
-    """,
+        "SELECT a.*, c.name as category_name, c.icon as category_icon FROM activities a JOIN categories c ON a.category_id = c.id WHERE c.id = ? AND a.is_active = 1 ORDER BY a.priority DESC, a.name",
         (category_id,),
     )
-
     activities = [dict(row) for row in cursor.fetchall()]
     conn.close()
-
-    # FIXED: Added user variable here
     return render_template(
         "user/category_activities.html",
         user=user,
@@ -1226,4 +1063,49 @@ def category_activities(category_id):
     )
 
 
-#run codex resume 019c6a36-f6b3-7c20-b99a-192ef4a48f31
+# ===============================
+# HISTORY
+# ===============================
+
+
+@user_bp.route("/history")
+@login_required
+def history():
+    """Show user's activity history with mood tracking"""
+    user = get_current_user_dict()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT uh.*, a.name as activity_name, a.execution_type,
+               CASE WHEN uh.sentiment_score >= 0.2 THEN 'positive'
+                    WHEN uh.sentiment_score <= -0.2 THEN 'negative'
+                    ELSE 'neutral' END as mood_type
+        FROM user_history uh
+        JOIN activities a ON uh.activity_id = a.id
+        WHERE uh.user_id = ?
+        ORDER BY uh.created_at DESC
+        """,
+        (current_user.id,),
+    )
+    history_list = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return render_template("user/history.html", user=user, history=history_list)
+
+
+@user_bp.route("/history/delete/<int:history_id>", methods=["POST"])
+@login_required
+def delete_history(history_id):
+    """Delete a history entry"""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "DELETE FROM user_history WHERE id = ? AND user_id = ?",
+        (history_id, current_user.id),
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "message": "History entry deleted"})
+
+
+# run codex resume 019c6a36-f6b3-7c20-b99a-192ef4a48f31
