@@ -43,6 +43,9 @@ MAX_FILE_SIZE = 5 * 1024 * 1024
 
 # ── Gemini config ──────────────────────────────────────────────────────────────
 
+# 🔑 Hardcoded Gemini API key — no need for user to enter it
+GEMINI_API_KEY = "AIzaSyA7UWMOklLbpQn3vw0AN5I6YNsY_xXEOuw"
+
 GEMINI_SYSTEM = (
     "You are MoodMatch Assistant, a friendly and empathetic AI that helps users "
     "discover activities based on their mood. Acknowledge their feelings with warmth, "
@@ -223,21 +226,26 @@ def try_activity_chat():
 def chat_mood():
     """
     Chatbot endpoint: VADER sentiment + Gemini AI + activity DB lookup.
-    Expects JSON: { message, history, api_key }
+    Expects JSON: { message, history }
+    API key is hardcoded on the server — no need to send from frontend.
     """
+    debug_log = []  # Collects debug info returned to frontend
+
     try:
         data = request.get_json()
         user_message = data.get("message", "").strip()
         history = data.get("history", [])
-        api_key = data.get("api_key", "").strip()
+
+        debug_log.append(f"📨 Message received: '{user_message}'")
 
         if not user_message:
             return jsonify({"error": "No message provided"}), 400
 
-        # 1. VADER sentiment
+        # ── 1. VADER sentiment ─────────────────────────────────────────────────
         sentiment_data = None
         mood_type = "neutral"
         mood_emoji = "😐"
+        compound = 0.0
 
         if VADER_AVAILABLE:
             analyzer = SentimentIntensityAnalyzer()
@@ -250,128 +258,194 @@ def chat_mood():
                 "emoji": mood_emoji,
                 "label": mood_type.capitalize(),
             }
+            debug_log.append(f"🧠 VADER: compound={compound:.2f} → {mood_type} {mood_emoji}")
+        else:
+            debug_log.append("⚠️ VADER not available — run: pip install vaderSentiment")
 
-        # 2. Build conversation prompt
+        # ── 2. Build conversation prompt ───────────────────────────────────────
         prompt = ""
         for msg in history[-6:]:
             role = "User" if msg["role"] == "user" else "Assistant"
             prompt += f"{role}: {msg['content']}\n"
         prompt += f"User: {user_message}\nAssistant:"
 
-        # Enrich system with mood context
         system = (
             f"{GEMINI_SYSTEM}\n\n"
             f"Current mood analysis — Type: {mood_type} {mood_emoji}, "
-            f"Score: {sentiment_data['score'] if sentiment_data else 'N/A'}. "
+            f"Score: {compound:.2f}. "
             "If stressed/sad → suggest calming activities. "
             "If energetic/happy → suggest engaging activities."
         )
 
-        # 3. Gemini AI call
-        ai_response = f"I sense you're feeling {mood_type} {mood_emoji}. Let me find some activities for you!"
+        # ── 3. Gemini AI call (hardcoded key) ──────────────────────────────────
+        ai_response = f"I sense you're feeling {mood_type} {mood_emoji}. Here are some activity matches for you!"
         model_used = "fallback"
 
-        if api_key:
-            try:
-                ai_response, log = call_gemini(api_key, prompt, system)
-                model_used = next(
-                    (e["model"] for e in log if e.get("step") == "success"), "unknown"
-                )
-            except Exception as e:
-                err = str(e)
-                if "429" in err:
-                    ai_response = (
-                        f"⚠️ Gemini quota exceeded (429). "
-                        f"I can still analyze your {mood_type} mood {mood_emoji} — "
-                        "here are activity matches from our database:"
-                    )
-                elif "403" in err:
-                    ai_response = (
-                        "🔑 Gemini API key rejected. Check your key and try again."
-                    )
-                else:
-                    ai_response = f"I sense you're feeling {mood_type} {mood_emoji}. Here are some activity matches!"
-        else:
-            ai_response = (
-                f"No API key provided. Based on your {mood_type} mood {mood_emoji}, "
-                "here are some activity suggestions from our database:"
+        try:
+            debug_log.append(f"🔑 Using hardcoded Gemini key: {GEMINI_API_KEY[:12]}...")
+            ai_response, gemini_log = call_gemini(GEMINI_API_KEY, prompt, system)
+            model_used = next(
+                (e["model"] for e in gemini_log if e.get("step") == "success"), "unknown"
             )
+            debug_log.append(f"✅ Gemini success using model: {model_used}")
+            # Append any model-level failures for visibility
+            for entry in gemini_log:
+                if entry.get("step") == "failed":
+                    debug_log.append(f"  ↳ Tried {entry['model']}: {entry.get('error', '')[:80]}")
+        except Exception as e:
+            err = str(e)
+            debug_log.append(f"❌ Gemini failed: {err[:200]}")
+            if "429" in err:
+                ai_response = (
+                    f"⚠️ Gemini quota exceeded. Based on your {mood_type} mood {mood_emoji}, "
+                    "here are activity suggestions from our database:"
+                )
+            elif "403" in err:
+                ai_response = "🔑 Gemini API key rejected (403). Please check the key in user.py."
+            else:
+                ai_response = (
+                    f"I sense you're feeling {mood_type} {mood_emoji}. "
+                    "Here are some activity matches from our database!"
+                )
 
-        # 4. Fetch matching activities from DB
+        # ── 4. Fetch activities from DB (safe fallback query) ──────────────────
         activities = []
-        keywords = extract_keywords(user_message)
+        db_debug = ""
 
         try:
             conn = get_db()
             cursor = conn.cursor()
 
-            query = """
-                SELECT a.id, a.name, a.description, a.execution_type, a.priority,
-                       c.name as category_name, c.icon as category_icon
-                FROM activities a
-                JOIN categories c ON a.category_id = c.id
-                WHERE a.is_active = 1
-            """
+            # First: check what columns actually exist in activities table
+            cursor.execute("PRAGMA table_info(activities)")
+            cols = [row[1] for row in cursor.fetchall()]
+            debug_log.append(f"📋 activities columns: {cols}")
+
+            has_mood_tags = "mood_tags" in cols
+            has_category_id = "category_id" in cols
+
+            # Check if categories table exists
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='categories'")
+            has_categories_table = cursor.fetchone() is not None
+            debug_log.append(f"📋 categories table exists: {has_categories_table}")
+
+            if has_categories_table and has_category_id:
+                # Full query with categories join
+                base_query = """
+                    SELECT a.id, a.name, a.description, a.execution_type, a.priority,
+                           c.name as category_name, c.icon as category_icon
+                    FROM activities a
+                    JOIN categories c ON a.category_id = c.id
+                    WHERE a.is_active = 1
+                """
+            else:
+                # Fallback: no categories join
+                base_query = """
+                    SELECT a.id, a.name, a.description, a.execution_type, a.priority,
+                           a.execution_type as category_name, '🎯' as category_icon
+                    FROM activities a
+                    WHERE a.is_active = 1
+                """
+
             params = []
 
-            if keywords:
-                mood_conds = " OR ".join(
-                    [f"LOWER(a.mood_tags) LIKE ?" for _ in keywords]
-                )
-                query += f" AND ({mood_conds})"
-                params.extend([f"%{kw}%" for kw in keywords])
+            if has_mood_tags:
+                keywords = extract_keywords(user_message)
+                if keywords:
+                    mood_conds = " OR ".join([f"LOWER(a.mood_tags) LIKE ?" for _ in keywords])
+                    base_query += f" AND ({mood_conds})"
+                    params.extend([f"%{kw}%" for kw in keywords])
+                if mood_type == "negative":
+                    base_query += " AND (LOWER(a.mood_tags) LIKE '%calm%' OR LOWER(a.mood_tags) LIKE '%relax%' OR LOWER(a.mood_tags) LIKE '%peace%')"
+                elif mood_type == "positive":
+                    base_query += " AND (LOWER(a.mood_tags) LIKE '%energetic%' OR LOWER(a.mood_tags) LIKE '%happy%' OR LOWER(a.mood_tags) LIKE '%fun%')"
+            else:
+                # No mood_tags — just search name/description
+                keywords = extract_keywords(user_message)
+                if keywords:
+                    name_conds = " OR ".join([f"LOWER(a.name) LIKE ? OR LOWER(a.description) LIKE ?" for _ in keywords])
+                    base_query += f" AND ({name_conds})"
+                    for kw in keywords:
+                        params.extend([f"%{kw}%", f"%{kw}%"])
 
-            if mood_type == "negative":
-                query += " AND (LOWER(a.mood_tags) LIKE '%calm%' OR LOWER(a.mood_tags) LIKE '%relax%' OR LOWER(a.mood_tags) LIKE '%peace%')"
-            elif mood_type == "positive":
-                query += " AND (LOWER(a.mood_tags) LIKE '%energetic%' OR LOWER(a.mood_tags) LIKE '%happy%' OR LOWER(a.mood_tags) LIKE '%fun%')"
+            base_query += " ORDER BY a.priority DESC, RANDOM() LIMIT 5"
 
-            query += " ORDER BY a.priority DESC, RANDOM() LIMIT 5"
-            cursor.execute(query, params)
+            debug_log.append(f"🗄️ DB query params: {params}")
+            cursor.execute(base_query, params)
             activities = [dict(row) for row in cursor.fetchall()]
-            conn.close()
-        except Exception as db_err:
-            print(f"DB error in chat_mood: {db_err}")
+            debug_log.append(f"✅ Activities found: {len(activities)}")
 
-        # 5. Save to mood history (best-effort)
+            # If zero results, return all active activities (so user always sees something)
+            if not activities:
+                debug_log.append("⚠️ No keyword matches — returning all active activities")
+                if has_categories_table and has_category_id:
+                    fallback_q = """
+                        SELECT a.id, a.name, a.description, a.execution_type, a.priority,
+                               c.name as category_name, c.icon as category_icon
+                        FROM activities a
+                        JOIN categories c ON a.category_id = c.id
+                        WHERE a.is_active = 1
+                        ORDER BY a.priority DESC, RANDOM() LIMIT 5
+                    """
+                else:
+                    fallback_q = """
+                        SELECT a.id, a.name, a.description, a.execution_type, a.priority,
+                               a.execution_type as category_name, '🎯' as category_icon
+                        FROM activities a
+                        WHERE a.is_active = 1
+                        ORDER BY a.priority DESC, RANDOM() LIMIT 5
+                    """
+                cursor.execute(fallback_q)
+                activities = [dict(row) for row in cursor.fetchall()]
+                debug_log.append(f"✅ Fallback activities returned: {len(activities)}")
+
+            conn.close()
+
+        except Exception as db_err:
+            import traceback
+            db_debug = traceback.format_exc()
+            debug_log.append(f"❌ DB error: {str(db_err)}")
+            print(f"[chat_mood] DB error:\n{db_debug}")
+
+        # ── 5. Save to mood history (best-effort) ──────────────────────────────
         try:
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO user_mood_history (user_id, mood_input, sentiment_score, sentiment_type, created_at) VALUES (?,?,?,?,?)",
-                (
-                    current_user.id,
-                    user_message,
-                    sentiment_data["score"] if sentiment_data else "0.0",
-                    mood_type,
-                    datetime.now(),
-                ),
-            )
-            conn.commit()
+            # Check if user_mood_history table exists
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='user_mood_history'")
+            if cursor.fetchone():
+                cursor.execute(
+                    "INSERT INTO user_mood_history (user_id, mood_input, sentiment_score, sentiment_type, created_at) VALUES (?,?,?,?,?)",
+                    (current_user.id, user_message, compound, mood_type, datetime.now()),
+                )
+                conn.commit()
+                debug_log.append("💾 Mood saved to user_mood_history")
+            else:
+                debug_log.append("⚠️ user_mood_history table not found — skipping save")
             conn.close()
-        except:
-            pass
+        except Exception as hist_err:
+            debug_log.append(f"⚠️ Could not save mood history: {str(hist_err)}")
 
-        return jsonify(
-            {
-                "response": ai_response,
-                "sentiment": sentiment_data,
-                "activities": activities,
-                "model_used": model_used,
-                "timestamp": datetime.now().isoformat(),
-            }
-        )
+        print(f"\n[chat_mood DEBUG]\n" + "\n".join(debug_log) + "\n")
+
+        return jsonify({
+            "response": ai_response,
+            "sentiment": sentiment_data,
+            "activities": activities,
+            "model_used": model_used,
+            "timestamp": datetime.now().isoformat(),
+            "debug": debug_log,  # ← visible in browser console + debug panel
+        })
 
     except Exception as e:
         import traceback
-
         traceback.print_exc()
-        return (
-            jsonify(
-                {"error": "Something went wrong. Please try again!", "details": str(e)}
-            ),
-            500,
-        )
+        debug_log.append(f"💥 Unhandled exception: {str(e)}")
+        return jsonify({
+            "error": "Something went wrong. Please try again!",
+            "details": str(e),
+            "debug": debug_log,
+        }), 500
 
 
 # ── DEBUG: test Gemini key + list models ───────────────────────────────────────
