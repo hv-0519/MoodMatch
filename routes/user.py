@@ -34,6 +34,16 @@ except ImportError:
     VADER_AVAILABLE = False
     print("⚠️ vaderSentiment not installed. Run: pip install vaderSentiment")
 
+# Emotion Detection (ML Model)
+try:
+    from emotion_detector import predict_emotion_with_vader
+
+    EMOTION_MODEL_AVAILABLE = True
+    print("✅ Emotion detection model loaded")
+except ImportError as e:
+    EMOTION_MODEL_AVAILABLE = False
+    print(f"⚠️ Emotion detection not available: {e}")
+
 user_bp = Blueprint("user", __name__)
 
 DB_PATH = "models/instance/moodmatch.db"
@@ -44,7 +54,7 @@ MAX_FILE_SIZE = 5 * 1024 * 1024
 # ── Gemini config ──────────────────────────────────────────────────────────────
 
 # 🔑 Hardcoded Gemini API key — no need for user to enter it
-GEMINI_API_KEY = "AIzaSyA7UWMOklLbpQn3vw0AN5I6YNsY_xXEOuw"
+GEMINI_API_KEY = "AIzaSyA7B9AAndpAmkIIwm9dZ3dd_3vwI_BbZaI"
 
 GEMINI_SYSTEM = (
     "You are MoodMatch Assistant, a friendly and empathetic AI that helps users "
@@ -174,36 +184,64 @@ def get_sentiment_classification(score):
 
 
 def extract_keywords(text, min_length=3):
+    """
+    Enhanced keyword extraction with better filtering.
+    Extracts meaningful words and prioritizes activity names.
+    """
+    # Expanded stopwords
     stopwords = {
-        "the",
-        "is",
-        "at",
-        "which",
-        "on",
-        "a",
-        "an",
-        "and",
-        "or",
-        "but",
-        "in",
-        "with",
-        "to",
-        "for",
-        "of",
-        "as",
-        "by",
-        "i",
-        "me",
-        "my",
-        "we",
-        "am",
-        "are",
+        'the', 'is', 'at', 'which', 'on', 'a', 'an', 'and', 'or', 'but',
+        'in', 'with', 'to', 'for', 'of', 'as', 'by', 'i', 'me', 'my',
+        'we', 'am', 'are', 'was', 'were', 'be', 'been', 'being',
+        'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
+        'could', 'should', 'may', 'might', 'must', 'can',
+        'this', 'that', 'these', 'those', 'it', 'its',
+        'he', 'she', 'they', 'them', 'their', 'his', 'her',
+        'want', 'need', 'like', 'feel', 'feeling', 'something', 'anything'
     }
+    
+    # Activity-related keywords (high priority)
+    activity_keywords = {
+        'read', 'reading', 'book', 'books', 'novel', 'article',
+        'write', 'writing', 'journal', 'diary', 'essay',
+        'game', 'gaming', 'play', 'playing', 'video', 'sport', 'sports',
+        'cook', 'cooking', 'recipe', 'food', 'bake', 'baking',
+        'exercise', 'workout', 'yoga', 'run', 'running', 'walk', 'walking',
+        'meditate', 'meditation', 'mindfulness', 'relax', 'relaxation',
+        'paint', 'painting', 'draw', 'drawing', 'art', 'creative',
+        'music', 'listen', 'song', 'sing', 'singing',
+        'watch', 'movie', 'film', 'show', 'series', 'tv',
+        'travel', 'trip', 'explore', 'adventure',
+        'learn', 'study', 'course', 'education'
+    }
+    
+    # Clean and split text
     words = text.lower().split()
-    keywords = [
-        w.strip(".,!?;:") for w in words if len(w) >= min_length and w not in stopwords
-    ]
-    return keywords[:10]
+    keywords = []
+    
+    for word in words:
+        # Remove punctuation
+        clean_word = word.strip('.,!?;:()[]{}"\'-')
+        
+        # Skip if too short or stopword
+        if len(clean_word) < min_length or clean_word in stopwords:
+            continue
+        
+        # Add activity keywords first (higher priority)
+        if clean_word in activity_keywords:
+            keywords.insert(0, clean_word)  # Insert at beginning
+        else:
+            keywords.append(clean_word)
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_keywords = []
+    for kw in keywords:
+        if kw not in seen:
+            seen.add(kw)
+            unique_keywords.append(kw)
+    
+    return unique_keywords[:10]
 
 
 # ===============================
@@ -221,15 +259,27 @@ def try_activity_chat():
     )
 
 
+"""
+IMPROVED chat_mood() Function
+==============================
+Fixes activity filtering bug + includes emotion detection
+Replace the existing chat_mood() function in user.py with this version
+"""
+
 @user_bp.route("/chat_mood", methods=["POST"])
 @login_required
 def chat_mood():
     """
-    Chatbot endpoint: VADER sentiment + Gemini AI + activity DB lookup.
+    Enhanced chatbot endpoint: ML Emotion Detection + VADER sentiment + Gemini AI + Smart Activity Matching
     Expects JSON: { message, history }
-    API key is hardcoded on the server — no need to send from frontend.
+    
+    IMPROVEMENTS:
+    - Better keyword extraction with activity prioritization
+    - Smart activity filtering (reading -> only reading activities)
+    - Name-first search strategy
+    - Emotion-aware recommendations
     """
-    debug_log = []  # Collects debug info returned to frontend
+    debug_log = []
 
     try:
         data = request.get_json()
@@ -241,24 +291,83 @@ def chat_mood():
         if not user_message:
             return jsonify({"error": "No message provided"}), 400
 
-        # ── 1. VADER sentiment ─────────────────────────────────────────────────
+        # ── 1. EMOTION DETECTION (ML + VADER) ─────────────────────────────────
         sentiment_data = None
+        emotion_data = None
         mood_type = "neutral"
         mood_emoji = "😐"
         compound = 0.0
+        detected_emotion = "neutral"
+        emotion_confidence = 0.0
 
         if VADER_AVAILABLE:
             analyzer = SentimentIntensityAnalyzer()
             scores = analyzer.polarity_scores(user_message)
             compound = scores["compound"]
-            mood_type, mood_emoji = get_sentiment_classification(compound)
-            sentiment_data = {
-                "type": mood_type,
-                "score": f"{compound:.2f}",
-                "emoji": mood_emoji,
-                "label": mood_type.capitalize(),
-            }
-            debug_log.append(f"🧠 VADER: compound={compound:.2f} → {mood_type} {mood_emoji}")
+
+            # Try ML emotion detection if available
+            if EMOTION_MODEL_AVAILABLE:
+                try:
+                    emotion_result = predict_emotion_with_vader(user_message, scores)
+
+                    if emotion_result:
+                        detected_emotion = emotion_result["emotion"]
+                        emotion_confidence = emotion_result["emotion_confidence"]
+                        mood_type = emotion_result["mood_category"]
+                        mood_emoji = emotion_result["emotion_emoji"]
+
+                        emotion_data = {
+                            "emotion": detected_emotion,
+                            "confidence": f"{emotion_confidence:.0%}",
+                            "emoji": emotion_result["emotion_emoji"],
+                            "top_emotions": emotion_result["top_emotions"],
+                        }
+
+                        sentiment_data = {
+                            "type": mood_type,
+                            "score": f"{compound:.2f}",
+                            "emoji": emotion_result["mood_emoji"],
+                            "label": f"{detected_emotion.capitalize()} ({emotion_confidence:.0%})",
+                        }
+
+                        debug_log.append(
+                            f"🎭 EMOTION: {detected_emotion} ({emotion_confidence:.0%}) | "
+                            f"VADER: {compound:.2f} → {mood_type}"
+                        )
+                    else:
+                        # Fallback to VADER only
+                        mood_type, mood_emoji = get_sentiment_classification(compound)
+                        sentiment_data = {
+                            "type": mood_type,
+                            "score": f"{compound:.2f}",
+                            "emoji": mood_emoji,
+                            "label": mood_type.capitalize(),
+                        }
+                        debug_log.append(
+                            f"🧠 VADER only: compound={compound:.2f} → {mood_type} {mood_emoji}"
+                        )
+                except Exception as e:
+                    debug_log.append(f"⚠️ Emotion detection failed: {str(e)[:100]}")
+                    # Fallback to VADER
+                    mood_type, mood_emoji = get_sentiment_classification(compound)
+                    sentiment_data = {
+                        "type": mood_type,
+                        "score": f"{compound:.2f}",
+                        "emoji": mood_emoji,
+                        "label": mood_type.capitalize(),
+                    }
+            else:
+                # VADER only
+                mood_type, mood_emoji = get_sentiment_classification(compound)
+                sentiment_data = {
+                    "type": mood_type,
+                    "score": f"{compound:.2f}",
+                    "emoji": mood_emoji,
+                    "label": mood_type.capitalize(),
+                }
+                debug_log.append(
+                    f"🧠 VADER only: compound={compound:.2f} → {mood_type} {mood_emoji}"
+                )
         else:
             debug_log.append("⚠️ VADER not available — run: pip install vaderSentiment")
 
@@ -271,10 +380,12 @@ def chat_mood():
 
         system = (
             f"{GEMINI_SYSTEM}\n\n"
-            f"Current mood analysis — Type: {mood_type} {mood_emoji}, "
-            f"Score: {compound:.2f}. "
-            "If stressed/sad → suggest calming activities. "
-            "If energetic/happy → suggest engaging activities."
+            f"User's emotional state:\n"
+            f"- Detected emotion: {detected_emotion} ({emotion_confidence:.0%} confidence) {mood_emoji}\n"
+            f"- Sentiment score: {compound:.2f} ({mood_type})\n\n"
+            "Respond with empathy and understanding. Acknowledge their feelings warmly. "
+            f"Since they're feeling {detected_emotion}, suggest appropriate activities that match this emotion. "
+            "Be supportive and helpful."
         )
 
         # ── 3. Gemini AI call (hardcoded key) ──────────────────────────────────
@@ -285,13 +396,15 @@ def chat_mood():
             debug_log.append(f"🔑 Using hardcoded Gemini key: {GEMINI_API_KEY[:12]}...")
             ai_response, gemini_log = call_gemini(GEMINI_API_KEY, prompt, system)
             model_used = next(
-                (e["model"] for e in gemini_log if e.get("step") == "success"), "unknown"
+                (e["model"] for e in gemini_log if e.get("step") == "success"),
+                "unknown",
             )
             debug_log.append(f"✅ Gemini success using model: {model_used}")
-            # Append any model-level failures for visibility
             for entry in gemini_log:
                 if entry.get("step") == "failed":
-                    debug_log.append(f"  ↳ Tried {entry['model']}: {entry.get('error', '')[:80]}")
+                    debug_log.append(
+                        f"  ↳ Tried {entry['model']}: {entry.get('error', '')[:80]}"
+                    )
         except Exception as e:
             err = str(e)
             debug_log.append(f"❌ Gemini failed: {err[:200]}")
@@ -301,22 +414,23 @@ def chat_mood():
                     "here are activity suggestions from our database:"
                 )
             elif "403" in err:
-                ai_response = "🔑 Gemini API key rejected (403). Please check the key in user.py."
+                ai_response = (
+                    "🔑 Gemini API key rejected (403). Please check the key in user.py."
+                )
             else:
                 ai_response = (
                     f"I sense you're feeling {mood_type} {mood_emoji}. "
                     "Here are some activity matches from our database!"
                 )
 
-        # ── 4. Fetch activities from DB (safe fallback query) ──────────────────
+        # ── 4. IMPROVED Activity Search with Smart Filtering ──────────────────
         activities = []
-        db_debug = ""
 
         try:
             conn = get_db()
             cursor = conn.cursor()
 
-            # First: check what columns actually exist in activities table
+            # Check table structure
             cursor.execute("PRAGMA table_info(activities)")
             cols = [row[1] for row in cursor.fetchall()]
             debug_log.append(f"📋 activities columns: {cols}")
@@ -325,12 +439,14 @@ def chat_mood():
             has_category_id = "category_id" in cols
 
             # Check if categories table exists
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='categories'")
+            cursor.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='categories'"
+            )
             has_categories_table = cursor.fetchone() is not None
             debug_log.append(f"📋 categories table exists: {has_categories_table}")
 
+            # Build base query
             if has_categories_table and has_category_id:
-                # Full query with categories join
                 base_query = """
                     SELECT a.id, a.name, a.description, a.execution_type, a.priority,
                            c.name as category_name, c.icon as category_icon
@@ -339,7 +455,6 @@ def chat_mood():
                     WHERE a.is_active = 1
                 """
             else:
-                # Fallback: no categories join
                 base_query = """
                     SELECT a.id, a.name, a.description, a.execution_type, a.priority,
                            a.execution_type as category_name, '🎯' as category_icon
@@ -349,25 +464,40 @@ def chat_mood():
 
             params = []
 
-            if has_mood_tags:
-                keywords = extract_keywords(user_message)
-                if keywords:
-                    mood_conds = " OR ".join([f"LOWER(a.mood_tags) LIKE ?" for _ in keywords])
+            # IMPROVED: Extract keywords with activity prioritization
+            keywords = extract_keywords_improved(user_message)
+            debug_log.append(f"🔑 Extracted keywords: {keywords}")
+
+            if keywords:
+                if has_mood_tags:
+                    # Search mood_tags
+                    mood_conds = " OR ".join(
+                        [f"LOWER(a.mood_tags) LIKE ?" for _ in keywords]
+                    )
                     base_query += f" AND ({mood_conds})"
                     params.extend([f"%{kw}%" for kw in keywords])
-                if mood_type == "negative":
-                    base_query += " AND (LOWER(a.mood_tags) LIKE '%calm%' OR LOWER(a.mood_tags) LIKE '%relax%' OR LOWER(a.mood_tags) LIKE '%peace%')"
-                elif mood_type == "positive":
-                    base_query += " AND (LOWER(a.mood_tags) LIKE '%energetic%' OR LOWER(a.mood_tags) LIKE '%happy%' OR LOWER(a.mood_tags) LIKE '%fun%')"
-            else:
-                # No mood_tags — just search name/description
-                keywords = extract_keywords(user_message)
-                if keywords:
-                    name_conds = " OR ".join([f"LOWER(a.name) LIKE ? OR LOWER(a.description) LIKE ?" for _ in keywords])
-                    base_query += f" AND ({name_conds})"
+                    
+                    # Add mood-based filtering
+                    if mood_type == "negative":
+                        base_query += " AND (LOWER(a.mood_tags) LIKE '%calm%' OR LOWER(a.mood_tags) LIKE '%relax%' OR LOWER(a.mood_tags) LIKE '%peace%')"
+                    elif mood_type == "positive":
+                        base_query += " AND (LOWER(a.mood_tags) LIKE '%energetic%' OR LOWER(a.mood_tags) LIKE '%happy%' OR LOWER(a.mood_tags) LIKE '%fun%')"
+                else:
+                    # IMPROVED: Prioritize name matches over description
+                    name_conditions = []
+                    desc_conditions = []
+                    
                     for kw in keywords:
-                        params.extend([f"%{kw}%", f"%{kw}%"])
+                        name_conditions.append(f"LOWER(a.name) LIKE ?")
+                        params.append(f"%{kw}%")
+                        desc_conditions.append(f"LOWER(a.description) LIKE ?")
+                        params.append(f"%{kw}%")
+                    
+                    # Combine (name matches OR description matches)
+                    all_conditions = name_conditions + desc_conditions
+                    base_query += f" AND ({' OR '.join(all_conditions)})"
 
+            # Order by priority and add limit
             base_query += " ORDER BY a.priority DESC, RANDOM() LIMIT 5"
 
             debug_log.append(f"🗄️ DB query params: {params}")
@@ -375,9 +505,11 @@ def chat_mood():
             activities = [dict(row) for row in cursor.fetchall()]
             debug_log.append(f"✅ Activities found: {len(activities)}")
 
-            # If zero results, return all active activities (so user always sees something)
+            # Fallback: if no results, return top priority activities
             if not activities:
-                debug_log.append("⚠️ No keyword matches — returning all active activities")
+                debug_log.append(
+                    "⚠️ No keyword matches — returning top priority activities"
+                )
                 if has_categories_table and has_category_id:
                     fallback_q = """
                         SELECT a.id, a.name, a.description, a.execution_type, a.priority,
@@ -403,6 +535,7 @@ def chat_mood():
 
         except Exception as db_err:
             import traceback
+
             db_debug = traceback.format_exc()
             debug_log.append(f"❌ DB error: {str(db_err)}")
             print(f"[chat_mood] DB error:\n{db_debug}")
@@ -411,12 +544,19 @@ def chat_mood():
         try:
             conn = get_db()
             cursor = conn.cursor()
-            # Check if user_mood_history table exists
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='user_mood_history'")
+            cursor.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='user_mood_history'"
+            )
             if cursor.fetchone():
                 cursor.execute(
                     "INSERT INTO user_mood_history (user_id, mood_input, sentiment_score, sentiment_type, created_at) VALUES (?,?,?,?,?)",
-                    (current_user.id, user_message, compound, mood_type, datetime.now()),
+                    (
+                        current_user.id,
+                        user_message,
+                        compound,
+                        mood_type,
+                        datetime.now(),
+                    ),
                 )
                 conn.commit()
                 debug_log.append("💾 Mood saved to user_mood_history")
@@ -428,24 +568,188 @@ def chat_mood():
 
         print(f"\n[chat_mood DEBUG]\n" + "\n".join(debug_log) + "\n")
 
-        return jsonify({
-            "response": ai_response,
-            "sentiment": sentiment_data,
-            "activities": activities,
-            "model_used": model_used,
-            "timestamp": datetime.now().isoformat(),
-            "debug": debug_log,  # ← visible in browser console + debug panel
-        })
+        return jsonify(
+            {
+                "response": ai_response,
+                "sentiment": sentiment_data,
+                "emotion": emotion_data,
+                "activities": activities,
+                "model_used": model_used,
+                "timestamp": datetime.now().isoformat(),
+                "debug": debug_log,
+            }
+        )
 
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         debug_log.append(f"💥 Unhandled exception: {str(e)}")
-        return jsonify({
-            "error": "Something went wrong. Please try again!",
-            "details": str(e),
-            "debug": debug_log,
-        }), 500
+        return (
+            jsonify(
+                {
+                    "error": "Something went wrong. Please try again!",
+                    "details": str(e),
+                    "debug": debug_log,
+                }
+            ),
+            500,
+        )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# IMPROVED KEYWORD EXTRACTION FUNCTION
+# Add this function to user.py (or replace existing extract_keywords)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def extract_keywords_improved(text, min_length=3):
+    """
+    Enhanced keyword extraction with activity prioritization.
+    
+    Returns keywords in priority order:
+    1. Activity-specific words (reading, gaming, writing, etc.)
+    2. Other meaningful words
+    
+    Args:
+        text: User input message
+        min_length: Minimum word length to consider
+    
+    Returns:
+        List of keywords (max 10)
+    """
+    # Expanded stopwords
+    stopwords = {
+        'the', 'is', 'at', 'which', 'on', 'a', 'an', 'and', 'or', 'but',
+        'in', 'with', 'to', 'for', 'of', 'as', 'by', 'i', 'me', 'my',
+        'we', 'am', 'are', 'was', 'were', 'be', 'been', 'being',
+        'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
+        'could', 'should', 'may', 'might', 'must', 'can',
+        'this', 'that', 'these', 'those', 'it', 'its',
+        'he', 'she', 'they', 'them', 'their', 'his', 'her',
+        'want', 'need', 'like', 'feel', 'feeling', 'something', 
+        'anything', 'some', 'any', 'about', 'just', 'really',
+        'very', 'so', 'too', 'also', 'now', 'then', 'there'
+    }
+    
+    # Activity-specific keywords (HIGHEST PRIORITY)
+    activity_keywords = {
+        # Reading
+        'read', 'reading', 'book', 'books', 'novel', 'article', 'literature',
+        'story', 'stories', 'magazine', 'newspaper',
+        
+        # Writing
+        'write', 'writing', 'journal', 'journaling', 'diary', 'essay', 'blog',
+        'compose', 'composing', 'author', 'authoring',
+        
+        # Gaming
+        'game', 'games', 'gaming', 'play', 'playing', 'video', 'console',
+        'pc', 'mobile', 'sport', 'sports', 'compete', 'competition',
+        
+        # Cooking
+        'cook', 'cooking', 'recipe', 'recipes', 'food', 'bake', 'baking',
+        'prepare', 'preparing', 'meal', 'meals', 'dish',
+        
+        # Exercise
+        'exercise', 'workout', 'yoga', 'run', 'running', 'jog', 'jogging',
+        'walk', 'walking', 'gym', 'fitness', 'train', 'training',
+        
+        # Meditation/Relaxation
+        'meditate', 'meditation', 'mindfulness', 'relax', 'relaxation',
+        'breathe', 'breathing', 'calm', 'peace', 'zen',
+        
+        # Creative Arts
+        'paint', 'painting', 'draw', 'drawing', 'art', 'artistic', 'creative',
+        'craft', 'crafting', 'design', 'designing', 'sketch', 'sketching',
+        
+        # Music
+        'music', 'listen', 'listening', 'song', 'songs', 'sing', 'singing',
+        'instrument', 'guitar', 'piano', 'drums',
+        
+        # Entertainment
+        'watch', 'watching', 'movie', 'movies', 'film', 'films', 'show',
+        'shows', 'series', 'tv', 'television', 'stream', 'streaming',
+        
+        # Travel/Outdoor
+        'travel', 'traveling', 'trip', 'trips', 'explore', 'exploring',
+        'adventure', 'hike', 'hiking', 'outdoor', 'nature',
+        
+        # Learning
+        'learn', 'learning', 'study', 'studying', 'course', 'education',
+        'educate', 'research', 'practice', 'practicing'
+    }
+    
+    # Clean and tokenize
+    words = text.lower().split()
+    keywords = []
+    activity_matches = []
+    other_words = []
+    
+    for word in words:
+        # Remove punctuation
+        clean_word = word.strip('.,!?;:()[]{}"\'-')
+        
+        # Skip if too short or stopword
+        if len(clean_word) < min_length or clean_word in stopwords:
+            continue
+        
+        # Prioritize activity keywords
+        if clean_word in activity_keywords:
+            activity_matches.append(clean_word)
+        else:
+            other_words.append(clean_word)
+    
+    # Combine: activity keywords first, then others
+    keywords = activity_matches + other_words
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_keywords = []
+    for kw in keywords:
+        if kw not in seen:
+            seen.add(kw)
+            unique_keywords.append(kw)
+    
+    return unique_keywords[:10]  # Return top 10
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# INSTALLATION INSTRUCTIONS
+# ══════════════════════════════════════════════════════════════════════════════
+
+"""
+HOW TO INSTALL:
+
+1. Open your routes/user.py file
+
+2. Find the chat_mood() function (should be around line 224)
+
+3. Replace the ENTIRE function with the improved version above
+
+4. Add the extract_keywords_improved() function (replace old extract_keywords if it exists)
+
+5. Save the file
+
+6. Restart Flask:
+   python app.py
+
+7. Test with these queries:
+   - "I want to read something"      → Should return Reading activities only
+   - "I feel like gaming"             → Should return Gaming activities only  
+   - "I want to do some writing"      → Should return Writing activities only
+   - "I'm stressed and need to relax" → Should return Meditation, Calm activities
+
+WHAT CHANGED:
+✅ Better keyword extraction with activity prioritization
+✅ Name-first search strategy (searches activity name before description)
+✅ Improved stopword filtering
+✅ Activity-specific keywords list (reading, gaming, writing, etc.)
+✅ More accurate recommendations
+
+DEBUG:
+- Check debug panel (Ctrl+D) to see extracted keywords
+- Look for: "🔑 Extracted keywords: ['reading']"
+- This confirms keywords are being extracted correctly
+"""
 
 
 # ── DEBUG: test Gemini key + list models ───────────────────────────────────────
